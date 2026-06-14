@@ -1,0 +1,2174 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZAPP · 英语学习</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F8F7F4;
+  --white: #FFFFFF;
+  --ink: #1C1C1C;
+  --sub: #888;
+  --line: #E8E5E0;
+  --yellow: #F5E642;
+  --blue: #2563EB;
+  --coral: #F04E37;
+  --mint: #10B981;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* HEADER */
+header {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-family: 'Lora', serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: var(--ink);
+}
+
+.streak {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--coral);
+  background: #FEF0EE;
+  padding: 5px 12px;
+  border-radius: 999px;
+}
+
+/* TABS */
+.tabs {
+  display: flex;
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
+  padding: 0 16px;
+  gap: 4px;
+  overflow-x: auto;
+}
+
+.tab {
+  padding: 12px 18px;
+  border: none;
+  background: transparent;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--sub);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  white-space: nowrap;
+  transition: all 0.18s;
+}
+
+.tab.active {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+  font-weight: 600;
+}
+
+/* MAIN */
+main { padding: 28px 20px; max-width: 600px; margin: 0 auto; }
+.section { display: none; }
+.section.active { display: block; }
+
+/* ── FLASHCARDS ── */
+.fc-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.fc-label { font-size: 0.78rem; font-weight: 600; color: var(--sub); letter-spacing: 0.5px; }
+.fc-count { font-size: 0.78rem; font-weight: 600; color: var(--sub); }
+
+.pbar {
+  height: 3px;
+  background: var(--line);
+  border-radius: 2px;
+  margin-bottom: 28px;
+  overflow: hidden;
+}
+
+.pfill {
+  height: 100%;
+  background: var(--ink);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+/* card */
+.scene { perspective: 1200px; cursor: pointer; margin-bottom: 20px; position: relative; }
+
+.card-del-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.6);
+  font-size: 0.82rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+  z-index: 10;
+  line-height: 1;
+}
+.card-del-btn:hover { background: rgba(220,38,38,0.78); color: #fff; }
+
+.card3d {
+  width: 100%;
+  min-height: 260px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(.4,0,.2,1);
+  border-radius: 18px;
+}
+
+.card3d.flipped { transform: rotateY(180deg); }
+
+.face {
+  position: absolute;
+  width: 100%;
+  min-height: 260px;
+  border-radius: 18px;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 32px;
+  text-align: center;
+}
+
+.face-front {
+  background: #002FA7;
+  color: var(--white);
+}
+
+.face-back {
+  background: var(--yellow);
+  color: var(--ink);
+  transform: rotateY(180deg);
+}
+
+.word {
+  font-family: 'Lora', serif;
+  font-size: 2.8rem;
+  font-weight: 600;
+  letter-spacing: -1px;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.phone {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.65);
+  margin-bottom: 18px;
+  font-weight: 300;
+}
+
+.hint {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.5);
+}
+
+.meaning {
+  font-family: 'Lora', serif;
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  margin-bottom: 14px;
+}
+
+.example {
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: rgba(28,28,28,0.65);
+  font-style: italic;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+.back-reading {
+  font-size: 1.15rem;
+  color: rgba(28,28,28,0.5);
+  margin-bottom: 14px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+.back-ex {
+  font-size: 0.78rem;
+  color: rgba(28,28,28,0.52);
+  line-height: 1.7;
+  margin-top: 14px;
+  font-style: italic;
+  text-align: center;
+  word-break: break-word;
+}
+
+.batch-btn { color: #065F46; background: #ECFDF5; }
+.batch-btn:hover { background: #D1FAE5; }
+
+.batch-ta {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.88rem;
+  color: var(--ink);
+  background: var(--bg);
+  outline: none;
+  resize: vertical;
+  min-height: 180px;
+  line-height: 1.7;
+  transition: border-color 0.15s, background 0.15s;
+}
+.batch-ta:focus { border-color: #002FA7; background: var(--white); }
+
+.batch-hint {
+  font-size: 0.76rem;
+  color: var(--sub);
+  margin-bottom: 14px;
+  line-height: 1.8;
+  background: var(--bg);
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+
+.batch-msg {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 9px 14px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  display: none;
+}
+
+/* buttons */
+.btn-row { display: flex; gap: 10px; }
+
+.btn {
+  flex: 1;
+  padding: 13px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: var(--white);
+  color: var(--ink);
+}
+
+.btn:hover { background: var(--bg); }
+.btn-nope { color: var(--coral); }
+.btn-yep  { background: var(--ink); color: var(--white); border-color: var(--ink); }
+.btn-yep:hover { background: #333; }
+.btn-flip { background: var(--white); }
+.btn-wide { flex: 1; }
+
+/* done */
+.done {
+  text-align: center;
+  padding: 56px 20px;
+  background: var(--white);
+  border-radius: 18px;
+  border: 1px solid var(--line);
+}
+
+.done-num {
+  font-family: 'Lora', serif;
+  font-size: 3.5rem;
+  font-weight: 600;
+  letter-spacing: -2px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.done-sub { font-size: 0.88rem; color: var(--sub); margin-bottom: 28px; }
+
+.btn-redo {
+  padding: 12px 32px;
+  background: var(--ink);
+  color: var(--white);
+  border: none;
+  border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-redo:hover { background: #333; }
+
+/* ── ADD BUTTON ── */
+.add-btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #002FA7;
+  background: #EEF2FF;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+.add-btn:hover { background: #DBEAFE; }
+.shuffle-btn { color: #6D28D9; background: #EDE9FE; }
+.shuffle-btn:hover { background: #DDD6FE; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(28,28,28,0.5);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--white);
+  width: 100%;
+  max-width: 600px;
+  border-radius: 24px 24px 0 0;
+  padding: 24px 20px 40px;
+  max-height: 88vh;
+  overflow-y: auto;
+  animation: slideUp 0.28s cubic-bezier(.4,0,.2,1);
+}
+
+@keyframes slideUp {
+  from { transform: translateY(60px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.modal-title {
+  font-family: 'Lora', serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.modal-close {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--bg);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--sub);
+  transition: background 0.15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { background: var(--line); color: var(--ink); }
+
+.field { margin-bottom: 14px; }
+.field label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--sub);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 6px;
+}
+.field input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  color: var(--ink);
+  background: var(--bg);
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+.field input:focus { border-color: #002FA7; background: var(--white); }
+.field input.err { border-color: var(--coral); animation: shake 0.2s ease; }
+@keyframes shake {
+  0%,100%{ transform:translateX(0); }
+  25%{ transform:translateX(-6px); }
+  75%{ transform:translateX(6px); }
+}
+
+.modal-save {
+  width: 100%;
+  padding: 13px;
+  background: #002FA7;
+  color: var(--white);
+  border: none;
+  border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: background 0.15s, transform 0.1s;
+}
+.modal-save:hover { background: #0026A0; }
+.modal-save:active { transform: scale(0.98); }
+
+.m-divider { height: 1px; background: var(--line); margin: 22px 0 16px; }
+
+.clist-title {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--sub);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 10px;
+}
+
+.custom-empty {
+  font-size: 0.86rem;
+  color: var(--sub);
+  text-align: center;
+  padding: 18px 0;
+}
+
+.custom-item {
+  display: flex;
+  align-items: center;
+  padding: 11px 14px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  gap: 10px;
+}
+.ci-info { flex: 1; min-width: 0; }
+.ci-word { font-weight: 600; font-size: 0.9rem; }
+.ci-meaning { font-size: 0.78rem; color: var(--sub); margin-top: 1px; }
+.del-btn {
+  flex-shrink: 0;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--sub);
+  cursor: pointer;
+  font-size: 0.85rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+.del-btn:hover { background: #FEF0EE; color: var(--coral); }
+
+/* ── CHAT ── */
+.scenario {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: var(--white);
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  margin-bottom: 18px;
+}
+
+.scenario-icon { font-size: 1.4rem; }
+.scenario-tag { font-size: 0.72rem; font-weight: 600; color: var(--sub); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+.scenario-name { font-size: 0.96rem; font-weight: 600; color: var(--ink); }
+
+.scene-picker {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin-bottom: 12px;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.scene-picker::-webkit-scrollbar { display: none; }
+
+.scene-opt {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 16px;
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  background: var(--white);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'DM Sans', sans-serif;
+}
+.scene-opt:hover { border-color: #93C5FD; background: #F0F7FF; }
+.scene-opt.active { border-color: #002FA7; background: #EEF2FF; }
+.so-icon { font-size: 1.4rem; line-height: 1; }
+.so-name { font-size: 0.72rem; font-weight: 600; color: var(--ink); white-space: nowrap; }
+
+.chatbox {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px;
+  min-height: 300px;
+  max-height: 360px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.bubble {
+  max-width: 78%;
+  padding: 11px 15px;
+  border-radius: 14px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  animation: fadeUp 0.22s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(6px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+.bubble-ai {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+.bubble-user {
+  background: var(--ink);
+  color: var(--white);
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+
+.blabel { font-size: 0.66rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.45; margin-bottom: 3px; }
+
+.typing {
+  display: flex;
+  gap: 4px;
+  padding: 13px 16px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  border-bottom-left-radius: 4px;
+  align-self: flex-start;
+  align-items: center;
+}
+
+.dot { width:6px; height:6px; background:#bbb; border-radius:50%; animation: bop 1.1s infinite; }
+.dot:nth-child(2){ animation-delay:.15s; }
+.dot:nth-child(3){ animation-delay:.3s; }
+
+@keyframes bop {
+  0%,60%,100%{ transform:translateY(0); }
+  30%{ transform:translateY(-5px); }
+}
+
+.input-row { display:flex; gap:8px; }
+
+.chat-in {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--white);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.chat-in:focus { border-color: var(--ink); }
+
+.send-btn {
+  padding: 12px 18px;
+  background: var(--ink);
+  color: var(--white);
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.send-btn:hover { background: #333; }
+
+/* ── READING ── */
+.read-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 28px 24px;
+  margin-bottom: 16px;
+}
+
+.read-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--mint);
+  background: #ECFDF5;
+  padding: 3px 10px;
+  border-radius: 999px;
+  margin-bottom: 14px;
+}
+
+.read-title {
+  font-family: 'Lora', serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  margin-bottom: 18px;
+  line-height: 1.35;
+}
+
+.read-body {
+  font-size: 0.93rem;
+  line-height: 1.9;
+  color: #333;
+}
+
+.hl {
+  background: var(--yellow);
+  padding: 0 2px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+
+.hl:hover { background: #EDD900; }
+
+.qs { margin-top: 0; }
+
+.q-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-bottom: 12px;
+}
+
+.q-text { font-size: 0.9rem; font-weight: 600; margin-bottom: 12px; line-height: 1.5; }
+
+.opts { display: flex; flex-direction: column; gap: 7px; }
+
+.opt {
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  text-align: left;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.87rem;
+  color: var(--ink);
+  transition: all 0.15s;
+}
+
+.opt:hover:not(:disabled) { border-color: var(--ink); background: var(--white); }
+.opt.correct { background: #ECFDF5; border-color: var(--mint); color: var(--mint); font-weight: 600; }
+.opt.wrong   { background: #FEF0EE; border-color: var(--coral); color: var(--coral); }
+
+/* TOOLTIP */
+.tt {
+  display: none;
+  position: fixed;
+  background: var(--ink);
+  color: var(--white);
+  padding: 9px 14px;
+  border-radius: 10px;
+  font-size: 0.83rem;
+  z-index: 999;
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+}
+
+.tt-en { font-family:'Lora',serif; font-size:0.95rem; font-weight:600; margin-bottom:2px; }
+.tt-zh { opacity: 0.75; }
+
+/* ── STATS ── */
+.stats-hero {
+  background: #002FA7;
+  border-radius: 18px;
+  padding: 32px 24px;
+  color: var(--white);
+  text-align: center;
+  margin-bottom: 14px;
+}
+.sh-label { font-size: 0.78rem; font-weight: 600; opacity: 0.6; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 8px; }
+.sh-num {
+  font-family: 'Lora', serif;
+  font-size: 5rem;
+  font-weight: 600;
+  letter-spacing: -3px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.sh-unit { font-size: 0.88rem; opacity: 0.7; }
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.stat-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 20px 16px;
+  text-align: center;
+}
+.sc-num {
+  font-family: 'Lora', serif;
+  font-size: 2.2rem;
+  font-weight: 600;
+  letter-spacing: -1px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.sc-label { font-size: 0.76rem; color: var(--sub); font-weight: 500; }
+
+.stat-note {
+  font-size: 0.78rem;
+  color: var(--sub);
+  text-align: center;
+  padding: 10px 0 4px;
+}
+
+.dq-wrap {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px 16px 12px;
+}
+.dq-text {
+  text-align: center;
+  font-size: 0.84rem;
+  color: var(--sub);
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.quiz-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 28px 24px 22px;
+  margin-bottom: 14px;
+}
+.quiz-q-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--sub);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 18px;
+  text-align: center;
+}
+.quiz-sentence {
+  font-family: 'Lora', serif;
+  font-size: 1.1rem;
+  line-height: 1.9;
+  color: var(--ink);
+  margin-bottom: 22px;
+  text-align: center;
+}
+.blank {
+  display: inline-block;
+  min-width: 72px;
+  border-bottom: 2.5px solid #002FA7;
+  padding: 0 4px;
+  font-weight: 700;
+  color: #002FA7;
+  letter-spacing: 1px;
+}
+.qopts { display: flex; flex-direction: column; gap: 8px; }
+.qopt {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  color: var(--ink);
+  text-align: left;
+  transition: all 0.15s;
+}
+.qopt:hover:not(:disabled) { border-color: #93C5FD; background: #F0F7FF; }
+.qopt.correct { background: #ECFDF5; border-color: var(--mint); color: #065F46; font-weight: 600; }
+.qopt.wrong   { background: #FEF0EE; border-color: var(--coral); color: #9B1C1C; }
+.qnum {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--line);
+  font-size: 0.78rem;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+.qopt.correct .qnum { background: var(--mint); color: #fff; }
+.qopt.wrong .qnum   { background: var(--coral); color: #fff; }
+.quiz-empty-msg {
+  text-align: center;
+  padding: 40px 20px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  font-size: 0.88rem;
+  color: var(--sub);
+  line-height: 1.9;
+}
+
+/* ── MCQ MODULE ── */
+.mcq-sent {
+  font-size: 1.02rem;
+  line-height: 2.2;
+  color: var(--ink);
+  margin-bottom: 20px;
+  text-align: center;
+}
+.mcq-blank {
+  display: inline-block;
+  min-width: 64px;
+  border-bottom: 2.5px solid #002FA7;
+  padding: 0 8px;
+  font-weight: 700;
+  color: #002FA7;
+  text-align: center;
+  letter-spacing: 1px;
+}
+.mcw {
+  cursor: pointer;
+  border-radius: 2px;
+  transition: color 0.12s;
+}
+.mcw:hover { color: #002FA7; text-decoration: underline; text-decoration-color: #93C5FD; text-underline-offset: 2px; }
+
+@media(max-width:480px){
+  main { padding: 20px 14px; }
+  .word { font-size: 2.2rem; }
+  .meaning { font-size: 1.6rem; }
+}
+
+.card-star-btn {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.6);
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+  z-index: 10;
+  line-height: 1;
+}
+.card-star-btn:hover { background: rgba(255,107,107,0.22); color: #FF6B6B; }
+.card-star-btn.starred { color: #FF6B6B; background: rgba(255,107,107,0.18); }
+
+.filter-pill {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--sub);
+  background: var(--bg);
+  border: 1.5px solid var(--line);
+  padding: 5px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.filter-pill:hover { border-color: #888; color: var(--ink); }
+.filter-pill.active { background: #FEFCE8; border-color: #CA8A04; color: #713F12; }
+
+.done-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 18px 0 22px;
+}
+.done-stat {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 8px;
+  text-align: center;
+}
+.done-stat-num {
+  font-family: 'Lora', serif;
+  font-size: 1.85rem;
+  font-weight: 600;
+  letter-spacing: -1px;
+  color: var(--ink);
+  margin-bottom: 3px;
+}
+.done-stat-label { font-size: 0.7rem; color: var(--sub); font-weight: 500; }
+
+.ci-star {
+  flex-shrink: 0;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: color 0.15s;
+}
+.ci-star:hover { color: #FF6B6B; }
+.ci-star.starred { color: #FF6B6B; }
+
+#no-cards-msg {
+  display: none;
+  text-align: center;
+  padding: 40px 20px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  font-size: 0.88rem;
+  color: var(--sub);
+  line-height: 1.9;
+}
+
+.btn-prev {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--sub);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 0.15s;
+}
+.btn-prev:hover { color: var(--ink); }
+
+.fc-queue-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.fc-queue-text { font-size: 0.75rem; color: var(--sub); font-weight: 500; }
+.fc-limit-btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.73rem;
+  font-weight: 600;
+  color: var(--sub);
+  background: transparent;
+  border: 1.5px solid var(--line);
+  padding: 3px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.fc-limit-btn:hover { border-color: #888; color: var(--ink); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Zapp</div>
+  <div class="streak" id="streak-display">🔥 0天连续</div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('flash',this)">📇 单词闪卡</button>
+  <button class="tab" onclick="switchTab('chat',this)">💬 对话练习</button>
+  <button class="tab" onclick="switchTab('read',this)">📖 阅读理解</button>
+  <button class="tab" onclick="switchTab('stats',this)">📊 学习统计</button>
+  <button class="tab" onclick="switchTab('mcq',this)">📝 选词题</button>
+</div>
+
+<main>
+
+<!-- FLASHCARDS -->
+<section id="flash" class="section active">
+  <div class="fc-meta">
+    <span class="fc-label">今日单词</span>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="add-btn" onclick="openModal()">＋ 添加单词</button>
+      <button class="add-btn batch-btn" onclick="openBatch()">⇥ 批量导入</button>
+      <button class="add-btn shuffle-btn" onclick="shuffleCards()">⇄ 随机洗牌</button>
+      <button class="filter-pill" id="star-filter-pill" onclick="toggleStarFilter()">⭐ 只练星标</button>
+      <span class="fc-count" id="counter">1 / 8</span>
+    </div>
+  </div>
+  <div class="pbar"><div class="pfill" id="pbar" style="width:0%"></div></div>
+
+  <div class="fc-queue-row">
+    <span class="fc-queue-text" id="queue-info">今日队列加载中…</span>
+    <button class="fc-limit-btn" id="limit-btn" onclick="openLimitEdit()">每日 <strong id="limit-display">20</strong> 个</button>
+  </div>
+  <div id="limit-edit-row" style="display:none;align-items:center;gap:8px;padding:0 0 14px;flex-wrap:wrap;">
+    <span style="font-size:0.78rem;color:var(--sub);">每日练习上限</span>
+    <input type="number" id="limit-input" min="1" max="500" value="20"
+      style="width:56px;padding:5px 8px;border:1px solid var(--line);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.9rem;text-align:center;outline:none;background:var(--bg);color:var(--ink);">
+    <button class="modal-save" style="padding:7px 16px;font-size:0.82rem;width:auto;" onclick="saveDailyLimit()">确定</button>
+    <button class="btn" style="padding:7px 12px;font-size:0.82rem;" onclick="closeLimitEdit()">取消</button>
+  </div>
+
+  <div id="no-cards-msg">没有星标单词<br><span style="font-size:0.78rem">点击卡片上的 ☆ 给单词加星标</span></div>
+
+  <div class="scene" id="scene" onclick="flipCard()">
+    <button class="card-star-btn" id="card-star-btn" onclick="toggleStarCurrent(event)" title="星标单词">☆</button>
+    <button class="card-del-btn" id="card-del-btn" onclick="deleteCurrentCard(event)" title="删除单词">🗑</button>
+    <div class="card3d" id="fc">
+      <div class="face face-front">
+        <div class="word" id="cword">桜</div>
+        <div class="hint">点击翻转</div>
+      </div>
+      <div class="face face-back">
+        <div class="back-reading" id="cback-reading">さくら</div>
+        <div class="meaning" id="cmeaning">樱花</div>
+        <div class="back-ex" id="cback-ex" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="prev-row" style="text-align:center;margin-bottom:6px;display:none">
+    <button class="btn-prev" onclick="prevCard()">← 上一张</button>
+  </div>
+
+  <div class="btn-row" id="flip-row">
+    <button class="btn btn-flip btn-wide" onclick="flipCard()">看答案</button>
+  </div>
+  <div class="btn-row" id="judge-row" style="display:none">
+    <button class="btn btn-nope" onclick="next(false)">不认识</button>
+    <button class="btn btn-yep"  onclick="knewCard()">认识了 ✓</button>
+  </div>
+
+  <div id="del-confirm" style="display:none">
+    <div class="dq-wrap">
+      <div class="dq-text">永久删除「<span id="del-word-name"></span>」？</div>
+      <div class="btn-row">
+        <button class="btn" onclick="cancelDelete()">取消</button>
+        <button class="btn btn-nope" onclick="confirmDel()">删除</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="done" class="done" style="display:none">
+    <div class="done-num" id="score-num">0/8</div>
+    <div class="done-sub">今日单词完成</div>
+    <div class="done-grid">
+      <div class="done-stat">
+        <div class="done-stat-num" id="sum-total">0</div>
+        <div class="done-stat-label">本轮单词</div>
+      </div>
+      <div class="done-stat">
+        <div class="done-stat-num" id="sum-knew">0</div>
+        <div class="done-stat-label">认识了</div>
+      </div>
+      <div class="done-stat">
+        <div class="done-stat-num" id="sum-streak">0</div>
+        <div class="done-stat-label">连续天数</div>
+      </div>
+      <div class="done-stat">
+        <div class="done-stat-num" id="sum-week-new">0</div>
+        <div class="done-stat-label">本周新增</div>
+      </div>
+      <div class="done-stat" style="grid-column:1/-1">
+        <div class="done-stat-num" id="sum-week-mastered">0</div>
+        <div class="done-stat-label">本周掌握</div>
+      </div>
+    </div>
+    <button class="btn-redo" onclick="resetCards()">再来一遍</button>
+  </div>
+
+</section>
+
+<!-- CHAT -->
+<section id="chat" class="section">
+  <div class="scene-picker">
+    <button class="scene-opt active" onclick="selectScene(0)"><span class="so-icon">☕</span><span class="so-name">咖啡馆</span></button>
+    <button class="scene-opt" onclick="selectScene(1)"><span class="so-icon">✈️</span><span class="so-name">机场</span></button>
+    <button class="scene-opt" onclick="selectScene(2)"><span class="so-icon">🛒</span><span class="so-name">超市</span></button>
+    <button class="scene-opt" onclick="selectScene(3)"><span class="so-icon">🏥</span><span class="so-name">医院</span></button>
+    <button class="scene-opt" onclick="selectScene(4)"><span class="so-icon">💼</span><span class="so-name">面试</span></button>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-icon" id="sc-icon">☕</div>
+    <div>
+      <div class="scenario-tag" id="sc-tag">日常场景</div>
+      <div class="scenario-name" id="sc-name">在咖啡馆点单</div>
+    </div>
+  </div>
+
+  <div class="chatbox" id="chatbox"></div>
+
+  <div class="input-row">
+    <input class="chat-in" id="userIn" placeholder="用英文回复…" onkeydown="if(event.key==='Enter')send()">
+    <button class="send-btn" onclick="send()">↑</button>
+  </div>
+</section>
+
+<!-- READING -->
+<section id="read" class="section">
+  <div class="read-card">
+    <div class="read-tag">科技 · 初中级</div>
+    <div class="read-title">Why Do We Dream?</div>
+    <div class="read-body">
+      Scientists have long been <span class="hl" data-en="fascinated" data-zh="着迷的、深感兴趣的">fascinated</span> by dreams. Every night, while we sleep, our brains create vivid stories, emotions, and images.<br><br>
+      One popular <span class="hl" data-en="theory" data-zh="理论、学说">theory</span> suggests that dreams help us process emotions and <span class="hl" data-en="consolidate" data-zh="巩固（记忆）">consolidate</span> memories. During sleep, the brain replays experiences from the day, deciding what to keep and what to <span class="hl" data-en="discard" data-zh="丢弃、放弃">discard</span>.<br><br>
+      Another idea is that dreams help us <span class="hl" data-en="rehearse" data-zh="排练、预演">rehearse</span> responses to <span class="hl" data-en="challenging" data-zh="有挑战性的">challenging</span> situations — which might explain why many people dream about exams or public speaking.<br><br>
+      <span style="font-size:0.8rem;color:var(--sub);">👆 点击黄色词汇查看释义</span>
+    </div>
+  </div>
+
+  <div class="qs">
+    <div class="q-card">
+      <div class="q-text">1. According to the text, what does one theory say dreams help us do?</div>
+      <div class="opts">
+        <button class="opt" onclick="ans(this,'wrong')">A. Predict the future</button>
+        <button class="opt" onclick="ans(this,'correct')">B. Process emotions and consolidate memories</button>
+        <button class="opt" onclick="ans(this,'wrong')">C. Learn new languages</button>
+        <button class="opt" onclick="ans(this,'wrong')">D. Control body temperature</button>
+      </div>
+    </div>
+    <div class="q-card">
+      <div class="q-text">2. Why might people dream about exams?</div>
+      <div class="opts">
+        <button class="opt" onclick="ans(this,'wrong')">A. Because they enjoy exams</button>
+        <button class="opt" onclick="ans(this,'wrong')">B. Because the brain is bored at night</button>
+        <button class="opt" onclick="ans(this,'correct')">C. To rehearse responses to stressful situations</button>
+        <button class="opt" onclick="ans(this,'wrong')">D. Because exams happen at night</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section id="stats" class="section">
+  <div class="stats-hero">
+    <div class="sh-label">连续学习</div>
+    <div class="sh-num" id="st-streak">0</div>
+    <div class="sh-unit">天</div>
+  </div>
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="sc-num" id="st-total">0</div>
+      <div class="sc-label">累计背词</div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-num" id="st-known">0</div>
+      <div class="sc-label">认识单词</div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-num" id="st-rate">—</div>
+      <div class="sc-label">记忆准确率</div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-num" id="st-best">0</div>
+      <div class="sc-label">最长连续天数</div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-num" id="st-sessions">0</div>
+      <div class="sc-label">完成次数</div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-num" id="st-words">0</div>
+      <div class="sc-label">单词库总词数</div>
+    </div>
+  </div>
+  <div class="stat-note">数据实时保存在本地浏览器，清除缓存会重置</div>
+</section>
+
+<!-- MCQ -->
+<section id="mcq" class="section">
+  <div class="fc-meta">
+    <span class="fc-label">选词题</span>
+    <span class="fc-count" id="mcq-ctr">1 / 30</span>
+  </div>
+  <div class="pbar"><div class="pfill" id="mcq-bar" style="width:0%"></div></div>
+
+  <div class="quiz-card" id="mcq-card" style="display:none">
+    <div class="quiz-q-label">选出最合适的单词填入括号（点击句中单词可查询中文）</div>
+    <div class="mcq-sent" id="mcq-sent"></div>
+    <div class="qopts" id="mcq-opts"></div>
+  </div>
+
+  <div class="btn-row" id="mcq-nxt" style="display:none">
+    <button class="btn btn-yep btn-wide" onclick="nextMcq()">下一题 →</button>
+  </div>
+
+  <div id="mcq-done" class="done" style="display:none">
+    <div class="done-num" id="mcq-score">0/30</div>
+    <div class="done-sub">全部 30 题完成</div>
+    <button class="btn-redo" onclick="startMcq()">重新开始</button>
+  </div>
+</section>
+
+</main>
+
+<!-- ADD WORD MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">添加日语单词</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="field">
+      <label>日语单词 *</label>
+      <input id="fw" placeholder="e.g. 桜" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>读音（平假名）*</label>
+      <input id="fph" placeholder="e.g. さくら">
+    </div>
+    <div class="field">
+      <label>中文意思 *</label>
+      <input id="fm" placeholder="e.g. 樱花">
+    </div>
+    <button class="modal-save" id="saveBtn" onclick="saveWord()">保存单词</button>
+    <div class="m-divider"></div>
+    <div class="clist-title">我的单词</div>
+    <div id="customList"></div>
+  </div>
+</div>
+
+<!-- BATCH IMPORT MODAL -->
+<div class="modal-overlay" id="batchOverlay" onclick="handleBatchOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">批量导入</span>
+      <button class="modal-close" onclick="closeBatch()">✕</button>
+    </div>
+    <div class="batch-hint">
+      每行一个单词，用全角竖线 <strong>｜</strong> 分隔：<br>
+      <strong>三栏：</strong>单词｜读音｜中文意思<br>
+      <strong>四栏：</strong>单词｜读音｜中文意思｜例句
+    </div>
+    <div class="field">
+      <label>粘贴内容</label>
+      <textarea class="batch-ta" id="batchInput" placeholder="桜｜さくら｜樱花
+勉強｜べんきょう｜学习｜毎日勉強します。每天学习。
+友達｜ともだち｜朋友"></textarea>
+    </div>
+    <div class="batch-msg" id="batchMsg"></div>
+    <button class="modal-save" onclick="importBatch()">导入单词</button>
+  </div>
+</div>
+
+<div class="tt" id="tt">
+  <div class="tt-en" id="tt-en"></div>
+  <div class="tt-zh" id="tt-zh"></div>
+</div>
+
+<script>
+// TABS
+function switchTab(id,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='stats') renderStats();
+  if(id==='mcq' && !mcqDeck.length) startMcq();
+}
+
+// ── SRS ──
+function loadSRS(){
+  try{ return JSON.parse(localStorage.getItem('zapp_srs')||'{}'); }
+  catch(e){ return {}; }
+}
+function saveSRS(d){ localStorage.setItem('zapp_srs',JSON.stringify(d)); }
+
+function getSRS(word){
+  const d=loadSRS();
+  return d[word]||{hard:false,starred:false,nextReview:null,mastered:false,firstSeen:null,masteredDate:null};
+}
+
+function setSRS(word,fields){
+  const d=loadSRS();
+  d[word]=Object.assign(getSRS(word),fields);
+  saveSRS(d);
+}
+
+function dateOffset(dateStr,days){
+  const d=new Date(dateStr+'T00:00:00');
+  d.setDate(d.getDate()+days);
+  return d.toISOString().slice(0,10);
+}
+
+function ensureFirstSeen(word){
+  const s=getSRS(word);
+  if(!s.firstSeen) setSRS(word,{firstSeen:todayStr()});
+}
+
+function markCard(word,knew){
+  const today=todayStr();
+  ensureFirstSeen(word);
+  if(knew){
+    setSRS(word,{nextReview:dateOffset(today,3),mastered:true,masteredDate:today,hard:false});
+  } else {
+    setSRS(word,{nextReview:dateOffset(today,1),hard:true,mastered:false,masteredDate:null});
+  }
+}
+
+let starFilterActive=false;
+
+function loadDailyLimit(){
+  return parseInt(localStorage.getItem('zapp_daily_limit')||'20');
+}
+function saveDailyLimitVal(n){
+  localStorage.setItem('zapp_daily_limit',String(Math.max(1,n)));
+}
+function updateQueueInfo(dueCount,newCount){
+  const el=document.getElementById('queue-info');
+  if(!el) return;
+  const parts=[];
+  if(dueCount>0) parts.push(dueCount+'个到期复习');
+  if(newCount>0) parts.push(newCount+'个新词');
+  el.textContent=parts.length?'今日队列：'+parts.join(' + '):'今日无待练单词';
+}
+function openLimitEdit(){
+  const inp=document.getElementById('limit-input');
+  inp.value=loadDailyLimit();
+  document.getElementById('limit-edit-row').style.display='flex';
+  document.getElementById('limit-btn').style.display='none';
+  setTimeout(()=>{inp.focus();inp.select();},50);
+}
+function closeLimitEdit(){
+  document.getElementById('limit-edit-row').style.display='none';
+  document.getElementById('limit-btn').style.display='';
+}
+function saveDailyLimit(){
+  const v=parseInt(document.getElementById('limit-input').value);
+  if(isNaN(v)||v<1) return;
+  saveDailyLimitVal(v);
+  document.getElementById('limit-display').textContent=v;
+  closeLimitEdit();
+  resetCards();
+}
+
+function buildSessionDeck(){
+  const today=todayStr(), all=buildCards(), srsData=loadSRS();
+  const pool=starFilterActive?all.filter(c=>srsData[c.word]?.starred):all;
+  const limit=loadDailyLimit();
+  const due=[], newCards=[];
+  for(const c of pool){
+    const s=srsData[c.word]||{};
+    if(!s.nextReview) newCards.push(c);
+    else if(s.nextReview<=today) due.push(c);
+  }
+  due.sort((a,b)=>(srsData[b.word]?.hard?1:0)-(srsData[a.word]?.hard?1:0));
+  const duePart=due.slice(0,limit);
+  const newPart=newCards.slice(0,Math.max(0,limit-duePart.length));
+  updateQueueInfo(duePart.length,newPart.length);
+  return [...duePart,...newPart];
+}
+
+function updateStarBtn(starred){
+  const btn=document.getElementById('card-star-btn');
+  if(!btn) return;
+  btn.textContent=starred?'★':'☆';
+  btn.classList.toggle('starred',!!starred);
+}
+
+function toggleStarCurrent(e){
+  e.stopPropagation();
+  if(!cards.length) return;
+  const word=cards[cur].word;
+  const nowStarred=!getSRS(word).starred;
+  setSRS(word,{starred:nowStarred});
+  updateStarBtn(nowStarred);
+  if(starFilterActive&&!nowStarred){
+    cards.splice(cur,1);
+    if(!cards.length){ showNoCards(); return; }
+    if(cur>=cards.length) cur=cards.length-1;
+    flipped=false;
+    const fc=document.getElementById('fc');
+    fc.style.transition='none'; fc.classList.remove('flipped'); fc.offsetHeight; fc.style.transition='';
+    document.getElementById('flip-row').style.display='flex';
+    document.getElementById('judge-row').style.display='none';
+    updateCard();
+  }
+}
+
+function toggleStarFilter(){
+  starFilterActive=!starFilterActive;
+  document.getElementById('star-filter-pill').classList.toggle('active',starFilterActive);
+  const deck=buildSessionDeck();
+  if(!deck.length){ showNoCards(); return; }
+  document.getElementById('no-cards-msg').style.display='none';
+  cards=deck; cur=0; flipped=false; score=0;
+  document.getElementById('scene').style.display='block';
+  document.getElementById('done').style.display='none';
+  updateCard();
+}
+
+function showNoCards(){
+  document.getElementById('scene').style.display='none';
+  document.getElementById('flip-row').style.display='none';
+  document.getElementById('judge-row').style.display='none';
+  document.getElementById('prev-row').style.display='none';
+  document.getElementById('del-confirm').style.display='none';
+  document.getElementById('done').style.display='none';
+  document.getElementById('no-cards-msg').style.display='block';
+}
+
+function weekStartStr(){
+  const d=new Date(), dow=d.getDay();
+  d.setDate(d.getDate()-(dow===0?6:dow-1));
+  return d.toISOString().slice(0,10);
+}
+
+function renderDoneSummary(sessionTotal,sessionKnew){
+  const s=loadSt(), ws=weekStartStr(), srs=loadSRS();
+  let weekNew=0, weekMastered=0;
+  for(const v of Object.values(srs)){
+    if(v.firstSeen&&v.firstSeen>=ws) weekNew++;
+    if(v.masteredDate&&v.masteredDate>=ws) weekMastered++;
+  }
+  document.getElementById('sum-total').textContent=sessionTotal;
+  document.getElementById('sum-knew').textContent=sessionKnew;
+  document.getElementById('sum-streak').textContent=s.streak||0;
+  document.getElementById('sum-week-new').textContent=weekNew;
+  document.getElementById('sum-week-mastered').textContent=weekMastered;
+}
+
+function toggleStarFromList(word,btn){
+  const nowStarred=!getSRS(word).starred;
+  setSRS(word,{starred:nowStarred});
+  btn.textContent=nowStarred?'★':'☆';
+  btn.classList.toggle('starred',nowStarred);
+  if(cards[cur]&&cards[cur].word===word) updateStarBtn(nowStarred);
+}
+
+// ── CARDS ──
+const builtinCards=[
+  {word:'桜',phone:'さくら',meaning:'樱花',ex:''},
+  {word:'勉強',phone:'べんきょう',meaning:'学习',ex:''},
+  {word:'友達',phone:'ともだち',meaning:'朋友',ex:''},
+  {word:'映画',phone:'えいが',meaning:'电影',ex:''},
+  {word:'音楽',phone:'おんがく',meaning:'音乐',ex:''},
+  {word:'先生',phone:'せんせい',meaning:'老师',ex:''},
+  {word:'旅行',phone:'りょこう',meaning:'旅行',ex:''},
+  {word:'美味しい',phone:'おいしい',meaning:'好吃的',ex:''},
+];
+
+function loadCustom(){
+  try{ return JSON.parse(localStorage.getItem('zapp_custom')||'[]'); }
+  catch(e){ return []; }
+}
+function saveCustom(list){ localStorage.setItem('zapp_custom',JSON.stringify(list)); }
+
+function loadRemoved(){
+  try{ return new Set(JSON.parse(localStorage.getItem('zapp_removed')||'[]')); }
+  catch(e){ return new Set(); }
+}
+
+function permanentlyRemove(word){
+  const removed=loadRemoved();
+  removed.add(word);
+  localStorage.setItem('zapp_removed',JSON.stringify([...removed]));
+  saveCustom(loadCustom().filter(c=>c.word!==word));
+}
+
+function buildCards(){
+  const removed=loadRemoved();
+  return [
+    ...builtinCards.filter(c=>!removed.has(c.word)),
+    ...loadCustom().map(c=>({word:c.word,phone:c.phone||'',meaning:c.meaning,ex:c.ex||''}))
+  ];
+}
+
+let cards=[], cur=0, flipped=false, score=0;
+
+function updateCard(){
+  if(!cards.length) return;
+  const c=cards[cur];
+  document.getElementById('cword').textContent=c.word;
+  document.getElementById('cback-reading').textContent=c.phone;
+  const mEl=document.getElementById('cmeaning');
+  mEl.textContent=c.meaning;
+  const mLen=c.meaning.length;
+  mEl.style.fontSize=mLen<=5?'2rem':mLen<=8?'1.7rem':mLen<=12?'1.4rem':'1.15rem';
+  const exEl=document.getElementById('cback-ex');
+  if(c.ex){
+    exEl.innerHTML=c.ex.replace(/\n/g,'<br>');
+    exEl.style.display='block';
+  } else {
+    exEl.textContent='';
+    exEl.style.display='none';
+  }
+  document.getElementById('counter').textContent=`${cur+1} / ${cards.length}`;
+  document.getElementById('pbar').style.width=(cur/cards.length*100)+'%';
+  document.getElementById('fc').classList.remove('flipped');
+  document.getElementById('flip-row').style.display='flex';
+  document.getElementById('judge-row').style.display='none';
+  flipped=false;
+  const _s=getSRS(c.word);
+  updateStarBtn(_s.starred||false);
+  document.getElementById('prev-row').style.display=cur>0?'block':'none';
+}
+
+function flipCard(){
+  flipped=!flipped;
+  document.getElementById('fc').classList.toggle('flipped',flipped);
+  document.getElementById('flip-row').style.display=flipped?'none':'flex';
+  document.getElementById('judge-row').style.display=flipped?'flex':'none';
+}
+
+function next(knew){
+  markCard(cards[cur].word,knew);
+  if(knew) score++;
+  recordCard(knew);
+  cur++;
+  if(cur>=cards.length){
+    recordSession();
+    document.getElementById('scene').style.display='none';
+    document.getElementById('flip-row').style.display='none';
+    document.getElementById('judge-row').style.display='none';
+    document.getElementById('prev-row').style.display='none';
+    document.getElementById('score-num').textContent=score+'/'+cards.length;
+    renderDoneSummary(cards.length,score);
+    document.getElementById('done').style.display='block';
+  } else {
+    const fc=document.getElementById('fc');
+    fc.style.transition='none';
+    fc.classList.remove('flipped');
+    fc.offsetHeight; // force reflow so the instant reset is applied before re-enabling transition
+    fc.style.transition='';
+    updateCard();
+  }
+}
+
+function resetCards(){
+  cards=buildSessionDeck();
+  cur=0; flipped=false; score=0;
+  document.getElementById('no-cards-msg').style.display='none';
+  document.getElementById('done').style.display='none';
+  if(!cards.length){ showNoCards(); return; }
+  document.getElementById('scene').style.display='block';
+  updateCard();
+}
+
+function knewCard(){
+  next(true);
+}
+
+function deleteCurrentCard(e){
+  e.stopPropagation();
+  if(!cards.length) return;
+  document.getElementById('del-word-name').textContent=cards[cur].word;
+  document.getElementById('flip-row').style.display='none';
+  document.getElementById('judge-row').style.display='none';
+  document.getElementById('prev-row').style.display='none';
+  document.getElementById('del-confirm').style.display='block';
+}
+
+function cancelDelete(){
+  document.getElementById('del-confirm').style.display='none';
+  document.getElementById('flip-row').style.display=flipped?'none':'flex';
+  document.getElementById('judge-row').style.display=flipped?'flex':'none';
+  document.getElementById('prev-row').style.display=cur>0?'block':'none';
+}
+
+function confirmDel(){
+  document.getElementById('del-confirm').style.display='none';
+  permanentlyRemove(cards[cur].word);
+  cards.splice(cur,1);
+  if(!cards.length){
+    document.getElementById('scene').style.display='none';
+    document.getElementById('flip-row').style.display='none';
+    document.getElementById('judge-row').style.display='none';
+    document.getElementById('prev-row').style.display='none';
+    document.getElementById('score-num').textContent='0/0';
+    renderDoneSummary(score,score);
+    document.getElementById('done').style.display='block';
+    return;
+  }
+  if(cur>=cards.length) cur=cards.length-1;
+  flipped=false;
+  const fc=document.getElementById('fc');
+  fc.style.transition='none';
+  fc.classList.remove('flipped');
+  fc.offsetHeight;
+  fc.style.transition='';
+  document.getElementById('flip-row').style.display='flex';
+  document.getElementById('judge-row').style.display='none';
+  updateCard();
+}
+
+function prevCard(){
+  if(cur<=0) return;
+  cur--;
+  flipped=false;
+  const fc=document.getElementById('fc');
+  fc.style.transition='none';
+  fc.classList.remove('flipped');
+  fc.offsetHeight;
+  fc.style.transition='';
+  document.getElementById('flip-row').style.display='flex';
+  document.getElementById('judge-row').style.display='none';
+  updateCard();
+}
+
+function shuffleCards(){
+  const list=buildSessionDeck();
+  for(let i=list.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [list[i],list[j]]=[list[j],list[i]];
+  }
+  cards=list; cur=0; flipped=false; score=0;
+  document.getElementById('no-cards-msg').style.display='none';
+  document.getElementById('scene').style.display='block';
+  document.getElementById('done').style.display='none';
+  if(cards.length) updateCard();
+}
+
+// ── BATCH IMPORT ──
+function openBatch(){
+  document.getElementById('batchInput').value='';
+  const msg=document.getElementById('batchMsg');
+  msg.style.display='none';
+  document.getElementById('batchOverlay').classList.add('open');
+  setTimeout(()=>document.getElementById('batchInput').focus(),80);
+}
+
+function closeBatch(){
+  document.getElementById('batchOverlay').classList.remove('open');
+}
+
+function handleBatchOverlayClick(e){
+  if(e.target===document.getElementById('batchOverlay')) closeBatch();
+}
+
+function importBatch(){
+  const raw=document.getElementById('batchInput').value;
+  const lines=raw.split('\n').map(l=>l.trim()).filter(l=>l);
+  const list=loadCustom();
+  let nextId=list.length ? Math.max(...list.map(c=>c.id))+1 : 1;
+  let count=0;
+  for(const line of lines){
+    const parts=line.split(/[｜|]/);
+    if(parts.length<3) continue;
+    const word=parts[0].trim();
+    const phone=parts[1].trim();
+    const meaning=parts[2].trim();
+    const ex=parts[3]?parts[3].trim():'';
+    if(!word||!phone||!meaning) continue;
+    list.push({id:nextId++,word,phone,meaning,ex});
+    count++;
+  }
+  const msg=document.getElementById('batchMsg');
+  if(count>0){
+    saveCustom(list);
+    list.forEach(c=>ensureFirstSeen(c.word));
+    cards=buildSessionDeck();
+    msg.textContent=`成功导入 ${count} 个单词 ✓`;
+    msg.style.background='#ECFDF5';
+    msg.style.color='#065F46';
+    msg.style.display='block';
+    document.getElementById('batchInput').value='';
+    setTimeout(()=>{ msg.style.display='none'; closeBatch(); },2000);
+  } else {
+    msg.textContent='未识别到有效内容，请检查格式（需用｜分隔）';
+    msg.style.background='#FEF0EE';
+    msg.style.color='#B91C1C';
+    msg.style.display='block';
+  }
+}
+
+// ── MODAL ──
+function openModal(){
+  renderCustomList();
+  document.getElementById('modalOverlay').classList.add('open');
+  setTimeout(()=>document.getElementById('fw').focus(),80);
+}
+
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+  clearForm();
+}
+
+function handleOverlayClick(e){
+  if(e.target===document.getElementById('modalOverlay')) closeModal();
+}
+
+function clearForm(){
+  ['fw','fph','fm'].forEach(id=>document.getElementById(id).value='');
+}
+
+function saveWord(){
+  const fw=document.getElementById('fw');
+  const fph=document.getElementById('fph');
+  const fm=document.getElementById('fm');
+  const word=fw.value.trim();
+  const phone=fph.value.trim();
+  const meaning=fm.value.trim();
+  if(!word){ fw.classList.add('err'); setTimeout(()=>fw.classList.remove('err'),400); fw.focus(); return; }
+  if(!phone){ fph.classList.add('err'); setTimeout(()=>fph.classList.remove('err'),400); fph.focus(); return; }
+  if(!meaning){ fm.classList.add('err'); setTimeout(()=>fm.classList.remove('err'),400); fm.focus(); return; }
+  const list=loadCustom();
+  list.push({
+    id: list.length ? Math.max(...list.map(c=>c.id))+1 : 1,
+    word,
+    phone,
+    meaning,
+    ex: ''
+  });
+  saveCustom(list);
+  ensureFirstSeen(word);
+  cards = buildSessionDeck();
+  if(document.getElementById('done').style.display !== 'block'){
+    document.getElementById('counter').textContent=`${cur+1} / ${cards.length}`;
+  }
+  clearForm();
+  renderCustomList();
+  const btn=document.getElementById('saveBtn');
+  btn.textContent='已保存 ✓'; btn.style.background='#10B981';
+  setTimeout(()=>{ btn.textContent='保存单词'; btn.style.background=''; },1500);
+}
+
+function deleteWord(id){
+  saveCustom(loadCustom().filter(c=>c.id!==id));
+  renderCustomList();
+}
+
+function renderCustomList(){
+  const listEl=document.getElementById('customList');
+  const custom=loadCustom();
+  if(!custom.length){
+    listEl.innerHTML='<div class="custom-empty">还没有自定义单词</div>';
+    return;
+  }
+  listEl.innerHTML=custom.map((c,i)=>{
+    const starred=getSRS(c.word).starred||false;
+    return `
+    <div class="custom-item">
+      <div class="ci-info">
+        <div class="ci-word">${c.word}</div>
+        <div class="ci-meaning">${c.phone?c.phone+' · ':''}${c.meaning}</div>
+      </div>
+      <button class="ci-star${starred?' starred':''}" data-idx="${i}" title="星标">${starred?'★':'☆'}</button>
+      <button class="del-btn" onclick="deleteWord(${c.id})" title="删除">✕</button>
+    </div>`;
+  }).join('');
+  listEl.querySelectorAll('.ci-star').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const c=custom[parseInt(btn.dataset.idx)];
+      toggleStarFromList(c.word,btn);
+    });
+  });
+}
+
+// ── STATS TRACKING ──
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+function loadSt(){
+  try{ return JSON.parse(localStorage.getItem('zapp_stats')||'null')||
+    {totalSeen:0,totalKnown:0,streak:0,lastDate:'',longestStreak:0,sessions:0};
+  }catch(e){ return {totalSeen:0,totalKnown:0,streak:0,lastDate:'',longestStreak:0,sessions:0}; }
+}
+function saveSt(s){ localStorage.setItem('zapp_stats',JSON.stringify(s)); }
+
+function recordCard(knew){
+  const s=loadSt(), today=todayStr();
+  s.totalSeen++;
+  if(knew) s.totalKnown++;
+  if(s.lastDate!==today){
+    const yest=new Date(Date.now()-86400000).toISOString().slice(0,10);
+    s.streak = s.lastDate===yest ? s.streak+1 : 1;
+    s.lastDate=today;
+    if(s.streak>s.longestStreak) s.longestStreak=s.streak;
+  }
+  saveSt(s);
+  document.getElementById('streak-display').textContent=`🔥 ${s.streak}天连续`;
+}
+
+function recordSession(){
+  const s=loadSt();
+  s.sessions=(s.sessions||0)+1;
+  saveSt(s);
+}
+
+function renderStats(){
+  const s=loadSt();
+  document.getElementById('st-streak').textContent=s.streak;
+  document.getElementById('st-total').textContent=s.totalSeen;
+  document.getElementById('st-known').textContent=s.totalKnown;
+  document.getElementById('st-rate').textContent=
+    s.totalSeen>0 ? Math.round(s.totalKnown/s.totalSeen*100)+'%' : '—';
+  document.getElementById('st-best').textContent=s.longestStreak||s.streak;
+  document.getElementById('st-sessions').textContent=s.sessions||0;
+  document.getElementById('st-words').textContent=buildCards().length;
+}
+
+// Enter key in form fields
+document.addEventListener('DOMContentLoaded',()=>{
+  cards=buildSessionDeck();
+  document.getElementById('limit-display').textContent=loadDailyLimit();
+  updateCard();
+  selectScene(0);
+  const s=loadSt();
+  document.getElementById('streak-display').textContent=`🔥 ${s.streak}天连续`;
+  ['fw','fph','fm'].forEach(id=>{
+    document.getElementById(id).addEventListener('keydown',e=>{ if(e.key==='Enter') saveWord(); });
+  });
+  document.getElementById('limit-input').addEventListener('keydown',e=>{ if(e.key==='Enter') saveDailyLimit(); });
+});
+
+// ── CHAT ──
+const SCENES=[
+  {
+    icon:'☕', name:'咖啡馆', fullName:'在咖啡馆点单', tag:'日常场景', role:'Barista',
+    opener:'Hi! Welcome to Morning Brew. What can I get for you today?',
+    replies:[
+      'Sure! What size would you like — small, medium, or large? And hot or iced?',
+      'Great choice! What kind of milk — whole, oat, or almond?',
+      'Perfect. Can I get your name for the order?',
+      'Got it! Your order will be ready in about 3 minutes. Anything else?',
+      'Your total is $5.50. Thank you! Enjoy your drink! ☕\n（练习结束，做得很好！）'
+    ]
+  },
+  {
+    icon:'✈️', name:'机场', fullName:'机场办理登机', tag:'旅行场景', role:'Staff',
+    opener:'Good morning! May I see your passport and booking confirmation, please?',
+    replies:[
+      'Thank you. Do you have any bags to check in today?',
+      'Got it. Would you prefer a window or an aisle seat?',
+      "Here's your boarding pass. Your flight departs from Gate 14 at 15:45.",
+      'Boarding starts 45 minutes before departure. Please go through security now.',
+      'Have a wonderful flight! Safe travels! ✈️\n（练习结束，做得很好！）'
+    ]
+  },
+  {
+    icon:'🛒', name:'超市', fullName:'超市收银结账', tag:'日常场景', role:'Cashier',
+    opener:'Hi there! Did you find everything you were looking for today?',
+    replies:[
+      'Great! Do you have a loyalty card or any coupons to use?',
+      'No problem. Your total comes to $23.60. Would you like a bag?',
+      'Sure thing! Cash or card?',
+      "Here's your receipt. You saved $3.20 today with our deals!",
+      'Thanks for shopping with us — see you next time! 🛒\n（练习结束，做得很好！）'
+    ]
+  },
+  {
+    icon:'🏥', name:'医院', fullName:'医院问诊就医', tag:'生活场景', role:'Doctor',
+    opener:"Hello, I'm Dr. Chen. What brings you in today?",
+    replies:[
+      'I see. How long have you been experiencing these symptoms?',
+      'Are you currently taking any medications, or do you have any known allergies?',
+      'Can you rate the discomfort on a scale from 1 to 10?',
+      "I'd like to run a few tests. I'll also prescribe something for the pain in the meantime.",
+      'Take this twice a day with food and get plenty of rest. Come back in a week if it does not improve. 💊\n（练习结束，做得很好！）'
+    ]
+  },
+  {
+    icon:'💼', name:'面试', fullName:'英文工作面试', tag:'职场场景', role:'Interviewer',
+    opener:'Welcome! Please take a seat. Could you start by telling me a little about yourself?',
+    replies:[
+      "That's impressive! What would you say is your greatest professional strength?",
+      'Interesting. Can you describe a challenge you faced at work and how you handled it?',
+      'What interests you most about this particular role?',
+      'Great answer. Do you have any questions for me about the position or the company?',
+      "Excellent! We'll be in touch within the week. Thank you so much for coming in! 💼\n（练习结束，做得很好！）"
+    ]
+  }
+];
+
+let curScene=0, chatStep=0;
+
+function selectScene(idx){
+  curScene=idx; chatStep=0;
+  document.querySelectorAll('.scene-opt').forEach((el,i)=>el.classList.toggle('active',i===idx));
+  const sc=SCENES[idx];
+  document.getElementById('sc-icon').textContent=sc.icon;
+  document.getElementById('sc-tag').textContent=sc.tag;
+  document.getElementById('sc-name').textContent=sc.fullName;
+  const box=document.getElementById('chatbox');
+  box.innerHTML='';
+  addBubble('ai',sc.role,sc.opener,box);
+}
+
+function addBubble(type,role,text,box){
+  const el=document.createElement('div');
+  el.className=`bubble bubble-${type}`;
+  el.innerHTML=`<div class="blabel">${role}</div>${text.replace('\n','<br>')}`;
+  box.appendChild(el); box.scrollTop=9999;
+}
+
+function send(){
+  const inp=document.getElementById('userIn');
+  const txt=inp.value.trim(); if(!txt)return;
+  const box=document.getElementById('chatbox');
+  const sc=SCENES[curScene];
+  addBubble('user','You',txt,box);
+  inp.value='';
+  const typ=document.createElement('div');
+  typ.className='typing';
+  typ.innerHTML='<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+  box.appendChild(typ); box.scrollTop=9999;
+  const r=sc.replies[Math.min(chatStep,sc.replies.length-1)]; chatStep++;
+  setTimeout(()=>{ box.removeChild(typ); addBubble('ai',sc.role,r,box); },900);
+}
+
+// ── READING ──
+function ans(btn,type){
+  const grp=btn.closest('.opts');
+  grp.querySelectorAll('.opt').forEach(b=>{b.disabled=true;b.style.cursor='default';});
+  btn.classList.add(type);
+}
+
+// ── MCQ MODULE ──
+const MCQ_BANK=[
+  {s:"The scientist's research was so ( ) that it changed the way people understood the human brain.",opts:['gradual','groundbreaking','reluctant','disposable'],ans:1},
+  {s:"She felt ( ) after working three consecutive nights without proper rest.",opts:['exhausted','enthusiastic','elaborate','envious'],ans:0},
+  {s:"The company decided to ( ) its old policy after receiving many complaints from customers.",opts:['preserve','revise','worship','inflate'],ans:1},
+  {s:"Although the two scientists had different methods, they reached ( ) conclusions in the end.",opts:['identical','optional','hostile','portable'],ans:0},
+  {s:"The teacher asked students to ( ) the main points of the article in their own words.",opts:['summarize','exaggerate','hesitate','negotiate'],ans:0},
+  {s:"His ( ) behavior during the meeting made everyone feel uncomfortable.",opts:['aggressive','obedient','flexible','vivid'],ans:0},
+  {s:"The government introduced new measures to ( ) the spread of misinformation online.",opts:['accelerate','curb','admire','neglect'],ans:1},
+  {s:"After years of conflict, the two countries finally reached a ( ) agreement.",opts:['temporary','mutual','faithful','rigid'],ans:1},
+  {s:"The documentary ( ) the harsh living conditions faced by people in remote areas.",opts:['portrayed','interrupted','congratulated','narrowed'],ans:0},
+  {s:"She was ( ) to speak in public, so she practiced her speech every day for a month.",opts:['eager','reluctant','capable','determined'],ans:1},
+  {s:"The new employee was ( ) to ask questions because she didn't want to seem inexperienced.",opts:['eager','hesitant','willing','desperate'],ans:1},
+  {s:"The professor gave such an ( ) explanation that even beginners could understand it.",opts:['vague','unclear','elaborate','narrow'],ans:2},
+  {s:"After the earthquake, the government sent food and medicine to ( ) the victims.",opts:['assist','ignore','punish','replace'],ans:0},
+  {s:"The two companies decided to ( ) on the new project instead of competing.",opts:['collapse','collaborate','complain','contradict'],ans:1},
+  {s:"His ( ) tone during the argument made it impossible to have a calm discussion.",opts:['gentle','aggressive','polite','cheerful'],ans:1},
+  {s:"The documentary ( ) the daily lives of people living in extreme poverty.",opts:['ignored','celebrated','portrayed','interrupted'],ans:2},
+  {s:"She was ( ) by the amount of work she had to finish before the deadline.",opts:['relieved','overwhelmed','entertained','fascinated'],ans:1},
+  {s:"The politician's speech was ( ) because it avoided answering any direct questions.",opts:['inspiring','evasive','honest','persuasive'],ans:1},
+  {s:"The company had to ( ) its prices due to rising production costs.",opts:['lower','freeze','adjust','publish'],ans:2},
+  {s:"Despite working ( ) for three days, the team failed to finish the project on time.",opts:['casually','reluctantly','consecutively','cheerfully'],ans:2},
+  {s:"The new law was designed to ( ) people from throwing rubbish in public places.",opts:['encourage','deter','invite','protect'],ans:1},
+  {s:"She has a ( ) personality, which makes it easy for her to make new friends.",opts:['hostile','timid','charming','stubborn'],ans:2},
+  {s:"The scientist's discovery was so ( ) that it appeared in newspapers worldwide.",opts:['ordinary','groundbreaking','predictable','routine'],ans:1},
+  {s:"The two sides agreed to ( ) their differences and work toward a peaceful solution.",opts:['celebrate','negotiate','ignore','exaggerate'],ans:1},
+  {s:"The manager's decision to cut staff caused ( ) among the employees.",opts:['relief','excitement','resentment','confidence'],ans:2},
+  {s:"The building's ( ) design made it one of the most photographed in the city.",opts:['dull','striking','invisible','narrow'],ans:1},
+  {s:"He found it difficult to ( ) his anger when people interrupted him while speaking.",opts:['express','control','ignore','share'],ans:1},
+  {s:"The new policy was ( ) criticized by experts who said it would hurt low-income families.",opts:['widely','rarely','quietly','slightly'],ans:0},
+  {s:"The athlete's ( ) performance surprised everyone, including her own coach.",opts:['average','expected','exceptional','familiar'],ans:2},
+  {s:"She remained ( ) throughout the crisis, which helped calm everyone around her.",opts:['panicked','composed','confused','distracted'],ans:1},
+];
+
+const VOCAB={
+  gradual:'逐渐的',groundbreaking:'突破性的',reluctant:'不情愿的',disposable:'一次性的',
+  exhausted:'精疲力竭的',enthusiastic:'热情的',elaborate:'详尽的；精心设计的',envious:'嫉妒的',
+  preserve:'保留；保存',revise:'修改；修订',worship:'崇拜',inflate:'夸大；使膨胀',
+  identical:'完全相同的',optional:'可选的',hostile:'敌对的',portable:'便携的',
+  summarize:'总结',exaggerate:'夸大',hesitate:'犹豫',negotiate:'谈判；协商',
+  aggressive:'好斗的；激进的',obedient:'顺从的',flexible:'灵活的',vivid:'生动的',
+  accelerate:'加速',curb:'抑制；限制',admire:'钦佩',neglect:'忽视',
+  temporary:'临时的',mutual:'相互的；共同的',faithful:'忠诚的',rigid:'僵硬的；严格的',
+  portrayed:'描绘了',interrupted:'打断了',congratulated:'祝贺了',narrowed:'缩小了',
+  eager:'渴望的；热切的',capable:'有能力的',determined:'坚定的',
+  hesitant:'犹豫不决的',willing:'愿意的',desperate:'绝望的',
+  vague:'模糊的',unclear:'不清楚的',narrow:'狭窄的',
+  assist:'协助',ignore:'忽视',punish:'惩罚',replace:'替换；取代',
+  collapse:'崩溃；倒塌',collaborate:'合作',complain:'抱怨',contradict:'反驳',
+  gentle:'温柔的',polite:'礼貌的',cheerful:'开朗的',
+  ignored:'忽视了',celebrated:'庆祝了',
+  relieved:'如释重负的',overwhelmed:'不知所措的',entertained:'感到愉悦的',fascinated:'着迷的',
+  inspiring:'鼓舞人心的',evasive:'回避的',honest:'诚实的',persuasive:'有说服力的',
+  lower:'降低',freeze:'冻结；停止',adjust:'调整',publish:'发布；出版',
+  casually:'漫不经心地',reluctantly:'不情愿地',consecutively:'连续地',cheerfully:'愉快地',
+  encourage:'鼓励',deter:'阻止；威慑',invite:'邀请',protect:'保护',
+  timid:'胆小的',charming:'迷人的',stubborn:'固执的',
+  ordinary:'普通的',predictable:'可预测的',routine:'常规的',
+  celebrate:'庆祝',
+  relief:'宽慰',excitement:'兴奋',resentment:'怨恨；不满',confidence:'自信',
+  dull:'无聊的',striking:'引人注目的',invisible:'看不见的',
+  express:'表达',control:'控制',share:'分享',
+  widely:'广泛地',rarely:'很少',quietly:'安静地',slightly:'稍微',
+  average:'平均的；一般的',expected:'预期的',exceptional:'卓越的',familiar:'熟悉的',
+  panicked:'陷入恐慌的',composed:'镇定的',confused:'困惑的',distracted:'注意力分散的',
+  scientist:'科学家',research:'研究',human:'人类的',brain:'大脑',
+  consecutive:'连续的',proper:'适当的',rest:'休息',
+  company:'公司',policy:'政策',complaints:'投诉',customers:'顾客',
+  methods:'方法',conclusions:'结论',
+  uncomfortable:'不舒适的',
+  government:'政府',measures:'措施',spread:'传播',misinformation:'错误信息',
+  conflict:'冲突',countries:'国家',agreement:'协议',
+  documentary:'纪录片',harsh:'严酷的',conditions:'条件',remote:'偏远的',areas:'地区',
+  practiced:'练习了',speech:'演讲',month:'月份',
+  employee:'员工',inexperienced:'缺乏经验的',
+  professor:'教授',explanation:'解释',beginners:'初学者',
+  earthquake:'地震',food:'食物',medicine:'药物',victims:'受害者',
+  project:'项目',competing:'竞争',
+  tone:'语气',argument:'争论',impossible:'不可能的',calm:'冷静的',discussion:'讨论',
+  daily:'日常的',poverty:'贫困',
+  deadline:'截止日期',
+  politician:'政治家',avoided:'回避了',
+  prices:'价格',production:'生产',costs:'成本',
+  failed:'失败了',team:'团队',
+  law:'法律',throwing:'扔',rubbish:'垃圾',
+  personality:'个性',friends:'朋友',
+  discovery:'发现',worldwide:'全球的',
+  differences:'差异',peaceful:'和平的',solution:'解决方案',
+  decision:'决定',staff:'员工（群体）',employees:'雇员',
+  building:'建筑',photographed:'被拍照了',city:'城市',
+  anger:'愤怒',speaking:'说话',
+  criticized:'批评了',experts:'专家',families:'家庭',
+  athlete:'运动员',performance:'表现',coach:'教练',
+  crisis:'危机',
+};
+
+let mcqDeck=[], mcqCur=0, mcqScore=0;
+
+function lookupVocab(raw){
+  const w=raw.toLowerCase().replace(/[',]/g,'').trim();
+  return VOCAB[w]||VOCAB[w.replace(/s$/,'')]||VOCAB[w.replace(/ing$/,'')]||VOCAB[w.replace(/ed$/,'')]||VOCAB[w.replace(/ly$/,'')]||'';
+}
+
+function showMcw(el,e){
+  const zh=lookupVocab(el.dataset.w);
+  if(!zh)return;
+  const tt=document.getElementById('tt');
+  document.getElementById('tt-en').textContent=el.dataset.w;
+  document.getElementById('tt-zh').textContent=zh;
+  tt.style.display='block';
+  const x=Math.min(e.pageX-10,window.innerWidth-180);
+  tt.style.left=x+'px';
+  tt.style.top=Math.max(10,e.pageY-65)+'px';
+  clearTimeout(tt._t);
+  tt._t=setTimeout(()=>tt.style.display='none',2500);
+}
+
+function renderMcqSent(s){
+  const blank='<span class="mcq-blank">___</span>';
+  return s.split(/\(\s*\)/).map(part=>
+    part.replace(/([A-Za-z']+)/g,w=>`<span class="mcw" data-w="${w}" onclick="showMcw(this,event)">${w}</span>`)
+  ).join(blank);
+}
+
+function startMcq(){
+  mcqDeck=[...MCQ_BANK];
+  for(let i=mcqDeck.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [mcqDeck[i],mcqDeck[j]]=[mcqDeck[j],mcqDeck[i]];
+  }
+  mcqCur=0; mcqScore=0;
+  document.getElementById('mcq-card').style.display='block';
+  document.getElementById('mcq-nxt').style.display='none';
+  document.getElementById('mcq-done').style.display='none';
+  showMcqQ();
+}
+
+function showMcqQ(){
+  if(mcqCur>=mcqDeck.length){
+    document.getElementById('mcq-card').style.display='none';
+    document.getElementById('mcq-nxt').style.display='none';
+    document.getElementById('mcq-done').style.display='block';
+    document.getElementById('mcq-score').textContent=mcqScore+'/'+mcqDeck.length;
+    return;
+  }
+  const q=mcqDeck[mcqCur];
+  document.getElementById('mcq-ctr').textContent=`${mcqCur+1} / ${mcqDeck.length}`;
+  document.getElementById('mcq-bar').style.width=(mcqCur/mcqDeck.length*100)+'%';
+  document.getElementById('mcq-sent').innerHTML=renderMcqSent(q.s);
+  document.getElementById('mcq-opts').innerHTML=q.opts.map((opt,i)=>`
+    <button class="qopt" data-ans="${i}" onclick="answerMcq(this)">
+      <span class="qnum">${i+1}</span><span>${opt}</span>
+    </button>`).join('');
+  document.getElementById('mcq-nxt').style.display='none';
+}
+
+function answerMcq(btn){
+  const q=mcqDeck[mcqCur];
+  const chosen=parseInt(btn.dataset.ans);
+  document.getElementById('mcq-opts').querySelectorAll('.qopt').forEach(b=>{
+    b.disabled=true;
+    if(parseInt(b.dataset.ans)===q.ans) b.classList.add('correct');
+  });
+  if(chosen!==q.ans) btn.classList.add('wrong');
+  else mcqScore++;
+  mcqCur++;
+  document.getElementById('mcq-nxt').style.display='flex';
+}
+
+function nextMcq(){ showMcqQ(); }
+
+// ── TOOLTIPS ──
+document.querySelectorAll('.hl').forEach(el=>{
+  el.addEventListener('click',function(e){
+    const tt=document.getElementById('tt');
+    document.getElementById('tt-en').textContent=this.dataset.en;
+    document.getElementById('tt-zh').textContent=this.dataset.zh;
+    tt.style.display='block';
+    const x=Math.min(e.pageX-10,window.innerWidth-180);
+    tt.style.left=x+'px';
+    tt.style.top=(e.pageY-65)+'px';
+    clearTimeout(tt._t);
+    tt._t=setTimeout(()=>tt.style.display='none',2400);
+  });
+});
+</script>
+</body>
+</html>
