@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ZAPP · 英语学习</title>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 :root {
   --bg: #F8F7F4;
@@ -1034,13 +1035,25 @@ main { padding: 28px 20px; max-width: 600px; margin: 0 auto; }
   transition: all 0.15s;
 }
 .fc-limit-btn:hover { border-color: #888; color: var(--ink); }
+#sync-dot {
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: default;
+  user-select: none;
+  transition: color 0.3s;
+  min-width: 1.1rem;
+  text-align: center;
+}
 </style>
 </head>
 <body>
 
 <header>
   <div class="logo">Zapp</div>
-  <div class="streak" id="streak-display">🔥 0天连续</div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span id="sync-dot" title="云同步" style="color:#ccc">☁</span>
+    <div class="streak" id="streak-display">🔥 0天连续</div>
+  </div>
 </header>
 
 <div class="tabs">
@@ -1354,6 +1367,7 @@ function setSRS(word,fields){
   const d=loadSRS();
   d[word]=Object.assign(getSRS(word),fields);
   saveSRS(d);
+  pushSRS(word,d[word]);
 }
 
 function dateOffset(dateStr,days){
@@ -1535,6 +1549,8 @@ function permanentlyRemove(word){
   removed.add(word);
   localStorage.setItem('zapp_removed',JSON.stringify([...removed]));
   saveCustom(loadCustom().filter(c=>c.word!==word));
+  pushRemovedWord(word);
+  pushCustomWordDeleted(word);
 }
 
 function buildCards(){
@@ -1713,6 +1729,7 @@ function importBatch(){
   const list=loadCustom();
   let nextId=list.length ? Math.max(...list.map(c=>c.id))+1 : 1;
   let count=0;
+  const newWords=[];
   for(const line of lines){
     const parts=line.split(/[｜|]/);
     if(parts.length<3) continue;
@@ -1721,12 +1738,15 @@ function importBatch(){
     const meaning=parts[2].trim();
     const ex=parts[3]?parts[3].trim():'';
     if(!word||!phone||!meaning) continue;
-    list.push({id:nextId++,word,phone,meaning,ex});
+    const w={id:nextId++,word,phone,meaning,ex};
+    list.push(w);
+    newWords.push(w);
     count++;
   }
   const msg=document.getElementById('batchMsg');
   if(count>0){
     saveCustom(list);
+    newWords.forEach(w=>pushCustomWord(w));
     list.forEach(c=>ensureFirstSeen(c.word));
     cards=buildSessionDeck();
     msg.textContent=`成功导入 ${count} 个单词 ✓`;
@@ -1774,14 +1794,16 @@ function saveWord(){
   if(!phone){ fph.classList.add('err'); setTimeout(()=>fph.classList.remove('err'),400); fph.focus(); return; }
   if(!meaning){ fm.classList.add('err'); setTimeout(()=>fm.classList.remove('err'),400); fm.focus(); return; }
   const list=loadCustom();
-  list.push({
+  const newWord={
     id: list.length ? Math.max(...list.map(c=>c.id))+1 : 1,
     word,
     phone,
     meaning,
     ex: ''
-  });
+  };
+  list.push(newWord);
   saveCustom(list);
+  pushCustomWord(newWord);
   ensureFirstSeen(word);
   cards = buildSessionDeck();
   if(document.getElementById('done').style.display !== 'block'){
@@ -1795,7 +1817,10 @@ function saveWord(){
 }
 
 function deleteWord(id){
-  saveCustom(loadCustom().filter(c=>c.id!==id));
+  const custom=loadCustom();
+  const toDelete=custom.find(c=>c.id===id);
+  saveCustom(custom.filter(c=>c.id!==id));
+  if(toDelete) pushCustomWordDeleted(toDelete.word);
   renderCustomList();
 }
 
@@ -1868,8 +1893,139 @@ function renderStats(){
   document.getElementById('st-words').textContent=buildCards().length;
 }
 
+// ── SUPABASE SYNC ──
+const _SBURL='https://yrscvkupavfbgeewxoek.supabase.co';
+const _SBKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyc2N2a3VwYXZmYmdlZXd4b2VrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0MjQyNzgsImV4cCI6MjA5NzAwMDI3OH0._ZsWUzC2aDI9J2M7eR3d4xLE1V_1N0rdrXmFXeoCmjw';
+const _sb=supabase.createClient(_SBURL,_SBKEY);
+
+function getDeviceId(){
+  let id=localStorage.getItem('zapp_device_id');
+  if(!id){
+    id='zapp_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8);
+    localStorage.setItem('zapp_device_id',id);
+  }
+  return id;
+}
+const _DID=getDeviceId();
+
+let _syncFadeTimer=null;
+function setSyncStatus(st){
+  const el=document.getElementById('sync-dot');
+  if(!el) return;
+  const map={syncing:['↻','#2563EB','同步中…'],ok:['✓','#10B981','已同步'],error:['✕','#F04E37','同步失败'],idle:['☁','#ccc','云端同步']};
+  const [icon,color,tip]=map[st]||map.idle;
+  el.textContent=icon; el.style.color=color; el.title=tip;
+  if(st==='ok'){
+    clearTimeout(_syncFadeTimer);
+    _syncFadeTimer=setTimeout(()=>setSyncStatus('idle'),2000);
+  }
+}
+
+async function pushSRS(word,data){
+  const {error}=await _sb.from('word_srs').upsert({
+    device_id:_DID,word,
+    hard:!!data.hard,starred:!!data.starred,
+    next_review:data.nextReview||null,mastered:!!data.mastered,
+    first_seen:data.firstSeen||null,mastered_date:data.masteredDate||null,
+    updated_at:new Date().toISOString()
+  },{onConflict:'device_id,word'});
+  if(!error) setSyncStatus('ok'); else setSyncStatus('error');
+}
+
+async function pushCustomWord(w){
+  const {error}=await _sb.from('custom_words').upsert({
+    device_id:_DID,word:w.word,id_num:w.id,
+    phone:w.phone||'',meaning:w.meaning||'',ex:w.ex||'',
+    deleted:false,updated_at:new Date().toISOString()
+  },{onConflict:'device_id,word'});
+  if(!error) setSyncStatus('ok'); else setSyncStatus('error');
+}
+
+async function pushCustomWordDeleted(word){
+  await _sb.from('custom_words').upsert({
+    device_id:_DID,word,deleted:true,updated_at:new Date().toISOString()
+  },{onConflict:'device_id,word'});
+}
+
+async function pushRemovedWord(word){
+  await _sb.from('removed_words').upsert(
+    {device_id:_DID,word},{onConflict:'device_id,word'}
+  );
+}
+
+async function pullFromCloud(){
+  setSyncStatus('syncing');
+  try{
+    const [srsRes,customRes,removedRes]=await Promise.all([
+      _sb.from('word_srs').select('*').eq('device_id',_DID),
+      _sb.from('custom_words').select('*').eq('device_id',_DID),
+      _sb.from('removed_words').select('word').eq('device_id',_DID)
+    ]);
+
+    if(!srsRes.error&&srsRes.data?.length){
+      const srs=loadSRS();
+      srsRes.data.forEach(r=>{
+        srs[r.word]={
+          hard:r.hard,starred:r.starred,nextReview:r.next_review,
+          mastered:r.mastered,firstSeen:r.first_seen,masteredDate:r.mastered_date
+        };
+      });
+      saveSRS(srs);
+    }
+
+    if(!customRes.error&&customRes.data?.length){
+      const local=loadCustom();
+      const localMap=new Map(local.map(c=>[c.word,c]));
+      customRes.data.forEach(r=>{
+        if(r.deleted){
+          localMap.delete(r.word);
+        } else if(!localMap.has(r.word)){
+          localMap.set(r.word,{id:r.id_num,word:r.word,phone:r.phone,meaning:r.meaning,ex:r.ex});
+        }
+      });
+      saveCustom([...localMap.values()]);
+    }
+
+    if(!removedRes.error&&removedRes.data?.length){
+      const removed=loadRemoved();
+      removedRes.data.forEach(r=>removed.add(r.word));
+      localStorage.setItem('zapp_removed',JSON.stringify([...removed]));
+    }
+
+    setSyncStatus('ok');
+  }catch(e){
+    setSyncStatus('error');
+  }
+}
+
+async function pushAllToCloud(){
+  const srs=loadSRS();
+  const custom=loadCustom();
+  const removed=[...loadRemoved()];
+  const srsRows=Object.entries(srs).map(([word,data])=>({
+    device_id:_DID,word,
+    hard:!!data.hard,starred:!!data.starred,
+    next_review:data.nextReview||null,mastered:!!data.mastered,
+    first_seen:data.firstSeen||null,mastered_date:data.masteredDate||null,
+    updated_at:new Date().toISOString()
+  }));
+  const customRows=custom.map(w=>({
+    device_id:_DID,word:w.word,id_num:w.id,
+    phone:w.phone||'',meaning:w.meaning||'',ex:w.ex||'',
+    deleted:false,updated_at:new Date().toISOString()
+  }));
+  const removedRows=removed.map(word=>({device_id:_DID,word}));
+  await Promise.all([
+    srsRows.length?_sb.from('word_srs').upsert(srsRows,{onConflict:'device_id,word'}):null,
+    customRows.length?_sb.from('custom_words').upsert(customRows,{onConflict:'device_id,word'}):null,
+    removedRows.length?_sb.from('removed_words').upsert(removedRows,{onConflict:'device_id,word'}):null
+  ].filter(Boolean));
+}
+
 // Enter key in form fields
-document.addEventListener('DOMContentLoaded',()=>{
+document.addEventListener('DOMContentLoaded',async()=>{
+  await pullFromCloud();
+  pushAllToCloud();
   cards=buildSessionDeck();
   document.getElementById('limit-display').textContent=loadDailyLimit();
   updateCard();
