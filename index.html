@@ -287,6 +287,8 @@ main { padding: 28px 20px; max-width: 600px; margin: 0 auto; }
 .btn {
   flex: 1;
   padding: 13px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(0,0,0,0.08);
   border-radius: 12px;
   border: 1px solid var(--line);
   font-family: 'DM Sans', sans-serif;
@@ -1035,6 +1037,9 @@ main { padding: 28px 20px; max-width: 600px; margin: 0 auto; }
   transition: all 0.15s;
 }
 .fc-limit-btn:hover { border-color: #888; color: var(--ink); }
+/* iOS: lift button rows above the perspective 3D context of .scene */
+#flip-row, #judge-row, #prev-row { position: relative; z-index: 2; }
+.btn-prev { touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.08); }
 #sync-dot {
   font-size: 1.1rem;
   line-height: 1;
@@ -2036,6 +2041,28 @@ document.addEventListener('DOMContentLoaded',async()=>{
     document.getElementById(id).addEventListener('keydown',e=>{ if(e.key==='Enter') saveWord(); });
   });
   document.getElementById('limit-input').addEventListener('keydown',e=>{ if(e.key==='Enter') saveDailyLimit(); });
+
+  // iOS/iPad touch fix: touchend fires reliably even when perspective context swallows clicks
+  function addTap(el, fn){
+    if(!el) return;
+    let startY=0;
+    el.addEventListener('touchstart',e=>{ startY=e.touches[0].clientY; },{passive:true});
+    el.addEventListener('touchend',e=>{
+      if(Math.abs(e.changedTouches[0].clientY-startY)<10){
+        e.preventDefault();
+        fn();
+      }
+    },{passive:false});
+  }
+  const judgeRow=document.getElementById('judge-row');
+  if(judgeRow){
+    const [nopeBtn,yepBtn]=judgeRow.querySelectorAll('.btn');
+    addTap(nopeBtn,()=>next(false));
+    addTap(yepBtn,()=>knewCard());
+  }
+  const flipBtn=document.querySelector('#flip-row .btn-flip');
+  addTap(flipBtn,()=>flipCard());
+  addTap(document.getElementById('scene'),()=>flipCard());
 });
 
 // ── CHAT ──
