@@ -7,1785 +7,715 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
-/* ─── Reset & Base ─────────────────────────────────────── */
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-
-:root {
-  --bg: #FFFBF2;
-  --en-front-bg: #F6FFEA;
-  --en-front-text: #C93638;
-  --en-back-bg: #C93638;
-  --en-back-text: #FFFFFF;
-  --ja-front-bg: #F6FFEA;
-  --ja-front-text: #2B4570;
-  --ja-back-bg: #2B4570;
-  --ja-back-text: #F6FFEA;
-  --quiz-accent: #62C4DA;
-  --ink: #1C1C1C;
-  --sub: #777;
-  --line: #E8DFC8;
-  --white: #FFFFFF;
-  --danger: #E53935;
-  --gold: #F5A623;
-}
-
-html, body {
-  font-family: 'Manrope', sans-serif;
-  background: var(--bg);
-  color: var(--ink);
-  min-height: 100vh;
-}
-
-h1, h2, h3, .logo-text {
-  font-family: 'Playfair Display', serif;
-}
-
-button {
-  font-family: 'Manrope', sans-serif;
-  cursor: pointer;
-  border: none;
-  background: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-input, textarea, select {
-  font-family: 'Manrope', sans-serif;
-}
-
-/* ─── Header ────────────────────────────────────────────── */
-header {
-  height: 56px;
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  background: var(--bg);
-  border-bottom: 1px solid var(--line);
-  position: sticky;
-  top: 0;
-  z-index: 200;
-}
-
-.logo-text {
-  font-size: 1.3rem;
-  color: var(--ink);
-  letter-spacing: -0.5px;
-}
-
-/* ─── Tab Bar ───────────────────────────────────────────── */
-.tab-bar {
-  display: flex;
-  border-bottom: 1px solid var(--line);
-  background: var(--bg);
-  position: sticky;
-  top: 56px;
-  z-index: 199;
-}
-
-.tab-btn {
-  flex: 1;
-  padding: 12px 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--sub);
-  border-bottom: 2px solid transparent;
-  transition: color 0.2s, border-color 0.2s;
-  letter-spacing: 0.2px;
-}
-
-.tab-btn.active-en {
-  color: var(--en-back-bg);
-  border-bottom-color: var(--en-back-bg);
-}
-
-.tab-btn.active-ja {
-  color: var(--ja-back-bg);
-  border-bottom-color: var(--ja-back-bg);
-}
-
-.tab-btn.active-quiz {
-  color: var(--quiz-accent);
-  border-bottom-color: var(--quiz-accent);
-}
-
-/* ─── Sections ──────────────────────────────────────────── */
-.section {
-  display: none;
-  padding: 20px 16px 80px;
-  max-width: 680px;
-  margin: 0 auto;
-}
-
-.section.active {
-  display: block;
-}
-
-/* ─── Section Header Row ────────────────────────────────── */
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.section-title {
-  font-size: 1.4rem;
-  color: var(--ink);
-}
-
-.header-btns {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-/* ─── Pill Buttons ──────────────────────────────────────── */
-.pill-btn {
-  padding: 7px 14px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  border: 1.5px solid currentColor;
-  transition: background 0.15s, color 0.15s;
-}
-
-.pill-btn.en-primary {
-  color: var(--en-back-bg);
-  border-color: var(--en-back-bg);
-}
-.pill-btn.en-primary:hover, .pill-btn.en-primary.active {
-  background: var(--en-back-bg);
-  color: #fff;
-}
-
-.pill-btn.ja-primary {
-  color: var(--ja-back-bg);
-  border-color: var(--ja-back-bg);
-}
-.pill-btn.ja-primary:hover, .pill-btn.ja-primary.active {
-  background: var(--ja-back-bg);
-  color: var(--ja-back-text);
-}
-
-.pill-btn.quiz-primary {
-  color: var(--quiz-accent);
-  border-color: var(--quiz-accent);
-}
-.pill-btn.quiz-primary:hover, .pill-btn.quiz-primary.active {
-  background: var(--quiz-accent);
-  color: #fff;
-}
-
-/* ─── Word Card ─────────────────────────────────────────── */
-.card-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.word-card {
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-  position: relative;
-}
-
-/* Front face */
-.card-front {
-  padding: 18px 16px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.en .card-front { background: var(--en-front-bg); }
-.ja .card-front { background: var(--ja-front-bg); }
-
-.card-word {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.5rem;
-  line-height: 1.2;
-}
-
-.en .card-word { color: var(--en-front-text); }
-.ja .card-word { color: var(--ja-front-text); }
-
-.card-reading {
-  font-size: 0.8rem;
-  font-weight: 500;
-  opacity: 0.65;
-}
-
-.en .card-reading { color: var(--en-front-text); }
-.ja .card-reading { color: var(--ja-front-text); }
-
-/* Back face */
-.card-back {
-  display: none;
-  padding: 14px 16px;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.card-back.visible {
-  display: flex;
-}
-
-.en .card-back { background: var(--en-back-bg); color: var(--en-back-text); }
-.ja .card-back { background: var(--ja-back-bg); color: var(--ja-back-text); }
-
-.card-meaning {
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1.4;
-}
-
-.card-example {
-  font-size: 0.8rem;
-  font-weight: 400;
-  opacity: 0.85;
-  line-height: 1.5;
-}
-
-/* Card action row */
-.card-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border-top: 1px solid rgba(0,0,0,0.06);
-  flex-wrap: wrap;
-}
-
-.en .card-actions { background: var(--en-front-bg); }
-.ja .card-actions { background: var(--ja-front-bg); }
-
-.en .card-back + .card-actions { background: var(--en-back-bg); border-top-color: rgba(255,255,255,0.2); }
-.ja .card-back + .card-actions { background: var(--ja-back-bg); border-top-color: rgba(255,255,255,0.2); }
-
-.action-btn {
-  padding: 5px 11px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  border: 1.5px solid;
-  transition: background 0.15s, color 0.15s;
-  white-space: nowrap;
-}
-
-.btn-flip-en {
-  border-color: var(--en-back-bg);
-  color: var(--en-back-bg);
-}
-.btn-flip-en:hover { background: var(--en-back-bg); color: #fff; }
-
-.btn-flip-ja {
-  border-color: var(--ja-back-bg);
-  color: var(--ja-back-bg);
-}
-.btn-flip-ja:hover { background: var(--ja-back-bg); color: var(--ja-back-text); }
-
-.btn-flip-back-en {
-  border-color: rgba(255,255,255,0.7);
-  color: rgba(255,255,255,0.9);
-}
-.btn-flip-back-en:hover { background: rgba(255,255,255,0.2); }
-
-.btn-flip-back-ja {
-  border-color: rgba(246,255,234,0.7);
-  color: rgba(246,255,234,0.9);
-}
-.btn-flip-back-ja:hover { background: rgba(246,255,234,0.2); }
-
-.btn-know {
-  border-color: #4CAF50;
-  color: #4CAF50;
-}
-.btn-know:hover { background: #4CAF50; color: #fff; }
-
-.btn-unknow {
-  border-color: var(--danger);
-  color: var(--danger);
-}
-.btn-unknow:hover { background: var(--danger); color: #fff; }
-
-.star-btn {
-  margin-left: auto;
-  font-size: 1.1rem;
-  line-height: 1;
-  padding: 4px;
-  opacity: 0.5;
-  transition: opacity 0.15s, transform 0.15s;
-}
-.star-btn.starred { opacity: 1; }
-.star-btn:hover { transform: scale(1.2); }
-
-.delete-btn {
-  position: absolute;
-  top: 8px;
-  right: 10px;
-  font-size: 0.7rem;
-  color: var(--sub);
-  opacity: 0.4;
-  padding: 4px 6px;
-  border-radius: 6px;
-  transition: opacity 0.15s, background 0.15s;
-  z-index: 10;
-}
-.delete-btn:hover { opacity: 1; background: rgba(229,57,53,0.1); color: var(--danger); }
-
-/* Due / Priority badge */
-.due-badge {
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 8px;
-  letter-spacing: 0.3px;
-}
-.due-badge.due-now { background: #FFF3E0; color: #E65100; }
-.due-badge.new-word { background: #E3F2FD; color: #1565C0; }
-.due-badge.priority { background: #FCE4EC; color: #880E4F; }
-
-/* ─── Empty State ───────────────────────────────────────── */
-.empty-state {
-  text-align: center;
-  padding: 48px 20px;
-  color: var(--sub);
-}
-.empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
-.empty-state p { font-size: 0.9rem; line-height: 1.6; }
-
-/* ─── Import Panel ──────────────────────────────────────── */
-.panel {
-  display: none;
-  background: var(--white);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 20px;
-  margin-bottom: 16px;
-}
-.panel.open { display: block; }
-
-.panel-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 1rem;
-  margin-bottom: 10px;
-}
-
-.panel textarea {
-  width: 100%;
-  min-height: 100px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 10px;
-  font-size: 0.82rem;
-  resize: vertical;
-  background: var(--bg);
-  color: var(--ink);
-  line-height: 1.6;
-  outline: none;
-}
-.panel textarea:focus { border-color: #aaa; }
-
-.panel-hint {
-  font-size: 0.75rem;
-  color: var(--sub);
-  margin-top: 6px;
-  line-height: 1.5;
-}
-
-.panel-footer {
-  display: flex;
-  gap: 8px;
-  margin-top: 12px;
-  justify-content: flex-end;
-}
-
-.solid-btn {
-  padding: 8px 18px;
-  border-radius: 20px;
-  font-size: 0.82rem;
-  font-weight: 700;
-  transition: opacity 0.15s;
-}
-.solid-btn:hover { opacity: 0.85; }
-
-.solid-btn.en-solid { background: var(--en-back-bg); color: #fff; }
-.solid-btn.ja-solid { background: var(--ja-back-bg); color: var(--ja-back-text); }
-.solid-btn.quiz-solid { background: var(--quiz-accent); color: #fff; }
-.solid-btn.gray-solid { background: #E0DDD5; color: var(--ink); }
-
-/* ─── Practice Session ──────────────────────────────────── */
-.practice-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: var(--bg);
-  z-index: 300;
-  overflow-y: auto;
-}
-.practice-overlay.open { display: block; }
-
-.practice-inner {
-  max-width: 480px;
-  margin: 0 auto;
-  padding: 24px 16px 80px;
-}
-
-.practice-topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 24px;
-}
-
-.practice-progress {
-  font-size: 0.85rem;
-  color: var(--sub);
-  font-weight: 600;
-}
-
-.close-practice-btn {
-  font-size: 0.85rem;
-  color: var(--sub);
-  padding: 6px 12px;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  transition: background 0.15s;
-}
-.close-practice-btn:hover { background: var(--line); }
-
-/* Practice card */
-.practice-card {
-  border-radius: 18px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-  margin-bottom: 20px;
-}
-
-.practice-front {
-  padding: 40px 24px 28px;
-  text-align: center;
-  min-height: 180px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-.en .practice-front { background: var(--en-front-bg); }
-.ja .practice-front { background: var(--ja-front-bg); }
-
-.practice-word {
-  font-family: 'Playfair Display', serif;
-  font-size: 2.2rem;
-  line-height: 1.2;
-}
-.en .practice-word { color: var(--en-front-text); }
-.ja .practice-word { color: var(--ja-front-text); }
-
-.practice-reading {
-  font-size: 0.9rem;
-  font-weight: 500;
-  opacity: 0.6;
-}
-.en .practice-reading { color: var(--en-front-text); }
-.ja .practice-reading { color: var(--ja-front-text); }
-
-.practice-back {
-  display: none;
-  padding: 20px 24px 24px;
-  flex-direction: column;
-  gap: 8px;
-}
-.practice-back.visible { display: flex; }
-
-.en .practice-back { background: var(--en-back-bg); color: var(--en-back-text); }
-.ja .practice-back { background: var(--ja-back-bg); color: var(--ja-back-text); }
-
-.practice-meaning {
-  font-size: 1.2rem;
-  font-weight: 700;
-  line-height: 1.4;
-}
-.practice-example {
-  font-size: 0.85rem;
-  opacity: 0.85;
-  line-height: 1.6;
-}
-
-.practice-btns {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.big-btn {
-  flex: 1;
-  min-width: 100px;
-  padding: 14px 20px;
-  border-radius: 14px;
-  font-size: 0.9rem;
-  font-weight: 700;
-  border: 2px solid;
-  transition: background 0.15s, color 0.15s;
-}
-
-.big-btn.flip-en { border-color: var(--en-back-bg); color: var(--en-back-bg); }
-.big-btn.flip-en:hover { background: var(--en-back-bg); color: #fff; }
-.big-btn.flip-ja { border-color: var(--ja-back-bg); color: var(--ja-back-bg); }
-.big-btn.flip-ja:hover { background: var(--ja-back-bg); color: var(--ja-back-text); }
-
-.big-btn.know { border-color: #4CAF50; color: #4CAF50; }
-.big-btn.know:hover { background: #4CAF50; color: #fff; }
-.big-btn.unknow { border-color: var(--danger); color: var(--danger); }
-.big-btn.unknow:hover { background: var(--danger); color: #fff; }
-
-/* ─── Summary Screen ────────────────────────────────────── */
-.summary-screen {
-  display: none;
-  text-align: center;
-  padding: 40px 20px;
-}
-.summary-screen.visible { display: block; }
-.summary-title {
-  font-size: 1.8rem;
-  margin-bottom: 24px;
-}
-.summary-stats {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-bottom: 32px;
-}
-.stat-box {
-  background: var(--white);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 16px 24px;
-  min-width: 100px;
-}
-.stat-num {
-  font-family: 'Playfair Display', serif;
-  font-size: 2rem;
-  font-weight: 700;
-}
-.stat-label {
-  font-size: 0.75rem;
-  color: var(--sub);
-  font-weight: 600;
-  margin-top: 4px;
-}
-
-/* ─── Daily limit bar ───────────────────────────────────── */
-.limit-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 16px;
-  font-size: 0.8rem;
-  color: var(--sub);
-  font-weight: 600;
-}
-.limit-track {
-  flex: 1;
-  height: 6px;
-  background: var(--line);
-  border-radius: 3px;
-  overflow: hidden;
-}
-.limit-fill {
-  height: 100%;
-  border-radius: 3px;
-  transition: width 0.3s;
-}
-.en-fill { background: var(--en-back-bg); }
-.ja-fill { background: var(--ja-back-bg); }
-
-/* ─── Filter Row ────────────────────────────────────────── */
-.filter-row {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 14px;
-  flex-wrap: wrap;
-}
-
-.filter-chip {
-  padding: 5px 12px;
-  border-radius: 16px;
-  font-size: 0.77rem;
-  font-weight: 600;
-  border: 1.5px solid var(--line);
-  color: var(--sub);
-  transition: all 0.15s;
-}
-.filter-chip.active-en {
-  background: var(--en-back-bg);
-  border-color: var(--en-back-bg);
-  color: #fff;
-}
-.filter-chip.active-ja {
-  background: var(--ja-back-bg);
-  border-color: var(--ja-back-bg);
-  color: var(--ja-back-text);
-}
-
-/* ─── Modal / Dialog ────────────────────────────────────── */
-.modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.4);
-  z-index: 500;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-}
-.modal-overlay.open {
-  display: flex;
-}
-.modal-box {
-  background: var(--white);
-  border-radius: 18px;
-  padding: 28px 24px 20px;
-  max-width: 360px;
-  width: 100%;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.15);
-}
-.modal-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.1rem;
-  margin-bottom: 10px;
-}
-.modal-body {
-  font-size: 0.88rem;
-  color: var(--sub);
-  line-height: 1.6;
-  margin-bottom: 20px;
-}
-.modal-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-}
-
-/* ─── Quiz Section ──────────────────────────────────────── */
-.quiz-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-.quiz-title { font-size: 1.4rem; }
-
-.quiz-card {
-  background: var(--white);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 24px 20px 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  margin-bottom: 16px;
-}
-
-.quiz-sentence {
-  font-size: 1.05rem;
-  line-height: 1.8;
-  margin-bottom: 20px;
-  color: var(--ink);
-}
-
-.quiz-blank {
-  display: inline-block;
-  min-width: 80px;
-  border-bottom: 2px solid var(--quiz-accent);
-  color: var(--quiz-accent);
-  font-weight: 700;
-  text-align: center;
-  padding: 0 6px;
-}
-
-.clickable-word {
-  cursor: pointer;
-  border-bottom: 1px dashed #aaa;
-  position: relative;
-  transition: color 0.15s;
-}
-.clickable-word:hover { color: var(--quiz-accent); }
-
-.word-tooltip {
-  display: none;
-  position: absolute;
-  bottom: calc(100% + 6px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--ink);
-  color: #fff;
-  font-size: 0.72rem;
-  padding: 4px 8px;
-  border-radius: 6px;
-  white-space: nowrap;
-  z-index: 50;
-  pointer-events: none;
-}
-.word-tooltip::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 4px solid transparent;
-  border-top-color: var(--ink);
-}
-.clickable-word:hover .word-tooltip,
-.clickable-word.show-tip .word-tooltip { display: block; }
-
-.quiz-options {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.option-btn {
-  padding: 12px 14px;
-  border-radius: 12px;
-  font-size: 0.88rem;
-  font-weight: 600;
-  border: 2px solid var(--line);
-  color: var(--ink);
-  text-align: left;
-  transition: all 0.15s;
-  line-height: 1.4;
-}
-.option-btn:hover:not(:disabled) {
-  border-color: var(--quiz-accent);
-  color: var(--quiz-accent);
-  background: #F0FAFD;
-}
-.option-btn.correct {
-  border-color: #4CAF50;
-  background: #E8F5E9;
-  color: #2E7D32;
-}
-.option-btn.wrong {
-  border-color: var(--danger);
-  background: #FFEBEE;
-  color: var(--danger);
-}
-.option-btn:disabled { cursor: default; }
-
-.quiz-feedback {
-  display: none;
-  margin-top: 14px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  line-height: 1.5;
-}
-.quiz-feedback.show { display: block; }
-.quiz-feedback.right { background: #E8F5E9; color: #2E7D32; }
-.quiz-feedback.wrong-fb { background: #FFEBEE; color: var(--danger); }
-
-.quiz-nav {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 12px;
-}
-
-/* Add quiz form */
-.add-quiz-form {
-  display: none;
-  background: var(--white);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 20px;
-  margin-bottom: 16px;
-}
-.add-quiz-form.open { display: block; }
-
-.form-group {
-  margin-bottom: 12px;
-}
-.form-label {
-  display: block;
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--sub);
-  margin-bottom: 5px;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-}
-.form-input {
-  width: 100%;
-  padding: 9px 12px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  font-size: 0.88rem;
-  background: var(--bg);
-  color: var(--ink);
-  outline: none;
-}
-.form-input:focus { border-color: var(--quiz-accent); }
-
-.option-inputs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.correct-select {
-  width: 100%;
-  padding: 9px 12px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  font-size: 0.88rem;
-  background: var(--bg);
-  color: var(--ink);
-  outline: none;
-}
-.correct-select:focus { border-color: var(--quiz-accent); }
-
-/* ─── Toast ─────────────────────────────────────────────── */
-.toast {
-  display: none;
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--ink);
-  color: #fff;
-  font-size: 0.85rem;
-  font-weight: 600;
-  padding: 10px 20px;
-  border-radius: 20px;
-  z-index: 1000;
-  white-space: nowrap;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-}
-.toast.show { display: block; }
-
-/* ─── Loading ───────────────────────────────────────────── */
-.loading-spinner {
-  text-align: center;
-  padding: 40px;
-  color: var(--sub);
-  font-size: 0.9rem;
-}
-
-/* ─── Responsive ─────────────────────────────────────────── */
-@media (max-width: 480px) {
-  .quiz-options { grid-template-columns: 1fr; }
-  .practice-word { font-size: 1.8rem; }
-  .option-inputs { grid-template-columns: 1fr; }
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#FFFBF2;
+  --en-front-bg:#F6FFEA;--en-front-text:#C93638;
+  --en-back-bg:#C93638;--en-back-text:#FFFFFF;
+  --ja-front-bg:#F6FFEA;--ja-front-text:#2B4570;
+  --ja-back-bg:#2B4570;--ja-back-text:#F6FFEA;
+  --quiz:#62C4DA;
+  --ink:#1C1C1C;--sub:#777;--line:#E8DFC8;--white:#fff;
+  --danger:#E53935;--green:#4CAF50;
+}
+html,body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+h1,h2,h3,.logo{font-family:'Playfair Display',serif}
+button{font-family:'Manrope',sans-serif;cursor:pointer;border:none;background:none;-webkit-tap-highlight-color:transparent}
+input,textarea,select{font-family:'Manrope',sans-serif}
+
+/* Header */
+header{height:56px;display:flex;align-items:center;padding:0 20px;background:var(--bg);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:200}
+.logo{font-size:1.3rem;letter-spacing:-0.5px}
+
+/* Tabs */
+.tab-bar{display:flex;border-bottom:1px solid var(--line);background:var(--bg);position:sticky;top:56px;z-index:199}
+.tab-btn{flex:1;padding:12px 8px;font-size:0.85rem;font-weight:600;color:var(--sub);border-bottom:2px solid transparent;transition:color .2s,border-color .2s}
+.tab-btn.t-en{color:var(--en-back-bg);border-bottom-color:var(--en-back-bg)}
+.tab-btn.t-ja{color:var(--ja-back-bg);border-bottom-color:var(--ja-back-bg)}
+.tab-btn.t-quiz{color:var(--quiz);border-bottom-color:var(--quiz)}
+
+/* Sections */
+.section{display:none;padding:20px 16px 80px;max-width:680px;margin:0 auto}
+.section.active{display:block}
+
+/* Section header */
+.sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:8px;flex-wrap:wrap}
+.sec-title{font-size:1.4rem}
+.hd-btns{display:flex;gap:8px;flex-wrap:wrap}
+
+/* Pill buttons */
+.pill{padding:7px 14px;border-radius:20px;font-size:0.8rem;font-weight:600;border:1.5px solid currentColor;transition:background .15s,color .15s}
+.pill.en{color:var(--en-back-bg);border-color:var(--en-back-bg)}
+.pill.en:hover{background:var(--en-back-bg);color:#fff}
+.pill.ja{color:var(--ja-back-bg);border-color:var(--ja-back-bg)}
+.pill.ja:hover{background:var(--ja-back-bg);color:var(--ja-back-text)}
+.pill.qz{color:var(--quiz);border-color:var(--quiz)}
+.pill.qz:hover{background:var(--quiz);color:#fff}
+
+/* Filter chips */
+.filter-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.chip{padding:5px 12px;border-radius:16px;font-size:0.77rem;font-weight:600;border:1.5px solid var(--line);color:var(--sub);transition:all .15s}
+.chip.a-en{background:var(--en-back-bg);border-color:var(--en-back-bg);color:#fff}
+.chip.a-ja{background:var(--ja-back-bg);border-color:var(--ja-back-bg);color:var(--ja-back-text)}
+
+/* Card nav meta row */
+.nav-meta{display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:0 2px}
+.nav-count{font-size:0.85rem;font-weight:700;color:var(--sub)}
+.badge{font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:8px;letter-spacing:.3px}
+.b-pri{background:#FCE4EC;color:#880E4F}
+.b-new{background:#E3F2FD;color:#1565C0}
+.b-due{background:#FFF3E0;color:#E65100}
+.meta-btn{font-size:1rem;padding:5px 8px;border-radius:8px;color:var(--sub);opacity:.45;transition:opacity .15s,background .15s}
+.meta-btn.starred{opacity:1}
+.meta-btn:hover{opacity:1;background:rgba(0,0,0,.05)}
+.meta-btn.del-btn:hover{background:#FFEBEE;color:var(--danger)}
+
+/* Flash card */
+.flash-card{border-radius:20px;overflow:hidden;cursor:pointer;box-shadow:0 4px 24px rgba(0,0,0,.1);margin-bottom:16px;user-select:none;-webkit-user-select:none}
+.flash-card:active{box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.flash-face{padding:44px 28px 36px;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px}
+.en .flash-front{background:var(--en-front-bg)}
+.en .flash-back{background:var(--en-back-bg)}
+.ja .flash-front{background:var(--ja-front-bg)}
+.ja .flash-back{background:var(--ja-back-bg)}
+.f-word{font-family:'Playfair Display',serif;font-size:2.4rem;line-height:1.2;word-break:break-word}
+.en .flash-front .f-word{color:var(--en-front-text)}
+.ja .flash-front .f-word{color:var(--ja-front-text)}
+.f-reading{font-size:1rem;font-weight:500;opacity:.65}
+.en .flash-front .f-reading{color:var(--en-front-text)}
+.ja .flash-front .f-reading{color:var(--ja-front-text)}
+.f-hint{font-size:0.72rem;font-weight:600;letter-spacing:.5px;margin-top:4px;opacity:.28}
+.en .flash-front .f-hint{color:var(--en-front-text)}
+.ja .flash-front .f-hint{color:var(--ja-front-text)}
+.f-meaning{font-size:1.3rem;font-weight:700;line-height:1.4;word-break:break-word}
+.en .flash-back .f-meaning{color:var(--en-back-text)}
+.ja .flash-back .f-meaning{color:var(--ja-back-text)}
+.f-example{font-size:0.88rem;line-height:1.65;opacity:.85}
+.en .flash-back .f-example{color:var(--en-back-text)}
+.ja .flash-back .f-example{color:var(--ja-back-text)}
+
+/* Nav actions */
+.nav-actions{display:flex;gap:10px;align-items:center}
+.nav-arrow{width:48px;height:48px;border-radius:50%;font-size:1.1rem;font-weight:700;border:1.5px solid var(--line);color:var(--sub);flex-shrink:0;transition:all .15s;display:flex;align-items:center;justify-content:center}
+.nav-arrow:hover:not(:disabled){border-color:#aaa;color:var(--ink);background:rgba(0,0,0,.03)}
+.nav-arrow:disabled{opacity:.22;cursor:default}
+.mark-group{display:flex;gap:10px;flex:1}
+.mark-btn{flex:1;padding:13px 10px;border-radius:14px;font-size:0.88rem;font-weight:700;border:2px solid;transition:all .15s}
+.know{border-color:var(--green);color:var(--green)}
+.know:hover{background:var(--green);color:#fff}
+.unknow{border-color:var(--danger);color:var(--danger)}
+.unknow:hover{background:var(--danger);color:#fff}
+
+/* Deck end / empty */
+.deck-end{text-align:center;padding:48px 20px}
+.deck-end .ei{font-size:2.8rem;margin-bottom:14px}
+.deck-end h3{font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:8px}
+.deck-end .es{color:var(--sub);font-size:0.9rem;margin-bottom:24px;line-height:1.8}
+.deck-end .es strong{color:var(--ink)}
+.empty-state{text-align:center;padding:48px 20px;color:var(--sub)}
+.empty-state .ei{font-size:2.5rem;margin-bottom:12px}
+.empty-state p{font-size:0.9rem;line-height:1.6}
+.loading{text-align:center;padding:48px;color:var(--sub);font-size:.9rem}
+
+/* Solid buttons */
+.sbtn{padding:10px 22px;border-radius:22px;font-size:0.85rem;font-weight:700;transition:opacity .15s}
+.sbtn:hover{opacity:.85}
+.sbtn.en-s{background:var(--en-back-bg);color:#fff}
+.sbtn.ja-s{background:var(--ja-back-bg);color:var(--ja-back-text)}
+.sbtn.qz-s{background:var(--quiz);color:#fff}
+.sbtn.gray{background:#E0DDD5;color:var(--ink)}
+
+/* Modal */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:500;align-items:flex-end;justify-content:center}
+.modal.open{display:flex}
+.mbox{background:var(--white);border-radius:24px 24px 0 0;padding:24px 20px 36px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;box-shadow:0 -4px 40px rgba(0,0,0,.15)}
+.mhandle{width:36px;height:4px;background:var(--line);border-radius:2px;margin:0 auto 18px}
+.mtitle{font-family:'Playfair Display',serif;font-size:1.15rem;margin-bottom:16px}
+.mbody{font-size:.88rem;color:var(--sub);line-height:1.6;margin-bottom:18px}
+.mfoot{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
+@media(min-width:640px){
+  .modal{align-items:center;padding:16px}
+  .mbox{border-radius:20px;max-height:85vh}
+  .mhandle{display:none}
+}
+
+/* Form */
+.fg{margin-bottom:13px}
+.flabel{display:block;font-size:.75rem;font-weight:700;color:var(--sub);margin-bottom:5px;letter-spacing:.5px;text-transform:uppercase}
+.finput{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:.9rem;background:var(--bg);color:var(--ink);outline:none;transition:border-color .15s}
+.finput:focus{border-color:#aaa}
+.ftarea{width:100%;min-height:120px;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:.85rem;background:var(--bg);color:var(--ink);outline:none;resize:vertical;line-height:1.7;transition:border-color .15s}
+.ftarea:focus{border-color:#aaa}
+.fhint{font-size:.75rem;color:var(--sub);margin-top:5px;line-height:1.5}
+
+/* Quiz */
+.quiz-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.quiz-hd h2{font-size:1.4rem}
+.qpanel{display:none;background:var(--white);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:16px}
+.qpanel.open{display:block}
+.qpanel-title{font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:14px}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.qcard{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:22px 20px 18px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:14px}
+.qsentence{font-size:1.05rem;line-height:1.9;margin-bottom:18px}
+.qblank{display:inline-block;min-width:80px;border-bottom:2px solid var(--quiz);color:var(--quiz);font-weight:700;text-align:center;padding:0 6px}
+.cword{cursor:pointer;border-bottom:1px dashed #bbb;position:relative;transition:color .15s}
+.cword:hover{color:var(--quiz)}
+.wtip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:.72rem;padding:4px 9px;border-radius:6px;white-space:nowrap;z-index:50;pointer-events:none}
+.wtip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:var(--ink)}
+.cword:hover .wtip,.cword.tip-on .wtip{display:block}
+.qopts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.obtn{padding:12px 14px;border-radius:12px;font-size:.88rem;font-weight:600;border:2px solid var(--line);color:var(--ink);text-align:left;transition:all .15s;line-height:1.4}
+.obtn:hover:not(:disabled){border-color:var(--quiz);color:var(--quiz);background:#F0FAFD}
+.obtn.correct{border-color:var(--green);background:#E8F5E9;color:#2E7D32}
+.obtn.wrong{border-color:var(--danger);background:#FFEBEE;color:var(--danger)}
+.obtn:disabled{cursor:default}
+.qfb{display:none;margin-top:12px;padding:10px 14px;border-radius:10px;font-size:.85rem;font-weight:600}
+.qfb.show{display:block}
+.qfb.ok{background:#E8F5E9;color:#2E7D32}
+.qfb.ng{background:#FFEBEE;color:var(--danger)}
+.qselect{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:.9rem;background:var(--bg);color:var(--ink);outline:none}
+
+/* Toast */
+.toast{display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:.85rem;font-weight:600;padding:10px 20px;border-radius:20px;z-index:1000;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.toast.show{display:block}
+
+@media(max-width:480px){
+  .qopts,.opt-grid{grid-template-columns:1fr}
+  .f-word,.flash-word{font-size:1.9rem}
 }
 </style>
 </head>
 <body>
 
-<!-- Header -->
-<header>
-  <span class="logo-text">ZAPP</span>
-</header>
+<header><span class="logo">ZAPP</span></header>
 
-<!-- Tab Bar -->
 <div class="tab-bar">
-  <button class="tab-btn active-en" onclick="switchTab('en')">英语单词</button>
+  <button class="tab-btn t-en" onclick="switchTab('en')">英语单词</button>
   <button class="tab-btn" onclick="switchTab('ja')">日语单词</button>
   <button class="tab-btn" onclick="switchTab('quiz')">选词题</button>
 </div>
 
-<!-- ════════════════════════════════════════════════════════
-     ENGLISH SECTION
-═══════════════════════════════════════════════════════════ -->
-<div id="section-en" class="section active">
-  <div class="section-header">
-    <h2 class="section-title">英语单词</h2>
-    <div class="header-btns">
-      <button class="pill-btn en-primary" onclick="togglePanel('en-import-panel')">+ 导入</button>
-      <button class="pill-btn en-primary" onclick="startPractice('en')">练习</button>
+<!-- ── EN ── -->
+<div id="sec-en" class="section active">
+  <div class="sec-hd">
+    <h2 class="sec-title">英语单词</h2>
+    <div class="hd-btns">
+      <button class="pill en" onclick="openModal('m-en-add')">+ 添加</button>
+      <button class="pill en" onclick="openModal('m-en-imp')">批量导入</button>
     </div>
   </div>
-
-  <!-- Import Panel -->
-  <div id="en-import-panel" class="panel">
-    <div class="panel-title">批量导入单词</div>
-    <textarea id="en-import-text" placeholder="每行一个单词，格式：
-单词｜音标｜中文意思｜例句（可选）
-
-例：
-abandon｜/əˈbændən/｜放弃｜She abandoned her plan.
-accomplish｜/əˈkɒmplɪʃ/｜完成｜He accomplished his goal."></textarea>
-    <p class="panel-hint">用「｜」或「|」分隔各列，例句可省略。</p>
-    <div class="panel-footer">
-      <button class="solid-btn gray-solid" onclick="togglePanel('en-import-panel')">取消</button>
-      <button class="solid-btn en-solid" onclick="importWords('en')">导入</button>
-    </div>
+  <div class="filter-row" id="fr-en">
+    <button class="chip a-en" onclick="setFilter('en','all',this)">全部</button>
+    <button class="chip" onclick="setFilter('en','starred',this)">⭐ 收藏</button>
+    <button class="chip" onclick="setFilter('en','due',this)">待复习</button>
+    <button class="chip" onclick="setFilter('en','priority',this)">不认识</button>
   </div>
-
-  <!-- Filter Row -->
-  <div class="filter-row">
-    <button class="filter-chip active-en" onclick="setFilter('en','all',this)">全部</button>
-    <button class="filter-chip" onclick="setFilter('en','starred',this)">⭐ 收藏</button>
-    <button class="filter-chip" onclick="setFilter('en','due',this)">待复习</button>
-    <button class="filter-chip" onclick="setFilter('en','priority',this)">不认识</button>
-  </div>
-
-  <!-- Daily Limit Bar -->
-  <div class="limit-bar">
-    <span id="en-limit-text">今日: 0/20</span>
-    <div class="limit-track"><div id="en-limit-fill" class="limit-fill en-fill" style="width:0%"></div></div>
-  </div>
-
-  <!-- Card List -->
-  <div id="en-card-list" class="card-list">
-    <div class="loading-spinner">加载中…</div>
-  </div>
+  <div id="ca-en"><div class="loading">加载中…</div></div>
 </div>
 
-<!-- ════════════════════════════════════════════════════════
-     JAPANESE SECTION
-═══════════════════════════════════════════════════════════ -->
-<div id="section-ja" class="section">
-  <div class="section-header">
-    <h2 class="section-title">日语单词</h2>
-    <div class="header-btns">
-      <button class="pill-btn ja-primary" onclick="togglePanel('ja-import-panel')">+ 导入</button>
-      <button class="pill-btn ja-primary" onclick="startPractice('ja')">练习</button>
+<!-- ── JA ── -->
+<div id="sec-ja" class="section">
+  <div class="sec-hd">
+    <h2 class="sec-title">日语单词</h2>
+    <div class="hd-btns">
+      <button class="pill ja" onclick="openModal('m-ja-add')">+ 添加</button>
+      <button class="pill ja" onclick="openModal('m-ja-imp')">批量导入</button>
     </div>
   </div>
-
-  <!-- Import Panel -->
-  <div id="ja-import-panel" class="panel">
-    <div class="panel-title">批量导入单词</div>
-    <textarea id="ja-import-text" placeholder="每行一个单词，格式：
-单词｜读音｜中文意思｜例句（可选）
-
-例：
-勉強｜べんきょう｜学习｜毎日勉強します。
-図書館｜としょかん｜图书馆｜図書館で本を読む。"></textarea>
-    <p class="panel-hint">用「｜」或「|」分隔各列，例句可省略。</p>
-    <div class="panel-footer">
-      <button class="solid-btn gray-solid" onclick="togglePanel('ja-import-panel')">取消</button>
-      <button class="solid-btn ja-solid" onclick="importWords('ja')">导入</button>
-    </div>
+  <div class="filter-row" id="fr-ja">
+    <button class="chip a-ja" onclick="setFilter('ja','all',this)">全部</button>
+    <button class="chip" onclick="setFilter('ja','starred',this)">⭐ 收藏</button>
+    <button class="chip" onclick="setFilter('ja','due',this)">待复习</button>
+    <button class="chip" onclick="setFilter('ja','priority',this)">不认识</button>
   </div>
-
-  <!-- Filter Row -->
-  <div class="filter-row">
-    <button class="filter-chip active-ja" onclick="setFilter('ja','all',this)">全部</button>
-    <button class="filter-chip" onclick="setFilter('ja','starred',this)">⭐ 收藏</button>
-    <button class="filter-chip" onclick="setFilter('ja','due',this)">待复习</button>
-    <button class="filter-chip" onclick="setFilter('ja','priority',this)">不认识</button>
-  </div>
-
-  <!-- Daily Limit Bar -->
-  <div class="limit-bar">
-    <span id="ja-limit-text">今日: 0/20</span>
-    <div class="limit-track"><div id="ja-limit-fill" class="limit-fill ja-fill" style="width:0%"></div></div>
-  </div>
-
-  <!-- Card List -->
-  <div id="ja-card-list" class="card-list">
-    <div class="loading-spinner">加载中…</div>
-  </div>
+  <div id="ca-ja"><div class="loading">加载中…</div></div>
 </div>
 
-<!-- ════════════════════════════════════════════════════════
-     QUIZ SECTION
-═══════════════════════════════════════════════════════════ -->
-<div id="section-quiz" class="section">
-  <div class="quiz-header">
-    <h2 class="quiz-title">选词题</h2>
-    <button class="pill-btn quiz-primary" onclick="toggleAddQuiz()">+ 添加</button>
+<!-- ── QUIZ ── -->
+<div id="sec-quiz" class="section">
+  <div class="quiz-hd">
+    <h2>选词题</h2>
+    <button class="pill qz" onclick="toggleAddQuiz()">+ 添加</button>
   </div>
-
-  <!-- Add Quiz Form -->
-  <div id="add-quiz-form" class="add-quiz-form">
-    <div class="panel-title">添加新题目</div>
-    <div class="form-group">
-      <label class="form-label">句子（用 ___ 表示空格）</label>
-      <input id="q-sentence" class="form-input" type="text" placeholder="She ___ the piano every evening.">
+  <div id="add-quiz-panel" class="qpanel">
+    <div class="qpanel-title">添加新题目</div>
+    <div class="fg">
+      <label class="flabel">句子（用 ___ 表示空格）</label>
+      <input id="q-sent" class="finput" type="text" placeholder="She ___ the piano every evening.">
     </div>
-    <div class="form-group">
-      <label class="form-label">四个选项</label>
-      <div class="option-inputs">
-        <input id="q-opt1" class="form-input" type="text" placeholder="选项 A">
-        <input id="q-opt2" class="form-input" type="text" placeholder="选项 B">
-        <input id="q-opt3" class="form-input" type="text" placeholder="选项 C">
-        <input id="q-opt4" class="form-input" type="text" placeholder="选项 D">
+    <div class="fg">
+      <label class="flabel">四个选项</label>
+      <div class="opt-grid">
+        <input id="q-o1" class="finput" type="text" placeholder="选项 A">
+        <input id="q-o2" class="finput" type="text" placeholder="选项 B">
+        <input id="q-o3" class="finput" type="text" placeholder="选项 C">
+        <input id="q-o4" class="finput" type="text" placeholder="选项 D">
       </div>
     </div>
-    <div class="form-group">
-      <label class="form-label">正确答案</label>
-      <select id="q-correct" class="correct-select">
-        <option value="0">选项 A</option>
-        <option value="1">选项 B</option>
-        <option value="2">选项 C</option>
-        <option value="3">选项 D</option>
+    <div class="fg">
+      <label class="flabel">正确答案</label>
+      <select id="q-cor" class="qselect">
+        <option value="0">选项 A</option><option value="1">选项 B</option>
+        <option value="2">选项 C</option><option value="3">选项 D</option>
       </select>
     </div>
-    <div class="panel-footer">
-      <button class="solid-btn gray-solid" onclick="toggleAddQuiz()">取消</button>
-      <button class="solid-btn quiz-solid" onclick="addQuizQuestion()">添加</button>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="sbtn gray" onclick="toggleAddQuiz()">取消</button>
+      <button class="sbtn qz-s" onclick="addQuizQ()">添加</button>
     </div>
   </div>
-
-  <!-- Quiz Cards -->
   <div id="quiz-list"></div>
 </div>
 
-<!-- ════════════════════════════════════════════════════════
-     PRACTICE OVERLAY
-═══════════════════════════════════════════════════════════ -->
-<div id="practice-overlay" class="practice-overlay">
-  <div class="practice-inner">
-    <div class="practice-topbar">
-      <div id="practice-progress" class="practice-progress">0 / 0</div>
-      <button class="close-practice-btn" onclick="closePractice()">✕ 结束</button>
-    </div>
-
-    <!-- Practice Card -->
-    <div id="practice-card-wrap">
-      <div id="practice-card" class="practice-card en">
-        <div id="p-front" class="practice-front">
-          <div id="p-word" class="practice-word">—</div>
-          <div id="p-reading" class="practice-reading"></div>
-        </div>
-        <div id="p-back" class="practice-back">
-          <div id="p-meaning" class="practice-meaning"></div>
-          <div id="p-example" class="practice-example"></div>
-        </div>
-      </div>
-      <div class="practice-btns" id="practice-btns">
-        <button id="btn-flip-practice" class="big-btn flip-en" onclick="flipPracticeCard()">翻转看答案</button>
-      </div>
-    </div>
-
-    <!-- Summary -->
-    <div id="summary-screen" class="summary-screen">
-      <h2 class="summary-title">练习完成 🎉</h2>
-      <div class="summary-stats">
-        <div class="stat-box">
-          <div id="sum-total" class="stat-num">0</div>
-          <div class="stat-label">本轮总数</div>
-        </div>
-        <div class="stat-box">
-          <div id="sum-known" class="stat-num">0</div>
-          <div class="stat-label">认识</div>
-        </div>
-        <div class="stat-box">
-          <div id="sum-unknown" class="stat-num">0</div>
-          <div class="stat-label">不认识</div>
-        </div>
-        <div class="stat-box">
-          <div id="sum-streak" class="stat-num">0</div>
-          <div class="stat-label">连续天数</div>
-        </div>
-      </div>
-      <button id="sum-close-btn" class="solid-btn en-solid" onclick="closePractice()">返回单词库</button>
+<!-- ── MODALS ── -->
+<!-- EN Add -->
+<div id="m-en-add" class="modal" onclick="bdClose(event,'m-en-add')">
+  <div class="mbox">
+    <div class="mhandle"></div>
+    <div class="mtitle">添加英语单词</div>
+    <div class="fg"><label class="flabel">单词 *</label><input id="en-w" class="finput" type="text" placeholder="abandon"></div>
+    <div class="fg"><label class="flabel">音标</label><input id="en-r" class="finput" type="text" placeholder="/əˈbændən/"></div>
+    <div class="fg"><label class="flabel">中文意思 *</label><input id="en-m" class="finput" type="text" placeholder="放弃"></div>
+    <div class="fg"><label class="flabel">例句</label><input id="en-e" class="finput" type="text" placeholder="She abandoned her plan."></div>
+    <div class="mfoot">
+      <button class="sbtn gray" onclick="closeModal('m-en-add')">取消</button>
+      <button class="sbtn en-s" onclick="addWord('en')">添加</button>
     </div>
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════════════════
-     DELETE CONFIRM MODAL
-═══════════════════════════════════════════════════════════ -->
-<div id="delete-modal" class="modal-overlay">
-  <div class="modal-box">
-    <div class="modal-title">确认删除</div>
-    <div class="modal-body">删除后无法恢复，确定要删除这个单词吗？</div>
-    <div class="modal-actions">
-      <button class="solid-btn gray-solid" onclick="closeDeleteModal()">取消</button>
-      <button id="confirm-delete-btn" class="solid-btn" style="background:var(--danger);color:#fff">删除</button>
+<!-- EN Import -->
+<div id="m-en-imp" class="modal" onclick="bdClose(event,'m-en-imp')">
+  <div class="mbox">
+    <div class="mhandle"></div>
+    <div class="mtitle">批量导入英语单词</div>
+    <div class="fg">
+      <textarea id="en-imp-txt" class="ftarea" placeholder="每行一个单词：
+单词｜音标｜中文意思｜例句（可选）
+
+abandon｜/əˈbændən/｜放弃｜She abandoned her plan.
+accomplish｜/əˈkɒmplɪʃ/｜完成｜He accomplished his goal."></textarea>
+      <p class="fhint">用「｜」或「|」分隔，例句可省略。</p>
+    </div>
+    <div class="mfoot">
+      <button class="sbtn gray" onclick="closeModal('m-en-imp')">取消</button>
+      <button class="sbtn en-s" onclick="importWords('en')">导入</button>
     </div>
   </div>
 </div>
 
-<!-- Toast -->
+<!-- JA Add -->
+<div id="m-ja-add" class="modal" onclick="bdClose(event,'m-ja-add')">
+  <div class="mbox">
+    <div class="mhandle"></div>
+    <div class="mtitle">添加日语单词</div>
+    <div class="fg"><label class="flabel">单词 *</label><input id="ja-w" class="finput" type="text" placeholder="勉強"></div>
+    <div class="fg"><label class="flabel">读音（假名）</label><input id="ja-r" class="finput" type="text" placeholder="べんきょう"></div>
+    <div class="fg"><label class="flabel">中文意思 *</label><input id="ja-m" class="finput" type="text" placeholder="学习"></div>
+    <div class="fg"><label class="flabel">例句</label><input id="ja-e" class="finput" type="text" placeholder="毎日勉強します。"></div>
+    <div class="mfoot">
+      <button class="sbtn gray" onclick="closeModal('m-ja-add')">取消</button>
+      <button class="sbtn ja-s" onclick="addWord('ja')">添加</button>
+    </div>
+  </div>
+</div>
+
+<!-- JA Import -->
+<div id="m-ja-imp" class="modal" onclick="bdClose(event,'m-ja-imp')">
+  <div class="mbox">
+    <div class="mhandle"></div>
+    <div class="mtitle">批量导入日语单词</div>
+    <div class="fg">
+      <textarea id="ja-imp-txt" class="ftarea" placeholder="每行一个单词：
+单词｜读音｜中文意思｜例句（可选）
+
+勉強｜べんきょう｜学习｜毎日勉強します。
+図書館｜としょかん｜图书馆｜図書館で本を読む。"></textarea>
+      <p class="fhint">用「｜」或「|」分隔，例句可省略。</p>
+    </div>
+    <div class="mfoot">
+      <button class="sbtn gray" onclick="closeModal('m-ja-imp')">取消</button>
+      <button class="sbtn ja-s" onclick="importWords('ja')">导入</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete confirm -->
+<div id="m-del" class="modal">
+  <div class="mbox" style="max-width:400px">
+    <div class="mhandle"></div>
+    <div class="mtitle">确认删除</div>
+    <div class="mbody">删除后无法恢复，确定要删除这个单词吗？</div>
+    <div class="mfoot">
+      <button class="sbtn gray" onclick="closeModal('m-del')">取消</button>
+      <button id="del-confirm-btn" class="sbtn" style="background:var(--danger);color:#fff">删除</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast" class="toast"></div>
 
-<!-- ════════════════════════════════════════════════════════
-     JAVASCRIPT
-═══════════════════════════════════════════════════════════ -->
 <script>
-// ─── Supabase Init ──────────────────────────────────────────
-const SUPABASE_URL = 'https://yrscvkupavfbgeewxoek.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyc2N2a3VwYXZmYmdlZXd4b2VrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0MjQyNzgsImV4cCI6MjA5NzAwMDI3OH0._ZsWUzC2aDI9J2M7eR3d4xLE1V_1N0rdrXmFXeoCmjw';
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPA_URL = 'https://yrscvkupavfbgeewxoek.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyc2N2a3VwYXZmYmdlZXd4b2VrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0MjQyNzgsImV4cCI6MjA5NzAwMDI3OH0._ZsWUzC2aDI9J2M7eR3d4xLE1V_1N0rdrXmFXeoCmjw';
+const db = supabase.createClient(SUPA_URL, SUPA_KEY);
 
-// ─── State ──────────────────────────────────────────────────
-const DAILY_LIMIT = 20;
-
-const state = {
-  en: { words: [], filter: 'all', todayCount: 0 },
-  ja: { words: [], filter: 'all', todayCount: 0 },
-  quiz: { questions: [], currentIdx: 0, answered: false }
+// ── State ──────────────────────────────────────────────────
+const allWords = { en: [], ja: [] };
+const nav = {
+  en: { deck:[], idx:0, flipped:false, filter:'all', sKnown:0, sUnknown:0 },
+  ja: { deck:[], idx:0, flipped:false, filter:'all', sKnown:0, sUnknown:0 }
 };
+let delId = null, delLang = null;
 
-const practice = {
-  lang: 'en',
-  queue: [],
-  idx: 0,
-  knownCount: 0,
-  unknownCount: 0,
-  flipped: false
-};
-
-let pendingDeleteId = null;
-let pendingDeleteLang = null;
-
-// ─── Tab Switching ──────────────────────────────────────────
-const tabBtns = document.querySelectorAll('.tab-btn');
-const sections = document.querySelectorAll('.section');
-
-function switchTab(tab) {
-  sections.forEach(s => s.classList.remove('active'));
-  tabBtns.forEach(b => {
-    b.classList.remove('active-en','active-ja','active-quiz');
-  });
-  document.getElementById('section-'+tab).classList.add('active');
-  const idx = ['en','ja','quiz'].indexOf(tab);
-  tabBtns[idx].classList.add('active-'+tab);
+// ── Tabs ──────────────────────────────────────────────────
+function switchTab(t) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('t-en','t-ja','t-quiz'));
+  document.getElementById('sec-'+t).classList.add('active');
+  document.querySelectorAll('.tab-btn')[['en','ja','quiz'].indexOf(t)].classList.add('t-'+t);
 }
 
-// ─── Panel Toggle ───────────────────────────────────────────
-function togglePanel(id) {
-  const el = document.getElementById(id);
-  el.classList.toggle('open');
-}
+// ── Modal ─────────────────────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.add('open') }
+function closeModal(id) { document.getElementById(id).classList.remove('open') }
+function bdClose(e, id) { if (e.target===document.getElementById(id)) closeModal(id) }
 
-// ─── Toast ──────────────────────────────────────────────────
-let toastTimer = null;
+// ── Toast ─────────────────────────────────────────────────
+let _tt = null;
 function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  if (_tt) clearTimeout(_tt);
+  _tt = setTimeout(() => el.classList.remove('show'), 2200);
 }
 
-// ─── Today's Date Key ───────────────────────────────────────
-function todayKey() {
-  return new Date().toISOString().slice(0,10);
+// ── Load words from Supabase ──────────────────────────────
+async function loadWords(lang, resetSession) {
+  const { data, error } = await db.from('words').select('*').eq('lang',lang).order('created_at',{ascending:false});
+  if (error) {
+    document.getElementById('ca-'+lang).innerHTML =
+      '<div class="empty-state"><div class="ei">⚠️</div><p>加载失败，请刷新重试</p></div>';
+    return;
+  }
+  allWords[lang] = data || [];
+  buildDeck(lang, resetSession !== false);
+  renderCard(lang);
 }
 
-// ─── Load Words ─────────────────────────────────────────────
-async function loadWords(lang) {
-  const { data, error } = await db
-    .from('words')
-    .select('*')
-    .eq('lang', lang)
-    .order('created_at', { ascending: false });
+// ── Build filtered & sorted deck ─────────────────────────
+function buildDeck(lang, reset) {
+  const f = nav[lang].filter, now = Date.now();
+  let d = allWords[lang];
+  if (f==='starred')  d = d.filter(w => w.starred);
+  else if (f==='due') d = d.filter(w => !w.due_at || new Date(w.due_at)<=now);
+  else if (f==='priority') d = d.filter(w => w.priority);
 
-  if (error) { console.error(error); return; }
-
-  // Sort: priority first, then by due date
-  const now = Date.now();
-  const sorted = (data || []).sort((a, b) => {
-    const ap = a.priority ? 1 : 0, bp = b.priority ? 1 : 0;
-    if (ap !== bp) return bp - ap;
-    const ad = a.due_at ? new Date(a.due_at).getTime() : 0;
-    const bd = b.due_at ? new Date(b.due_at).getTime() : 0;
-    return ad - bd;
+  nav[lang].deck = [...d].sort((a,b) => {
+    const sc = w => w.priority ? 0 : (!w.last_practiced ? 1 : (!w.due_at||new Date(w.due_at)<=now ? 2 : 3));
+    return sc(a)-sc(b);
   });
 
-  state[lang].words = sorted;
-
-  // Count today's practice
-  const todayStr = todayKey();
-  const todayPracticed = sorted.filter(w => w.last_practiced && w.last_practiced.startsWith(todayStr)).length;
-  state[lang].todayCount = todayPracticed;
-
-  renderWordList(lang);
-  updateLimitBar(lang);
+  if (reset) { nav[lang].idx=0; nav[lang].flipped=false; nav[lang].sKnown=0; nav[lang].sUnknown=0; }
+  else { if (nav[lang].idx > nav[lang].deck.length) nav[lang].idx = nav[lang].deck.length; }
 }
 
-// ─── Update Limit Bar ───────────────────────────────────────
-function updateLimitBar(lang) {
-  const count = state[lang].todayCount;
-  const pct = Math.min(100, (count / DAILY_LIMIT) * 100);
-  document.getElementById(lang+'-limit-text').textContent = `今日: ${count}/${DAILY_LIMIT}`;
-  document.getElementById(lang+'-limit-fill').style.width = pct + '%';
-}
+// ── Render one-card view ──────────────────────────────────
+function renderCard(lang) {
+  const area = document.getElementById('ca-'+lang);
+  const n = nav[lang];
 
-// ─── Render Word List ───────────────────────────────────────
-function renderWordList(lang) {
-  const container = document.getElementById(lang+'-card-list');
-  const filter = state[lang].filter;
-  const now = Date.now();
+  // Empty deck
+  if (n.deck.length === 0) {
+    const map = {
+      all:      ['📖','还没有单词，点击「+ 添加」或「批量导入」开始吧'],
+      starred:  ['⭐','还没有收藏的单词'],
+      due:      ['✅','目前没有待复习的单词'],
+      priority: ['💪','没有标记为「不认识」的单词']
+    };
+    const [ic,msg] = map[n.filter]||map.all;
+    area.innerHTML = `<div class="empty-state"><div class="ei">${ic}</div><p>${msg}</p></div>`;
+    return;
+  }
 
-  let words = state[lang].words;
-  if (filter === 'starred') words = words.filter(w => w.starred);
-  else if (filter === 'due') words = words.filter(w => !w.due_at || new Date(w.due_at).getTime() <= now);
-  else if (filter === 'priority') words = words.filter(w => w.priority);
-
-  if (words.length === 0) {
-    container.innerHTML = `<div class="empty-state">
-      <div class="empty-icon">${filter==='starred'?'⭐':'📖'}</div>
-      <p>${filter==='starred'?'还没有收藏的单词':'暂无单词，点击「导入」添加吧'}</p>
+  // Session complete
+  if (n.idx >= n.deck.length) {
+    const cs = lang==='en'?'en-s':'ja-s';
+    area.innerHTML = `<div class="deck-end">
+      <div class="ei">🎉</div>
+      <h3>全部完成！</h3>
+      <div class="es">共 <strong>${n.deck.length}</strong> 个 &nbsp;·&nbsp; 认识 <strong>${n.sKnown}</strong> &nbsp;·&nbsp; 不认识 <strong>${n.sUnknown}</strong></div>
+      <button class="sbtn ${cs}" onclick="restartDeck('${lang}')">从头再来</button>
     </div>`;
     return;
   }
 
-  container.innerHTML = words.map(w => renderCard(w, lang)).join('');
-}
-
-function renderCard(w, lang) {
+  const w = n.deck[n.idx];
   const now = Date.now();
-  const isDue = !w.due_at || new Date(w.due_at).getTime() <= now;
-  const isNew = !w.last_practiced;
   let badge = '';
-  if (w.priority) badge = '<span class="due-badge priority">不认识</span>';
-  else if (isNew) badge = '<span class="due-badge new-word">新词</span>';
-  else if (isDue) badge = '<span class="due-badge due-now">待复习</span>';
+  if (w.priority) badge = '<span class="badge b-pri">不认识</span>';
+  else if (!w.last_practiced) badge = '<span class="badge b-new">新词</span>';
+  else if (!w.due_at || new Date(w.due_at)<=now) badge = '<span class="badge b-due">待复习</span>';
 
-  const starClass = w.starred ? 'starred' : '';
+  const isFlipped = n.flipped;
   const starIcon = w.starred ? '⭐' : '☆';
+  const starClass = w.starred ? ' starred' : '';
+  const prevDis = n.idx===0 ? ' disabled' : '';
+  const nextDis = n.idx>=n.deck.length-1 ? ' disabled' : '';
 
-  const flipFrontClass = lang==='en' ? 'btn-flip-en' : 'btn-flip-ja';
-  const flipBackClass = lang==='en' ? 'btn-flip-back-en' : 'btn-flip-back-ja';
-
-  return `<div class="word-card ${lang}" id="card-${w.id}">
-    <button class="delete-btn" onclick="confirmDelete('${w.id}','${lang}')">✕</button>
-    <div class="card-front">
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-        <span class="card-word">${escHtml(w.word)}</span>
-        ${badge}
+  area.innerHTML = `
+    <div class="nav-meta">
+      <span class="nav-count">${n.idx+1} / ${n.deck.length}</span>
+      ${badge}
+      <div style="margin-left:auto;display:flex;gap:2px">
+        <button class="meta-btn${starClass}" onclick="starCurrent('${lang}')">${starIcon}</button>
+        <button class="meta-btn del-btn" onclick="delCurrent('${lang}')">✕</button>
       </div>
-      ${w.reading ? `<div class="card-reading">${escHtml(w.reading)}</div>` : ''}
     </div>
-    <div id="back-${w.id}" class="card-back">
-      <div class="card-meaning">${escHtml(w.meaning)}</div>
-      ${w.example ? `<div class="card-example">${escHtml(w.example)}</div>` : ''}
+
+    <div class="flash-card ${lang}" onclick="flipCard('${lang}')">
+      <div id="ff-${lang}" class="flash-face flash-front"${isFlipped?' style="display:none"':''}>
+        <div class="f-word">${esc(w.word)}</div>
+        ${w.reading?`<div class="f-reading">${esc(w.reading)}</div>`:''}
+        <div class="f-hint">点击翻转查看释义</div>
+      </div>
+      <div id="fb-${lang}" class="flash-face flash-back"${isFlipped?'':' style="display:none"'}>
+        <div class="f-meaning">${esc(w.meaning)}</div>
+        ${w.example?`<div class="f-example">${esc(w.example)}</div>`:''}
+      </div>
     </div>
-    <div id="actions-${w.id}" class="card-actions">
-      <button class="action-btn ${flipFrontClass}" id="flip-btn-${w.id}" onclick="flipCard('${w.id}','${lang}')">查看释义</button>
-      <button class="action-btn btn-know" id="know-btn-${w.id}" onclick="markKnow('${w.id}','${lang}')" style="display:none">认识 ✓</button>
-      <button class="action-btn btn-unknow" id="unknow-btn-${w.id}" onclick="markUnknow('${w.id}','${lang}')" style="display:none">不认识</button>
-      <button class="star-btn ${starClass}" onclick="toggleStar('${w.id}','${lang}')">${starIcon}</button>
-    </div>
-  </div>`;
+
+    <div class="nav-actions">
+      <button class="nav-arrow" onclick="prevCard('${lang}')"${prevDis}>←</button>
+      <div class="mark-group">
+        <button class="mark-btn unknow" onclick="markNext('${lang}','${w.id}',false)">不认识</button>
+        <button class="mark-btn know"   onclick="markNext('${lang}','${w.id}',true)">认识 ✓</button>
+      </div>
+      <button class="nav-arrow" onclick="nextCard('${lang}')"${nextDis}>→</button>
+    </div>`;
 }
 
-// ─── Flip Card ──────────────────────────────────────────────
-function flipCard(id, lang) {
-  const back = document.getElementById('back-'+id);
-  const flipBtn = document.getElementById('flip-btn-'+id);
-  const knowBtn = document.getElementById('know-btn-'+id);
-  const unknowBtn = document.getElementById('unknow-btn-'+id);
-  const actions = document.getElementById('actions-'+id);
-
-  if (!back.classList.contains('visible')) {
-    back.classList.add('visible');
-    flipBtn.textContent = '收起';
-    flipBtn.className = `action-btn ${lang==='en' ? 'btn-flip-back-en' : 'btn-flip-back-ja'}`;
-    // adjust actions background when back is shown
-    const nextSibling = back.nextElementSibling;
-    if (nextSibling && nextSibling.id === 'actions-'+id) {
-      nextSibling.style.background = lang==='en' ? 'var(--en-back-bg)' : 'var(--ja-back-bg)';
-      nextSibling.style.borderTopColor = 'rgba(255,255,255,0.2)';
-    }
-    knowBtn.style.display = 'inline-flex';
-    unknowBtn.style.display = 'inline-flex';
-  } else {
-    back.classList.remove('visible');
-    flipBtn.textContent = '查看释义';
-    flipBtn.className = `action-btn ${lang==='en' ? 'btn-flip-en' : 'btn-flip-ja'}`;
-    const nextSibling = back.nextElementSibling;
-    if (nextSibling) {
-      nextSibling.style.background = '';
-      nextSibling.style.borderTopColor = '';
-    }
-    knowBtn.style.display = 'none';
-    unknowBtn.style.display = 'none';
+// ── Flip (direct DOM, no innerHTML rebuild) ───────────────
+function flipCard(lang) {
+  nav[lang].flipped = !nav[lang].flipped;
+  const ff = document.getElementById('ff-'+lang);
+  const fb = document.getElementById('fb-'+lang);
+  if (ff && fb) {
+    ff.style.display = nav[lang].flipped ? 'none' : '';
+    fb.style.display = nav[lang].flipped ? '' : 'none';
   }
 }
 
-// ─── Mark Know / Unknown ────────────────────────────────────
-async function markKnow(id, lang) {
-  const dueAt = new Date(Date.now() + 3*24*60*60*1000).toISOString();
-  await db.from('words').update({
-    priority: false,
-    due_at: dueAt,
-    last_practiced: new Date().toISOString()
-  }).eq('id', id);
-  showToast('已标记为认识，3天后复习');
-  await loadWords(lang);
+// ── Navigation ────────────────────────────────────────────
+function nextCard(lang) {
+  const n = nav[lang];
+  n.flipped = false;
+  if (n.idx < n.deck.length) n.idx++;
+  renderCard(lang);
+}
+function prevCard(lang) {
+  const n = nav[lang];
+  if (n.idx > 0) { n.idx--; n.flipped = false; renderCard(lang); }
+}
+function restartDeck(lang) {
+  const n = nav[lang];
+  n.idx=0; n.flipped=false; n.sKnown=0; n.sUnknown=0;
+  renderCard(lang);
 }
 
-async function markUnknow(id, lang) {
-  const dueAt = new Date(Date.now() + 1*24*60*60*1000).toISOString();
-  await db.from('words').update({
-    priority: true,
-    due_at: dueAt,
-    last_practiced: new Date().toISOString()
-  }).eq('id', id);
-  showToast('已标记为不认识，明天再复习');
-  await loadWords(lang);
+// ── Mark know/unknown then advance ────────────────────────
+async function markNext(lang, id, known) {
+  const dueAt = new Date(Date.now()+(known?3:1)*86400000).toISOString();
+  await db.from('words').update({ priority:!known, due_at:dueAt, last_practiced:new Date().toISOString() }).eq('id',id);
+
+  // update local copies so filter refresh stays consistent
+  [allWords[lang], nav[lang].deck].forEach(arr => {
+    const w = arr.find(x => x.id===id);
+    if (w) { w.priority=!known; w.due_at=dueAt; w.last_practiced=new Date().toISOString(); }
+  });
+
+  if (known) nav[lang].sKnown++; else nav[lang].sUnknown++;
+  showToast(known ? '认识 ✓，3天后复习' : '不认识，明天再复习');
+  nextCard(lang);
 }
 
-// ─── Star Toggle ────────────────────────────────────────────
-async function toggleStar(id, lang) {
-  const word = state[lang].words.find(w => w.id === id);
-  if (!word) return;
-  const newVal = !word.starred;
-  await db.from('words').update({ starred: newVal }).eq('id', id);
-  word.starred = newVal;
-  renderWordList(lang);
-}
-
-// ─── Filter ─────────────────────────────────────────────────
-function setFilter(lang, filter, el) {
-  state[lang].filter = filter;
-  const row = el.parentElement;
-  row.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active-en','active-ja'));
-  el.classList.add(lang==='en' ? 'active-en' : 'active-ja');
-  renderWordList(lang);
-}
-
-// ─── Import Words ───────────────────────────────────────────
-async function importWords(lang) {
-  const raw = document.getElementById(lang+'-import-text').value.trim();
-  if (!raw) { showToast('请先输入内容'); return; }
-
-  const lines = raw.split('\n').filter(l => l.trim());
-  const toInsert = [];
-
-  for (const line of lines) {
-    const parts = line.split(/[｜|]/).map(p => p.trim());
-    if (parts.length < 3) continue;
-    toInsert.push({
-      lang,
-      word: parts[0],
-      reading: parts[1] || '',
-      meaning: parts[2] || '',
-      example: parts[3] || '',
-      starred: false,
-      priority: false,
-      due_at: null,
-      last_practiced: null
-    });
-  }
-
-  if (toInsert.length === 0) {
-    showToast('未识别到有效数据，请检查格式');
-    return;
-  }
-
-  const { error } = await db.from('words').insert(toInsert);
-  if (error) { showToast('导入失败：'+error.message); return; }
-
-  document.getElementById(lang+'-import-text').value = '';
-  togglePanel(lang+'-import-panel');
-  showToast(`成功导入 ${toInsert.length} 个单词`);
-  await loadWords(lang);
-}
-
-// ─── Delete ─────────────────────────────────────────────────
-function confirmDelete(id, lang) {
-  pendingDeleteId = id;
-  pendingDeleteLang = lang;
-  document.getElementById('delete-modal').classList.add('open');
-  document.getElementById('confirm-delete-btn').onclick = executeDelete;
-}
-
-function closeDeleteModal() {
-  document.getElementById('delete-modal').classList.remove('open');
-  pendingDeleteId = null;
-  pendingDeleteLang = null;
-}
-
-async function executeDelete() {
-  if (!pendingDeleteId) return;
-  const { error } = await db.from('words').delete().eq('id', pendingDeleteId);
-  closeDeleteModal();
-  if (error) { showToast('删除失败'); return; }
-  showToast('已删除');
-  await loadWords(pendingDeleteLang);
-}
-
-// ─── Practice Session ────────────────────────────────────────
-function startPractice(lang) {
-  const now = Date.now();
-  const words = state[lang].words;
-
-  // Due words + priority words up to DAILY_LIMIT
-  let queue = words.filter(w => {
-    const due = !w.due_at || new Date(w.due_at).getTime() <= now;
-    return due || w.priority;
-  }).slice(0, DAILY_LIMIT);
-
-  if (queue.length === 0) {
-    showToast('没有需要复习的单词');
-    return;
-  }
-
-  // Shuffle
-  for (let i = queue.length-1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i+1));
-    [queue[i], queue[j]] = [queue[j], queue[i]];
-  }
-
-  practice.lang = lang;
-  practice.queue = queue;
-  practice.idx = 0;
-  practice.knownCount = 0;
-  practice.unknownCount = 0;
-  practice.flipped = false;
-
-  // Set color class
-  const card = document.getElementById('practice-card');
-  card.className = 'practice-card ' + lang;
-
-  // Set flip button class
-  const flipBtn = document.getElementById('btn-flip-practice');
-  flipBtn.className = lang === 'en' ? 'big-btn flip-en' : 'big-btn flip-ja';
-
-  document.getElementById('summary-screen').classList.remove('visible');
-  document.getElementById('practice-card-wrap').style.display = '';
-  document.getElementById('practice-overlay').classList.add('open');
-
-  showPracticeCard();
-}
-
-function showPracticeCard() {
-  const w = practice.queue[practice.idx];
-  if (!w) { showSummary(); return; }
-
-  document.getElementById('p-word').textContent = w.word;
-  document.getElementById('p-reading').textContent = w.reading || '';
-  document.getElementById('p-meaning').textContent = w.meaning || '';
-  document.getElementById('p-example').textContent = w.example || '';
-
-  // Reset flip
-  document.getElementById('p-back').classList.remove('visible');
-  practice.flipped = false;
-
-  const lang = practice.lang;
-  const flipBtn = document.getElementById('btn-flip-practice');
-  flipBtn.textContent = '翻转看答案';
-  flipBtn.style.display = '';
-
-  document.getElementById('practice-btns').innerHTML = `
-    <button id="btn-flip-practice" class="big-btn ${lang==='en'?'flip-en':'flip-ja'}" onclick="flipPracticeCard()">翻转看答案</button>
-  `;
-
-  document.getElementById('practice-progress').textContent =
-    `${practice.idx + 1} / ${practice.queue.length}`;
-}
-
-function flipPracticeCard() {
-  if (practice.flipped) return;
-  practice.flipped = true;
-
-  document.getElementById('p-back').classList.add('visible');
-
-  const lang = practice.lang;
-  document.getElementById('practice-btns').innerHTML = `
-    <button class="big-btn unknow" onclick="practiceAnswer(false)">不认识</button>
-    <button class="big-btn know" onclick="practiceAnswer(true)">认识 ✓</button>
-  `;
-}
-
-async function practiceAnswer(known) {
-  const w = practice.queue[practice.idx];
+// ── Star ──────────────────────────────────────────────────
+async function starCurrent(lang) {
+  const w = nav[lang].deck[nav[lang].idx];
   if (!w) return;
+  const v = !w.starred;
+  await db.from('words').update({ starred:v }).eq('id',w.id);
+  const inAll = allWords[lang].find(x=>x.id===w.id);
+  if (inAll) inAll.starred=v;
+  w.starred=v;
+  renderCard(lang);
+}
 
-  if (known) {
-    practice.knownCount++;
-    const dueAt = new Date(Date.now() + 3*24*60*60*1000).toISOString();
-    await db.from('words').update({ priority:false, due_at:dueAt, last_practiced:new Date().toISOString() }).eq('id', w.id);
-  } else {
-    practice.unknownCount++;
-    const dueAt = new Date(Date.now() + 1*24*60*60*1000).toISOString();
-    await db.from('words').update({ priority:true, due_at:dueAt, last_practiced:new Date().toISOString() }).eq('id', w.id);
+// ── Delete ────────────────────────────────────────────────
+function delCurrent(lang) {
+  const w = nav[lang].deck[nav[lang].idx];
+  if (!w) return;
+  delId = w.id; delLang = lang;
+  document.getElementById('del-confirm-btn').onclick = execDelete;
+  openModal('m-del');
+}
+async function execDelete() {
+  if (!delId) return;
+  const lang = delLang;
+  await db.from('words').delete().eq('id', delId);
+  closeModal('m-del');
+  delId=null; delLang=null;
+  showToast('已删除');
+  await loadWords(lang, false);
+}
+
+// ── Filter ────────────────────────────────────────────────
+function setFilter(lang, f, el) {
+  nav[lang].filter = f;
+  document.getElementById('fr-'+lang).querySelectorAll('.chip').forEach(c=>c.classList.remove('a-en','a-ja'));
+  el.classList.add(lang==='en'?'a-en':'a-ja');
+  buildDeck(lang, true);
+  renderCard(lang);
+}
+
+// ── Add single word ───────────────────────────────────────
+async function addWord(lang) {
+  const word    = document.getElementById(lang+'-w').value.trim();
+  const reading = document.getElementById(lang+'-r').value.trim();
+  const meaning = document.getElementById(lang+'-m').value.trim();
+  const example = document.getElementById(lang+'-e').value.trim();
+  if (!word||!meaning) { showToast('请填写单词和中文意思'); return; }
+  const {error} = await db.from('words').insert({lang,word,reading,meaning,example,starred:false,priority:false,due_at:null,last_practiced:null});
+  if (error) { showToast('添加失败：'+error.message); return; }
+  ['w','r','m','e'].forEach(k => document.getElementById(lang+'-'+k).value='');
+  closeModal('m-'+lang+'-add');
+  showToast('已添加「'+word+'」');
+  await loadWords(lang, false);
+}
+
+// ── Bulk import ───────────────────────────────────────────
+async function importWords(lang) {
+  const raw = document.getElementById(lang+'-imp-txt').value.trim();
+  if (!raw) { showToast('请先输入内容'); return; }
+  const rows = [];
+  for (const line of raw.split('\n').filter(l=>l.trim())) {
+    const p = line.split(/[｜|]/).map(s=>s.trim());
+    if (p.length<3) continue;
+    rows.push({lang,word:p[0],reading:p[1]||'',meaning:p[2]||'',example:p[3]||'',starred:false,priority:false,due_at:null,last_practiced:null});
   }
-
-  practice.idx++;
-  showPracticeCard();
+  if (!rows.length) { showToast('未识别到有效数据，请检查格式'); return; }
+  const {error} = await db.from('words').insert(rows);
+  if (error) { showToast('导入失败：'+error.message); return; }
+  document.getElementById(lang+'-imp-txt').value='';
+  closeModal('m-'+lang+'-imp');
+  showToast(`成功导入 ${rows.length} 个单词`);
+  await loadWords(lang, false);
 }
 
-function showSummary() {
-  document.getElementById('practice-card-wrap').style.display = 'none';
-  document.getElementById('summary-screen').classList.add('visible');
-  document.getElementById('sum-total').textContent = practice.queue.length;
-  document.getElementById('sum-known').textContent = practice.knownCount;
-  document.getElementById('sum-unknown').textContent = practice.unknownCount;
-
-  // Streak: simple calc from localStorage
-  const lang = practice.lang;
-  const key = 'streak_'+lang;
-  const lastKey = 'streak_last_'+lang;
-  const today = todayKey();
-  const lastDay = localStorage.getItem(lastKey) || '';
-  let streak = parseInt(localStorage.getItem(key)||'0');
-  if (lastDay === today) {
-    // already practiced today, keep streak
-  } else {
-    const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
-    if (lastDay === yesterday) streak++;
-    else streak = 1;
-    localStorage.setItem(key, streak);
-    localStorage.setItem(lastKey, today);
-  }
-  document.getElementById('sum-streak').textContent = streak;
-
-  const sumBtn = document.getElementById('sum-close-btn');
-  sumBtn.className = `solid-btn ${lang==='en'?'en-solid':'ja-solid'}`;
-
-  // Reload word list
-  loadWords(lang);
-}
-
-function closePractice() {
-  document.getElementById('practice-overlay').classList.remove('open');
-}
-
-// ─── Quiz Section ────────────────────────────────────────────
-
-// Built-in question bank
-const BUILTIN_QUIZ = [
+// ── Quiz ──────────────────────────────────────────────────
+const QUIZ_BUILTIN = [
   {
-    sentence: "Despite her busy schedule, she always manages to ___ time for her family.",
-    words: [
-      {word:"Despite", zh:"尽管"},
-      {word:"her", zh:"她的"},
-      {word:"busy", zh:"忙碌的"},
-      {word:"schedule", zh:"日程"},
-      {word:"she", zh:"她"},
-      {word:"always", zh:"总是"},
-      {word:"manages", zh:"设法"},
-      {word:"time", zh:"时间"},
-      {word:"for", zh:"为了"},
-      {word:"her", zh:"她的"},
-      {word:"family", zh:"家人"}
-    ],
-    blank: 3,
-    options: ["make","do","take","find"],
-    correct: 3,
-    builtin: true
+    s:"Despite her busy schedule, she always manages to ___ time for her family.",
+    wm:{Despite:"尽管",busy:"忙碌的",schedule:"日程",manages:"设法",time:"时间",family:"家人"},
+    opts:["make","do","take","find"], cor:3, bi:true
   },
   {
-    sentence: "The scientist's discovery had a profound ___ on modern medicine.",
-    words: [
-      {word:"The", zh:"这个"},
-      {word:"scientist's", zh:"科学家的"},
-      {word:"discovery", zh:"发现"},
-      {word:"had", zh:"有"},
-      {word:"a", zh:"一个"},
-      {word:"profound", zh:"深远的"},
-      {word:"on", zh:"对于"},
-      {word:"modern", zh:"现代"},
-      {word:"medicine", zh:"医学"}
-    ],
-    blank: 5,
-    options: ["affect","impact","effect","influence"],
-    correct: 1,
-    builtin: true
+    s:"The scientist's discovery had a profound ___ on modern medicine.",
+    wm:{profound:"深远的",discovery:"发现",modern:"现代",medicine:"医学"},
+    opts:["affect","impact","effect","influence"], cor:1, bi:true
   },
   {
-    sentence: "It is essential that all employees ___ the new safety regulations.",
-    words: [
-      {word:"It", zh:"这"},
-      {word:"is", zh:"是"},
-      {word:"essential", zh:"至关重要的"},
-      {word:"that", zh:"那"},
-      {word:"all", zh:"所有"},
-      {word:"employees", zh:"员工"},
-      {word:"the", zh:"这个"},
-      {word:"new", zh:"新的"},
-      {word:"safety", zh:"安全"},
-      {word:"regulations", zh:"规定"}
-    ],
-    blank: 6,
-    options: ["follow","obey","comply with","adhere"],
-    correct: 2,
-    builtin: true
+    s:"It is essential that all employees ___ the new safety regulations.",
+    wm:{essential:"至关重要的",employees:"员工",safety:"安全",regulations:"规定"},
+    opts:["follow","obey","comply with","adhere"], cor:2, bi:true
   }
 ];
+const qState = { qs:[] };
 
 async function loadQuiz() {
-  const { data, error } = await db.from('quiz_questions').select('*').order('created_at', {ascending: false});
-  const userQuestions = (data || []).map(q => ({
-    sentence: q.sentence,
-    words: buildWordObjects(q.sentence),
-    blank: q.blank_index,
-    options: JSON.parse(q.options),
-    correct: q.correct_index,
-    builtin: false,
-    id: q.id
-  }));
-
-  state.quiz.questions = [...BUILTIN_QUIZ, ...userQuestions];
+  const {data} = await db.from('quiz_questions').select('*').order('created_at',{ascending:false});
+  const user = (data||[]).map(q=>({s:q.sentence,wm:{},opts:JSON.parse(q.options),cor:q.correct_index,bi:false,id:q.id}));
+  qState.qs = [...QUIZ_BUILTIN,...user];
   renderQuiz();
 }
 
-function buildWordObjects(sentence) {
-  return sentence.replace(/___/g, '').split(' ')
-    .filter(w => w.trim())
-    .map(w => ({word: w, zh: ''}));
-}
-
 function renderQuiz() {
-  const container = document.getElementById('quiz-list');
-  const qs = state.quiz.questions;
-  if (qs.length === 0) {
-    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><p>还没有题目</p></div>';
-    return;
-  }
-
-  container.innerHTML = qs.map((q, i) => renderQuizCard(q, i)).join('');
+  const c = document.getElementById('quiz-list');
+  if (!qState.qs.length) { c.innerHTML='<div class="empty-state"><div class="ei">📝</div><p>还没有题目</p></div>'; return; }
+  c.innerHTML = qState.qs.map((q,i)=>renderQCard(q,i)).join('');
 }
 
-function renderQuizCard(q, idx) {
-  const parts = q.sentence.split('___');
-  const before = parts[0] || '';
-  const after = parts[1] || '';
+function renderQCard(q, i) {
+  const parts = q.s.split('___');
+  const mk = (txt) => txt.split(/(\s+)/).map(t=>{
+    if (!t.trim()) return t;
+    const cl = t.replace(/[^a-zA-Z']/g,'');
+    if (!cl) return esc(t);
+    const zh = q.wm[cl]||q.wm[t.trim()]||'';
+    return `<span class="cword" onclick="tipToggle(this,'${esc(zh||cl)}')">${esc(t)}<span class="wtip"></span></span>`;
+  }).join('');
 
-  // Build clickable sentence
-  function makeClickable(text, qIdx) {
-    return text.split(' ').map(token => {
-      const clean = token.replace(/[^a-zA-Z']/g,'');
-      if (!clean) return token + ' ';
-      return `<span class="clickable-word" onclick="showWordTip(this,'${clean}')">${token}<span class="word-tooltip" id="tip-${clean}-${qIdx}"></span></span> `;
-    }).join('');
-  }
+  const blank = `<span class="qblank" id="qb${i}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>`;
+  const sent  = mk(parts[0]||'')+blank+mk(parts[1]||'');
+  const opts  = q.opts.map((o,oi)=>`<button class="obtn" id="qo${i}_${oi}" onclick="pickOpt(${i},${oi})">${esc(o)}</button>`).join('');
+  const delB  = q.bi ? '' : `<div style="margin-top:10px"><button class="pill qz" style="font-size:.72rem;padding:4px 10px" onclick="delQuiz('${q.id}')">删除</button></div>`;
 
-  const blankHtml = `<span class="quiz-blank" id="quiz-blank-${idx}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>`;
-
-  const sentenceHtml = makeClickable(before, idx) + blankHtml + makeClickable(after, idx);
-
-  const optBtns = q.options.map((opt, oi) =>
-    `<button class="option-btn" id="opt-${idx}-${oi}" onclick="selectOption(${idx},${oi})">${opt}</button>`
-  ).join('');
-
-  const deleteBtn = q.builtin ? '' :
-    `<button class="pill-btn quiz-primary" style="font-size:0.72rem;padding:4px 10px;margin-top:8px" onclick="deleteQuiz('${q.id}')">删除</button>`;
-
-  return `<div class="quiz-card" id="quiz-card-${idx}">
-    <div class="quiz-sentence">${sentenceHtml}</div>
-    <div class="quiz-options">${optBtns}</div>
-    <div id="quiz-fb-${idx}" class="quiz-feedback"></div>
-    ${deleteBtn}
+  return `<div class="qcard">
+    <div class="qsentence">${sent}</div>
+    <div class="qopts">${opts}</div>
+    <div id="qf${i}" class="qfb"></div>
+    ${delB}
   </div>`;
 }
 
-function showWordTip(el, word) {
-  el.classList.toggle('show-tip');
-  const tip = el.querySelector('.word-tooltip');
-  if (tip && !tip.textContent) {
-    tip.textContent = '加载中…';
-    translateWord(word).then(zh => { tip.textContent = zh || word; });
-  }
+function tipToggle(el, zh) {
+  el.classList.toggle('tip-on');
+  const t = el.querySelector('.wtip');
+  if (t) t.textContent = zh;
 }
 
-const zhCache = {};
-async function translateWord(word) {
-  if (zhCache[word]) return zhCache[word];
-  // Simple lookup from quiz questions' words arrays
-  for (const q of state.quiz.questions) {
-    for (const w of (q.words||[])) {
-      if (w.word.toLowerCase() === word.toLowerCase() && w.zh) {
-        zhCache[word] = w.zh;
-        return w.zh;
-      }
-    }
-  }
-  // Fallback: just return the word itself
-  zhCache[word] = word;
-  return word;
+function pickOpt(qi, oi) {
+  const q = qState.qs[qi];
+  for (let k=0;k<q.opts.length;k++) { const b=document.getElementById(`qo${qi}_${k}`); if(b) b.disabled=true; }
+  const ok = oi===q.cor;
+  const sel = document.getElementById(`qo${qi}_${oi}`);
+  const cor = document.getElementById(`qo${qi}_${q.cor}`);
+  if (sel) sel.classList.add(ok?'correct':'wrong');
+  if (!ok&&cor) cor.classList.add('correct');
+  const bl = document.getElementById('qb'+qi);
+  if (bl) bl.textContent = q.opts[q.cor];
+  const fb = document.getElementById('qf'+qi);
+  fb.className='qfb show '+(ok?'ok':'ng');
+  fb.textContent = ok ? '✓ 正确！' : `✗ 正确答案是：${q.opts[q.cor]}`;
 }
 
-function selectOption(qIdx, optIdx) {
-  const q = state.quiz.questions[qIdx];
-  const fb = document.getElementById('quiz-fb-'+qIdx);
-  const blank = document.getElementById('quiz-blank-'+qIdx);
+function toggleAddQuiz() { document.getElementById('add-quiz-panel').classList.toggle('open'); }
 
-  // Disable all options
-  for (let i = 0; i < q.options.length; i++) {
-    const btn = document.getElementById(`opt-${qIdx}-${i}`);
-    if (btn) btn.disabled = true;
-  }
-
-  const isCorrect = optIdx === q.correct;
-  const selBtn = document.getElementById(`opt-${qIdx}-${optIdx}`);
-  const corrBtn = document.getElementById(`opt-${qIdx}-${q.correct}`);
-
-  if (selBtn) selBtn.classList.add(isCorrect ? 'correct' : 'wrong');
-  if (!isCorrect && corrBtn) corrBtn.classList.add('correct');
-
-  if (blank) blank.textContent = q.options[q.correct];
-
-  fb.className = 'quiz-feedback show ' + (isCorrect ? 'right' : 'wrong-fb');
-  fb.textContent = isCorrect ? '✓ 正确！' : `✗ 正确答案是：${q.options[q.correct]}`;
-}
-
-function toggleAddQuiz() {
-  document.getElementById('add-quiz-form').classList.toggle('open');
-}
-
-async function addQuizQuestion() {
-  const sentence = document.getElementById('q-sentence').value.trim();
-  const opts = [
-    document.getElementById('q-opt1').value.trim(),
-    document.getElementById('q-opt2').value.trim(),
-    document.getElementById('q-opt3').value.trim(),
-    document.getElementById('q-opt4').value.trim()
-  ];
-  const correct = parseInt(document.getElementById('q-correct').value);
-
-  if (!sentence || opts.some(o => !o)) {
-    showToast('请填写句子和所有选项');
-    return;
-  }
-  if (!sentence.includes('___')) {
-    showToast('句子中请用 ___ 表示空格');
-    return;
-  }
-
-  const { error } = await db.from('quiz_questions').insert({
-    sentence,
-    options: JSON.stringify(opts),
-    correct_index: correct,
-    blank_index: 0
-  });
-
+async function addQuizQ() {
+  const s = document.getElementById('q-sent').value.trim();
+  const opts = ['q-o1','q-o2','q-o3','q-o4'].map(id=>document.getElementById(id).value.trim());
+  const cor = parseInt(document.getElementById('q-cor').value);
+  if (!s||opts.some(o=>!o)) { showToast('请填写句子和所有选项'); return; }
+  if (!s.includes('___'))   { showToast('句子中请用 ___ 表示空格'); return; }
+  const {error} = await db.from('quiz_questions').insert({sentence:s,options:JSON.stringify(opts),correct_index:cor,blank_index:0});
   if (error) { showToast('添加失败：'+error.message); return; }
-
-  ['q-sentence','q-opt1','q-opt2','q-opt3','q-opt4'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
-  toggleAddQuiz();
-  showToast('添加成功');
-  await loadQuiz();
+  ['q-sent','q-o1','q-o2','q-o3','q-o4'].forEach(id=>document.getElementById(id).value='');
+  toggleAddQuiz(); showToast('添加成功'); await loadQuiz();
 }
 
-async function deleteQuiz(id) {
+async function delQuiz(id) {
   if (!confirm('确认删除这道题目？')) return;
-  const { error } = await db.from('quiz_questions').delete().eq('id', id);
-  if (error) { showToast('删除失败'); return; }
-  showToast('已删除');
-  await loadQuiz();
+  await db.from('quiz_questions').delete().eq('id',id);
+  showToast('已删除'); await loadQuiz();
 }
 
-// ─── Helpers ─────────────────────────────────────────────────
-function escHtml(str) {
-  return String(str||'')
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
+// ── Util ──────────────────────────────────────────────────
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ─── Init ─────────────────────────────────────────────────────
-async function init() {
-  await Promise.all([loadWords('en'), loadWords('ja'), loadQuiz()]);
-}
-
-init();
+// ── Init ──────────────────────────────────────────────────
+Promise.all([loadWords('en',true), loadWords('ja',true), loadQuiz()]);
 </script>
 </body>
 </html>
