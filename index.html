@@ -206,6 +206,13 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
 .tag-sugg-box{display:flex;flex-wrap:wrap;gap:5px;padding:5px 2px 2px;margin-top:3px}
 .tag-sugg-item{font-size:.75rem;font-weight:600;padding:3px 9px;border-radius:10px;background:#F0EDE5;color:var(--sub);cursor:pointer}
 .tag-sugg-item:hover{background:#E3DFD6;color:var(--ink)}
+.tag-mgmt-btn{margin-left:auto;font-size:.7rem;opacity:.6;border-color:#ccc}
+.tag-mgmt-btn:hover{opacity:1;background:#F0EDE5}
+.tag-mgmt-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+.tag-mgmt-row:last-child{border-bottom:none}
+.tag-mgmt-count{font-size:.78rem;color:var(--sub);flex:1;min-width:0}
+.tag-mgmt-del{font-size:.75rem;font-weight:600;padding:4px 11px;border-radius:8px;color:var(--danger);border:1.5px solid var(--danger);background:none;transition:all .15s;flex-shrink:0}
+.tag-mgmt-del:hover{background:var(--danger);color:#fff}
 
 @media(max-width:480px){.qopts,.opt-grid{grid-template-columns:1fr}.f-word{font-size:1.9rem}}
 </style>
@@ -411,6 +418,18 @@ eloquent｜adj.｜/ˈeləkwənt/｜雄辩的｜She gave an eloquent speech.
     <div class="mfoot">
       <button class="sbtn gray" onclick="closeModal('m-edit')">取消</button>
       <button id="edit-save-btn" class="sbtn en-s" onclick="saveEdit()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tag Management -->
+<div id="m-tags" class="modal" onclick="bdClose(event,'m-tags')">
+  <div class="mbox">
+    <div class="mhandle"></div>
+    <div class="mtitle">标签管理</div>
+    <div id="tag-mgmt-list"></div>
+    <div class="mfoot">
+      <button class="sbtn gray" onclick="closeModal('m-tags')">关闭</button>
     </div>
   </div>
 </div>
@@ -826,8 +845,9 @@ function renderTagFilterRow(lang){
   const tags=allTags[lang], tf=nav[lang].tagFilter;
   if(!tags.length){ row.innerHTML=''; return; }
   row.innerHTML=`<span class="tag-filter-label">标签：</span>`
-    +tags.map(t=>`<button class="tag-chip${tf===t?' a-tag':''}" onclick="setTagFilter('${lang}','${esc(t)}')">${esc(t)}</button>`).join('')
-    +(tf?`<button class="tag-chip" style="opacity:.6" onclick="clearTagFilter('${lang}')">× 全部</button>`:'');
+    +tags.map(t=>`<button class="tag-chip${tf===t?' a-tag':''}" data-tag="${esc(t)}" onclick="setTagFilter('${lang}',this.dataset.tag)">${esc(t)}</button>`).join('')
+    +(tf?`<button class="tag-chip" style="opacity:.6" onclick="clearTagFilter('${lang}')">× 全部</button>`:'')
+    +`<button class="tag-chip tag-mgmt-btn" onclick="openTagMgmt()">管理标签</button>`;
 }
 
 function setTagFilter(lang,tag){
@@ -840,6 +860,59 @@ function clearTagFilter(lang){
   nav[lang].tagFilter=null;
   renderTagFilterRow(lang);
   buildDeck(lang,true); renderCard(lang);
+}
+
+function openTagMgmt(){
+  renderTagMgmt();
+  openModal('m-tags');
+}
+
+function renderTagMgmt(){
+  const el=document.getElementById('tag-mgmt-list');
+  if(!el) return;
+  const tagMap={};
+  ['en','ja'].forEach(lang=>{
+    allWords[lang].forEach(w=>{
+      (w.tags||[]).forEach(t=>{
+        if(!tagMap[t]) tagMap[t]={en:0,ja:0};
+        tagMap[t][lang]++;
+      });
+    });
+  });
+  const tags=Object.keys(tagMap).sort();
+  if(!tags.length){
+    el.innerHTML='<p style="color:var(--sub);font-size:.88rem;padding:8px 0 16px">还没有创建任何标签</p>';
+    return;
+  }
+  el.innerHTML=tags.map(t=>{
+    const c=tagMap[t], info=[];
+    if(c.en) info.push(`英语 ${c.en} 词`);
+    if(c.ja) info.push(`日语 ${c.ja} 词`);
+    return `<div class="tag-mgmt-row">
+      <span class="ctag">${esc(t)}</span>
+      <span class="tag-mgmt-count">${info.join(' · ')}</span>
+      <button class="tag-mgmt-del" data-tag="${esc(t)}" onclick="deleteTagGlobal(this.dataset.tag)">删除</button>
+    </div>`;
+  }).join('');
+}
+
+async function deleteTagGlobal(tag){
+  if(!confirm(`确认删除标签「${tag}」？\n所有包含此标签的单词都会自动移除它。`)) return;
+  const affected=[...allWords.en,...allWords.ja].filter(w=>w.tags&&w.tags.includes(tag));
+  const errs=await Promise.all(affected.map(w=>
+    db.from('words').update({tags:w.tags.filter(t=>t!==tag)}).eq('id',w.id)
+  ));
+  if(errs.some(r=>r.error)){showToast('部分删除失败，请刷新重试');return;}
+  // Update local state
+  [...allWords.en,...allWords.ja].forEach(w=>{ if(w.tags) w.tags=w.tags.filter(t=>t!==tag); });
+  // Clear active filter if it was this tag
+  ['en','ja'].forEach(lang=>{
+    if(nav[lang].tagFilter===tag){ nav[lang].tagFilter=null; buildDeck(lang,true); renderCard(lang); }
+  });
+  collectTags('en'); collectTags('ja');
+  renderTagFilterRow('en'); renderTagFilterRow('ja');
+  showToast(`已删除标签「${tag}」`);
+  renderTagMgmt();
 }
 
 function initTagCtx(ctx, tags){
