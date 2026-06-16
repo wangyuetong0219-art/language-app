@@ -2042,27 +2042,32 @@ document.addEventListener('DOMContentLoaded',async()=>{
   });
   document.getElementById('limit-input').addEventListener('keydown',e=>{ if(e.key==='Enter') saveDailyLimit(); });
 
-  // iOS/iPad touch fix: touchend fires reliably even when perspective context swallows clicks
-  function addTap(el, fn){
+  // Touch support for iOS/iPad.
+  // lastTap is per-element (closure) so one button's tap never blocks another.
+  function addTap(el,fn){
     if(!el) return;
-    let startY=0;
+    let startY=0, lastTap=0;
     el.addEventListener('touchstart',e=>{ startY=e.touches[0].clientY; },{passive:true});
     el.addEventListener('touchend',e=>{
-      if(Math.abs(e.changedTouches[0].clientY-startY)<10){
-        e.preventDefault();
+      const now=Date.now();
+      if(Math.abs(e.changedTouches[0].clientY-startY)<10 && now-lastTap>400){
+        lastTap=now;
+        e.preventDefault(); // suppress the subsequent synthetic click
         fn();
       }
     },{passive:false});
   }
+  // .scene is a div — iOS onclick on divs is unreliable; touchend is the fix.
+  // Desktop is unaffected: touch events never fire with a mouse.
+  addTap(document.getElementById('scene'),()=>flipCard());
+  // Judge buttons: belt-and-suspenders for iPad where the perspective context
+  // of .scene can interfere with touch-hit testing on sibling elements below.
   const judgeRow=document.getElementById('judge-row');
   if(judgeRow){
     const [nopeBtn,yepBtn]=judgeRow.querySelectorAll('.btn');
     addTap(nopeBtn,()=>next(false));
     addTap(yepBtn,()=>knewCard());
   }
-  const flipBtn=document.querySelector('#flip-row .btn-flip');
-  addTap(flipBtn,()=>flipCard());
-  addTap(document.getElementById('scene'),()=>flipCard());
 });
 
 // ── CHAT ──
