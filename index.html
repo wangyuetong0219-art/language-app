@@ -187,6 +187,26 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
 .toast{display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:.85rem;font-weight:600;padding:10px 20px;border-radius:20px;z-index:1000;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.2)}
 .toast.show{display:block}
 
+/* ── Tags ── */
+.card-tag-row{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;padding:0 2px}
+.ctag{font-size:.68rem;font-weight:600;padding:2px 8px;border-radius:10px;background:#EFECE4;color:#6B6257;cursor:pointer;transition:background .13s}
+.ctag:hover{background:#E3DFD6}
+.tag-filter-row{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.tag-filter-label{font-size:.72rem;font-weight:700;color:var(--sub);letter-spacing:.4px;flex-shrink:0}
+.tag-chip{padding:4px 11px;border-radius:14px;font-size:.73rem;font-weight:600;border:1.5px solid #D4CFBF;color:#6B6257;background:var(--bg);transition:all .15s}
+.tag-chip:hover{background:#E3DFD6}
+.tag-chip.a-tag{background:#6B6257;border-color:#6B6257;color:#fff}
+.tag-box{border:1.5px solid var(--line);border-radius:10px;padding:7px 10px;background:var(--bg);display:flex;flex-wrap:wrap;gap:5px;align-items:center;min-height:44px;cursor:text;transition:border-color .15s}
+.tag-box:focus-within{border-color:#999}
+.tag-pills-wrap{display:contents}
+.tag-edit-pill{display:inline-flex;align-items:center;gap:3px;font-size:.78rem;font-weight:600;padding:2px 6px 2px 9px;border-radius:10px;background:#E8E4DA;color:#555}
+.tag-rm{font-size:.8rem;opacity:.6;padding:0 2px;cursor:pointer;line-height:1;background:none;border:none;color:inherit}
+.tag-rm:hover{opacity:1}
+.tag-ti{border:none;outline:none;font-family:'Manrope',sans-serif;font-size:.88rem;background:transparent;flex:1;min-width:80px;height:24px}
+.tag-sugg-box{display:flex;flex-wrap:wrap;gap:5px;padding:5px 2px 2px;margin-top:3px}
+.tag-sugg-item{font-size:.75rem;font-weight:600;padding:3px 9px;border-radius:10px;background:#F0EDE5;color:var(--sub);cursor:pointer}
+.tag-sugg-item:hover{background:#E3DFD6;color:var(--ink)}
+
 @media(max-width:480px){.qopts,.opt-grid{grid-template-columns:1fr}.f-word{font-size:1.9rem}}
 </style>
 </head>
@@ -205,7 +225,7 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
   <div class="sec-hd">
     <h2 class="sec-title">英语单词</h2>
     <div class="hd-btns">
-      <button class="pill en" onclick="openModal('m-en-add')">+ 添加</button>
+      <button class="pill en" onclick="openAddModal('en')">+ 添加</button>
       <button class="pill en" onclick="openModal('m-en-imp')">批量导入</button>
     </div>
   </div>
@@ -215,6 +235,7 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
     <button class="chip" onclick="setFilter('en','due',this)">待复习</button>
     <button class="chip" onclick="setFilter('en','priority',this)">不认识</button>
   </div>
+  <div id="tfr-en" class="tag-filter-row"></div>
   <div id="ca-en"><div class="loading">加载中…</div></div>
 </div>
 
@@ -223,7 +244,7 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
   <div class="sec-hd">
     <h2 class="sec-title">日语单词</h2>
     <div class="hd-btns">
-      <button class="pill ja" onclick="openModal('m-ja-add')">+ 添加</button>
+      <button class="pill ja" onclick="openAddModal('ja')">+ 添加</button>
       <button class="pill ja" onclick="openModal('m-ja-imp')">批量导入</button>
     </div>
   </div>
@@ -233,6 +254,7 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
     <button class="chip" onclick="setFilter('ja','due',this)">待复习</button>
     <button class="chip" onclick="setFilter('ja','priority',this)">不认识</button>
   </div>
+  <div id="tfr-ja" class="tag-filter-row"></div>
   <div id="ca-ja"><div class="loading">加载中…</div></div>
 </div>
 
@@ -281,6 +303,14 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
     <div class="fg"><label class="flabel">音标</label><input id="en-r" class="finput" type="text" placeholder="/əˈbændən/"></div>
     <div class="fg"><label class="flabel">中文意思 *</label><input id="en-m" class="finput" type="text" placeholder="放弃"></div>
     <div class="fg"><label class="flabel">例句</label><input id="en-e" class="finput" type="text" placeholder="She abandoned her plan."></div>
+    <div class="fg">
+      <label class="flabel">标签</label>
+      <div class="tag-box" onclick="document.getElementById('ti-en-add').focus()">
+        <div id="tp-en-add" class="tag-pills-wrap"></div>
+        <input id="ti-en-add" class="tag-ti" placeholder="输入标签，回车确认" onkeydown="tagKey(event,'en-add')" oninput="tagInput(this.value,'en-add')">
+      </div>
+      <div id="ts-en-add" class="tag-sugg-box" style="display:none"></div>
+    </div>
     <div class="mfoot">
       <button class="sbtn gray" onclick="closeModal('m-en-add')">取消</button>
       <button class="sbtn en-s" onclick="addWord('en')">添加</button>
@@ -319,6 +349,14 @@ eloquent｜adj.｜/ˈeləkwənt/｜雄辩的｜She gave an eloquent speech.
     <div class="fg"><label class="flabel">读音（假名）</label><input id="ja-r" class="finput" type="text" placeholder="べんきょう"></div>
     <div class="fg"><label class="flabel">中文意思 *</label><input id="ja-m" class="finput" type="text" placeholder="学习"></div>
     <div class="fg"><label class="flabel">例句</label><input id="ja-e" class="finput" type="text" placeholder="毎日勉強します。"></div>
+    <div class="fg">
+      <label class="flabel">标签</label>
+      <div class="tag-box" onclick="document.getElementById('ti-ja-add').focus()">
+        <div id="tp-ja-add" class="tag-pills-wrap"></div>
+        <input id="ti-ja-add" class="tag-ti" placeholder="输入标签，回车确认" onkeydown="tagKey(event,'ja-add')" oninput="tagInput(this.value,'ja-add')">
+      </div>
+      <div id="ts-ja-add" class="tag-sugg-box" style="display:none"></div>
+    </div>
     <div class="mfoot">
       <button class="sbtn gray" onclick="closeModal('m-ja-add')">取消</button>
       <button class="sbtn ja-s" onclick="addWord('ja')">添加</button>
@@ -362,6 +400,14 @@ eloquent｜adj.｜/ˈeləkwənt/｜雄辩的｜She gave an eloquent speech.
     </div>
     <div class="fg"><label class="flabel">中文意思 *</label><input id="edit-m" class="finput" type="text"></div>
     <div class="fg"><label class="flabel">例句</label><input id="edit-e" class="finput" type="text"></div>
+    <div class="fg">
+      <label class="flabel">标签</label>
+      <div class="tag-box" onclick="document.getElementById('ti-edit').focus()">
+        <div id="tp-edit" class="tag-pills-wrap"></div>
+        <input id="ti-edit" class="tag-ti" placeholder="输入标签，回车确认" onkeydown="tagKey(event,'edit')" oninput="tagInput(this.value,'edit')">
+      </div>
+      <div id="ts-edit" class="tag-sugg-box" style="display:none"></div>
+    </div>
     <div class="mfoot">
       <button class="sbtn gray" onclick="closeModal('m-edit')">取消</button>
       <button id="edit-save-btn" class="sbtn en-s" onclick="saveEdit()">保存</button>
@@ -391,9 +437,11 @@ const db = supabase.createClient(SUPA_URL, SUPA_KEY);
 
 // ── State ───────────────────────────────────────────────────
 const allWords = { en:[], ja:[] };
+const allTags  = { en:[], ja:[] };
+const ctxTags  = {};
 const nav = {
-  en:{ deck:[], idx:0, flipped:false, filter:'all', sKnown:0, sUnknown:0 },
-  ja:{ deck:[], idx:0, flipped:false, filter:'all', sKnown:0, sUnknown:0 }
+  en:{ deck:[], idx:0, flipped:false, filter:'all', tagFilter:null, sKnown:0, sUnknown:0 },
+  ja:{ deck:[], idx:0, flipped:false, filter:'all', tagFilter:null, sKnown:0, sUnknown:0 }
 };
 let delId=null, delLang=null, editId=null, editLang=null;
 
@@ -427,17 +475,20 @@ async function loadWords(lang, resetSession) {
     return;
   }
   allWords[lang] = data||[];
+  collectTags(lang);
+  renderTagFilterRow(lang);
   buildDeck(lang, resetSession!==false);
   renderCard(lang);
 }
 
 // ── Build deck ──────────────────────────────────────────────
 function buildDeck(lang, reset) {
-  const f=nav[lang].filter, now=Date.now();
+  const f=nav[lang].filter, tf=nav[lang].tagFilter, now=Date.now();
   let d=allWords[lang];
   if(f==='starred')   d=d.filter(w=>w.starred);
   else if(f==='due')  d=d.filter(w=>!w.due_at||new Date(w.due_at)<=now);
   else if(f==='priority') d=d.filter(w=>w.priority);
+  if(tf) d=d.filter(w=>w.tags&&w.tags.includes(tf));
 
   nav[lang].deck=[...d].sort((a,b)=>{
     const sc=w=>w.priority?0:(!w.last_practiced?1:(!w.due_at||new Date(w.due_at)<=now?2:3));
@@ -530,6 +581,8 @@ function renderCard(lang) {
       </div>
     </div>
 
+    ${(w.tags&&w.tags.length)?`<div class="card-tag-row">${w.tags.map(t=>`<span class="ctag" onclick="setTagFilter('${lang}','${esc(t)}')">${esc(t)}</span>`).join('')}</div>`:''}
+
     <div class="nav-actions">
       <button class="nav-arrow" onclick="prevCard('${lang}')"${pd}>←</button>
       <div class="mark-group">
@@ -606,6 +659,7 @@ function editCurrent(lang){
   else            posRow.style.display='none';
 
   document.getElementById('edit-save-btn').className=`sbtn ${lang==='en'?'en-s':'ja-s'}`;
+  initTagCtx('edit', w.tags||[]);
   openModal('m-edit');
 }
 
@@ -615,7 +669,9 @@ async function saveEdit(){
   const meaning=document.getElementById('edit-m').value.trim();
   const example=document.getElementById('edit-e').value.trim();
   if(!word||!meaning){showToast('请填写单词和中文意思');return;}
-  const upd={word,reading,meaning,example};
+  const ti=document.getElementById('ti-edit');
+  if(ti&&ti.value.trim()) addTag('edit',ti.value);
+  const upd={word,reading,meaning,example,tags:ctxTags['edit']||[]};
   if(editLang==='en') upd.pos=document.getElementById('edit-pos').value.trim();
   const {error}=await db.from('words').update(upd).eq('id',editId);
   if(error){showToast('保存失败：'+error.message);return;}
@@ -638,12 +694,16 @@ async function addWord(lang){
   const meaning=document.getElementById(lang+'-m').value.trim();
   const example=document.getElementById(lang+'-e').value.trim();
   const pos    =lang==='en'?document.getElementById('en-pos').value.trim():'';
+  const ti     =document.getElementById('ti-'+lang+'-add');
+  if(ti&&ti.value.trim()) addTag(lang+'-add',ti.value);
+  const tags   =ctxTags[lang+'-add']||[];
   if(!word||!meaning){showToast('请填写单词和中文意思');return;}
-  const row={lang,word,reading,meaning,example,pos,starred:false,priority:false,due_at:null,last_practiced:null};
+  const row={lang,word,reading,meaning,example,pos,tags,starred:false,priority:false,due_at:null,last_practiced:null};
   const {error}=await db.from('words').insert(row);
   if(error){showToast('添加失败：'+error.message);return;}
   ['w','r','m','e'].forEach(k=>document.getElementById(lang+'-'+k).value='');
   if(lang==='en') document.getElementById('en-pos').value='';
+  initTagCtx(lang+'-add',[]);
   closeModal('m-'+lang+'-add');
   showToast('已添加「'+word+'」');
   await loadWords(lang,false);
@@ -746,6 +806,103 @@ async function delQuiz(id){
   if(!confirm('确认删除这道题目？'))return;
   await db.from('quiz_questions').delete().eq('id',id);
   showToast('已删除'); await loadQuiz();
+}
+
+// ── Tags ────────────────────────────────────────────────────
+function openAddModal(lang){
+  initTagCtx(lang+'-add',[]);
+  openModal('m-'+lang+'-add');
+}
+
+function collectTags(lang){
+  const set=new Set();
+  allWords[lang].forEach(w=>(w.tags||[]).forEach(t=>set.add(t)));
+  allTags[lang]=[...set].sort();
+}
+
+function renderTagFilterRow(lang){
+  const row=document.getElementById('tfr-'+lang);
+  if(!row) return;
+  const tags=allTags[lang], tf=nav[lang].tagFilter;
+  if(!tags.length){ row.innerHTML=''; return; }
+  row.innerHTML=`<span class="tag-filter-label">标签：</span>`
+    +tags.map(t=>`<button class="tag-chip${tf===t?' a-tag':''}" onclick="setTagFilter('${lang}','${esc(t)}')">${esc(t)}</button>`).join('')
+    +(tf?`<button class="tag-chip" style="opacity:.6" onclick="clearTagFilter('${lang}')">× 全部</button>`:'');
+}
+
+function setTagFilter(lang,tag){
+  nav[lang].tagFilter = nav[lang].tagFilter===tag ? null : tag;
+  renderTagFilterRow(lang);
+  buildDeck(lang,true); renderCard(lang);
+}
+
+function clearTagFilter(lang){
+  nav[lang].tagFilter=null;
+  renderTagFilterRow(lang);
+  buildDeck(lang,true); renderCard(lang);
+}
+
+function initTagCtx(ctx, tags){
+  ctxTags[ctx]=[...tags];
+  renderTagPills(ctx);
+  const ti=document.getElementById('ti-'+ctx);
+  if(ti) ti.value='';
+  hideSugg(ctx);
+}
+
+function renderTagPills(ctx){
+  const box=document.getElementById('tp-'+ctx);
+  if(!box) return;
+  box.innerHTML=(ctxTags[ctx]||[]).map((t,i)=>`<span class="tag-edit-pill">${esc(t)}<button class="tag-rm" onclick="rmTag('${ctx}',${i})">✕</button></span>`).join('');
+}
+
+function rmTag(ctx,idx){
+  if(!ctxTags[ctx]) return;
+  ctxTags[ctx].splice(idx,1);
+  renderTagPills(ctx);
+}
+
+function addTag(ctx,tag){
+  tag=tag.trim().replace(/,|，/g,'').trim();
+  if(!tag) return;
+  if(!ctxTags[ctx]) ctxTags[ctx]=[];
+  if(!ctxTags[ctx].includes(tag)) ctxTags[ctx].push(tag);
+  renderTagPills(ctx);
+  const ti=document.getElementById('ti-'+ctx);
+  if(ti) ti.value='';
+  hideSugg(ctx);
+}
+
+function tagKey(e,ctx){
+  if(e.key==='Enter'||e.key===','||e.key==='，'){
+    e.preventDefault();
+    const ti=document.getElementById('ti-'+ctx);
+    if(ti&&ti.value.trim()) addTag(ctx,ti.value);
+  } else if(e.key==='Backspace'){
+    const ti=document.getElementById('ti-'+ctx);
+    if(ti&&!ti.value&&ctxTags[ctx]&&ctxTags[ctx].length){
+      ctxTags[ctx].pop();
+      renderTagPills(ctx);
+    }
+  }
+}
+
+function tagInput(val,ctx){
+  const sbox=document.getElementById('ts-'+ctx);
+  if(!sbox) return;
+  val=val.trim();
+  if(!val){ sbox.style.display='none'; sbox.innerHTML=''; return; }
+  const existing=ctxTags[ctx]||[];
+  const pool=[...new Set([...allTags.en,...allTags.ja])];
+  const sugg=pool.filter(t=>t.toLowerCase().includes(val.toLowerCase())&&!existing.includes(t));
+  if(!sugg.length){ sbox.style.display='none'; sbox.innerHTML=''; return; }
+  sbox.style.display='flex';
+  sbox.innerHTML=sugg.map(t=>`<span class="tag-sugg-item" onclick="addTag('${ctx}','${esc(t)}')">${esc(t)}</span>`).join('');
+}
+
+function hideSugg(ctx){
+  const sbox=document.getElementById('ts-'+ctx);
+  if(sbox){ sbox.style.display='none'; sbox.innerHTML=''; }
 }
 
 // ── Util ────────────────────────────────────────────────────
