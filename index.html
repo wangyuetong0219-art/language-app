@@ -48,6 +48,14 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
 .pill.ja{color:var(--ja-back-bg);border-color:var(--ja-back-bg)}.pill.ja:hover{background:var(--ja-back-bg);color:var(--ja-back-text)}
 .pill.qz{color:var(--quiz);border-color:var(--quiz)}.pill.qz:hover{background:var(--quiz);color:#fff}
 
+/* ── Search ── */
+.search-row{position:relative;margin-bottom:14px}
+.search-input{width:100%;padding:10px 38px 10px 14px;border:1.5px solid var(--line);border-radius:12px;font-size:.9rem;background:var(--bg);color:var(--ink);outline:none;transition:border-color .15s}
+.search-input:focus{border-color:#999}
+.search-input::placeholder{color:#bbb}
+.search-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:1.1rem;color:var(--sub);padding:2px 5px;opacity:.5;line-height:1}
+.search-clear:hover{opacity:1}
+
 /* ── Filter chips ── */
 .filter-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
 .chip{padding:5px 12px;border-radius:16px;font-size:.77rem;font-weight:600;border:1.5px solid var(--line);color:var(--sub);transition:all .15s}
@@ -238,6 +246,10 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
       <button class="pill en" onclick="openModal('m-en-imp')">批量导入</button>
     </div>
   </div>
+  <div class="search-row">
+    <input id="si-en" class="search-input" type="text" placeholder="搜索单词、释义、例句、标签…" oninput="setSearch('en',this.value)">
+    <button id="sc-en" class="search-clear" style="display:none" onclick="clearSearch('en')">×</button>
+  </div>
   <div class="filter-row" id="fr-en">
     <button class="chip a-en" onclick="setFilter('en','all',this)">全部</button>
     <button class="chip" onclick="setFilter('en','starred',this)">⭐ 收藏</button>
@@ -256,6 +268,10 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
       <button class="pill ja" onclick="openAddModal('ja')">+ 添加</button>
       <button class="pill ja" onclick="openModal('m-ja-imp')">批量导入</button>
     </div>
+  </div>
+  <div class="search-row">
+    <input id="si-ja" class="search-input" type="text" placeholder="搜索単語、読み方、释义、标签…" oninput="setSearch('ja',this.value)">
+    <button id="sc-ja" class="search-clear" style="display:none" onclick="clearSearch('ja')">×</button>
   </div>
   <div class="filter-row" id="fr-ja">
     <button class="chip a-ja" onclick="setFilter('ja','all',this)">全部</button>
@@ -461,8 +477,8 @@ const allWords = { en:[], ja:[] };
 const allTags  = { en:[], ja:[] };
 const ctxTags  = {};
 const nav = {
-  en:{ deck:[], idx:0, flipped:false, filter:'all', tagFilter:null, sKnown:0, sUnknown:0 },
-  ja:{ deck:[], idx:0, flipped:false, filter:'all', tagFilter:null, sKnown:0, sUnknown:0 }
+  en:{ deck:[], idx:0, flipped:false, filter:'all', tagFilter:null, search:'', sKnown:0, sUnknown:0 },
+  ja:{ deck:[], idx:0, flipped:false, filter:'all', tagFilter:null, search:'', sKnown:0, sUnknown:0 }
 };
 let delId=null, delLang=null, editId=null, editLang=null;
 
@@ -513,27 +529,27 @@ function shuffle(arr){
 
 // ── Build deck ──────────────────────────────────────────────
 function buildDeck(lang, reset) {
-  const f=nav[lang].filter, tf=nav[lang].tagFilter, now=Date.now();
+  const f=nav[lang].filter, tf=nav[lang].tagFilter, sq=nav[lang].search.trim().toLowerCase(), now=Date.now();
   let d=allWords[lang];
   if(f==='starred')   d=d.filter(w=>w.starred);
   else if(f==='due')  d=d.filter(w=>!w.due_at||new Date(w.due_at)<=now);
   else if(f==='priority') d=d.filter(w=>w.priority);
   if(tf) d=d.filter(w=>w.tags&&w.tags.includes(tf));
+  if(sq) d=d.filter(w=>matchesSearch(w,sq));
 
-  // Assign priority group: 0=unknown 1=new 2=due 3=not-due-yet
-  const grp=w=>w.priority?0:(!w.last_practiced?1:(!w.due_at||new Date(w.due_at)<=now?2:3));
-  const lru=w=>w.last_practiced?new Date(w.last_practiced).getTime():0;
-  const gs=[[],[],[],[]];
-  d.forEach(w=>gs[grp(w)].push(w));
-
-  if(reset){
-    // Groups 0-2 (今日队列): randomly shuffle for variety
-    shuffle(gs[0]); shuffle(gs[1]); shuffle(gs[2]);
+  if(sq){
+    // Search mode: stable alphabetical sort, no shuffle
+    nav[lang].deck=[...d].sort((a,b)=>(a.word||'').localeCompare(b.word||''));
+  } else {
+    // Normal mode: priority groups + LRU + shuffle on reset
+    const grp=w=>w.priority?0:(!w.last_practiced?1:(!w.due_at||new Date(w.due_at)<=now?2:3));
+    const lru=w=>w.last_practiced?new Date(w.last_practiced).getTime():0;
+    const gs=[[],[],[],[]];
+    d.forEach(w=>gs[grp(w)].push(w));
+    if(reset){ shuffle(gs[0]); shuffle(gs[1]); shuffle(gs[2]); }
+    gs[3].sort((a,b)=>lru(a)-lru(b));
+    nav[lang].deck=[...gs[0],...gs[1],...gs[2],...gs[3]];
   }
-  // Group 3 (not yet due): LRU ascending — longest unvisited appears first
-  gs[3].sort((a,b)=>lru(a)-lru(b));
-
-  nav[lang].deck=[...gs[0],...gs[1],...gs[2],...gs[3]];
 
   if(reset){ nav[lang].idx=0; nav[lang].flipped=false; nav[lang].sKnown=0; nav[lang].sUnknown=0; }
   else if(nav[lang].idx>nav[lang].deck.length) nav[lang].idx=nav[lang].deck.length;
@@ -551,7 +567,7 @@ function renderCard(lang) {
       due:['✅','目前没有待复习的单词'],
       priority:['💪','没有标记为「不认识」的单词']
     };
-    const [ic,msg]=mp[n.filter]||mp.all;
+    const [ic,msg]=n.search?['🔍','没有找到匹配的单词']:(mp[n.filter]||mp.all);
     area.innerHTML=`<div class="empty-state"><div class="ei">${ic}</div><p>${msg}</p></div>`;
     return;
   }
@@ -725,6 +741,27 @@ async function saveEdit(){
   if(error){showToast('保存失败：'+error.message);return;}
   closeModal('m-edit'); showToast('已保存');
   await loadWords(editLang,false);
+}
+
+// ── Search ──────────────────────────────────────────────────
+function matchesSearch(w, q){
+  return [w.word,w.reading,w.meaning,w.example,...(w.tags||[])].some(f=>f&&String(f).toLowerCase().includes(q));
+}
+
+function setSearch(lang, val){
+  nav[lang].search=val;
+  const cl=document.getElementById('sc-'+lang);
+  if(cl) cl.style.display=val?'':'none';
+  buildDeck(lang,true); renderCard(lang);
+}
+
+function clearSearch(lang){
+  nav[lang].search='';
+  const si=document.getElementById('si-'+lang);
+  if(si) si.value='';
+  const cl=document.getElementById('sc-'+lang);
+  if(cl) cl.style.display='none';
+  buildDeck(lang,true); renderCard(lang);
 }
 
 // ── Filter ──────────────────────────────────────────────────
