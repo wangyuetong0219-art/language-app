@@ -142,6 +142,7 @@ main { padding: 28px 20px; max-width: 600px; margin: 0 auto; }
   transition: background 0.15s, color 0.15s;
   z-index: 10;
   line-height: 1;
+  touch-action: manipulation;
 }
 .card-del-btn:hover { background: rgba(220,38,38,0.78); color: #fff; }
 
@@ -934,6 +935,7 @@ main { padding: 28px 20px; max-width: 600px; margin: 0 auto; }
   transition: background 0.15s, color 0.15s;
   z-index: 10;
   line-height: 1;
+  touch-action: manipulation;
 }
 .card-star-btn:hover { background: rgba(255,107,107,0.22); color: #FF6B6B; }
 .card-star-btn.starred { color: #FF6B6B; background: rgba(255,107,107,0.18); }
@@ -1038,7 +1040,7 @@ main { padding: 28px 20px; max-width: 600px; margin: 0 auto; }
 }
 .fc-limit-btn:hover { border-color: #888; color: var(--ink); }
 /* iOS: lift button rows above the perspective 3D context of .scene */
-#flip-row, #judge-row, #prev-row { position: relative; z-index: 2; }
+#flip-row, #judge-row, #prev-row { position: relative; z-index: 2; isolation: isolate; }
 .btn-prev { touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.08); }
 #sync-dot {
   font-size: 1.1rem;
@@ -2058,8 +2060,22 @@ document.addEventListener('DOMContentLoaded',async()=>{
     },{passive:false});
   }
   // .scene is a div — iOS onclick on divs is unreliable; touchend is the fix.
+  // Skip if the touch originated from a child button (star/delete handle themselves).
   // Desktop is unaffected: touch events never fire with a mouse.
-  addTap(document.getElementById('scene'),()=>flipCard());
+  {
+    const sceneEl=document.getElementById('scene');
+    let startY=0, lastTap=0;
+    sceneEl.addEventListener('touchstart',e=>{ startY=e.touches[0].clientY; },{passive:true});
+    sceneEl.addEventListener('touchend',e=>{
+      if(e.target.closest('button')) return;
+      const now=Date.now();
+      if(Math.abs(e.changedTouches[0].clientY-startY)<10 && now-lastTap>400){
+        lastTap=now;
+        e.preventDefault();
+        flipCard();
+      }
+    },{passive:false});
+  }
   // Judge buttons: belt-and-suspenders for iPad where the perspective context
   // of .scene can interfere with touch-hit testing on sibling elements below.
   const judgeRow=document.getElementById('judge-row');
