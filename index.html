@@ -339,6 +339,7 @@ main { padding: 28px 20px; max-width: 600px; margin: 0 auto; }
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
+  touch-action: manipulation;
 }
 
 .btn-redo:hover { background: #333; }
@@ -1908,9 +1909,15 @@ const _sb=supabase.createClient(_SBURL,_SBKEY);
 function getDeviceId(){
   let id=localStorage.getItem('zapp_device_id');
   if(!id){
-    id='zapp_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8);
-    localStorage.setItem('zapp_device_id',id);
+    // fallback: recover from cookie so clearing localStorage doesn't lose cloud data
+    const m=document.cookie.match(/(?:^|;\s*)zapp_did=([^;]+)/);
+    if(m) id=m[1];
   }
+  if(!id){
+    id='zapp_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8);
+  }
+  localStorage.setItem('zapp_device_id',id);
+  document.cookie='zapp_did='+id+';max-age=31536000;path=/';
   return id;
 }
 const _DID=getDeviceId();
@@ -1986,7 +1993,7 @@ async function pullFromCloud(){
       customRes.data.forEach(r=>{
         if(r.deleted){
           localMap.delete(r.word);
-        } else if(!localMap.has(r.word)){
+        } else {
           localMap.set(r.word,{id:r.id_num,word:r.word,phone:r.phone,meaning:r.meaning,ex:r.ex});
         }
       });
@@ -2033,9 +2040,8 @@ async function pushAllToCloud(){
 document.addEventListener('DOMContentLoaded',async()=>{
   await pullFromCloud();
   pushAllToCloud();
-  cards=buildSessionDeck();
   document.getElementById('limit-display').textContent=loadDailyLimit();
-  updateCard();
+  resetCards();
   selectScene(0);
   const s=loadSt();
   document.getElementById('streak-display').textContent=`🔥 ${s.streak}天连续`;
@@ -2084,6 +2090,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
     addTap(nopeBtn,()=>next(false));
     addTap(yepBtn,()=>knewCard());
   }
+  addTap(document.querySelector('.btn-redo'),()=>resetCards());
 });
 
 // ── CHAT ──
