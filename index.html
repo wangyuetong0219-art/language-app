@@ -206,6 +206,8 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
 .tag-sugg-box{display:flex;flex-wrap:wrap;gap:5px;padding:5px 2px 2px;margin-top:3px}
 .tag-sugg-item{font-size:.75rem;font-weight:600;padding:3px 9px;border-radius:10px;background:#F0EDE5;color:var(--sub);cursor:pointer}
 .tag-sugg-item:hover{background:#E3DFD6;color:var(--ink)}
+.shuffle-btn{font-size:.75rem;font-weight:600;color:var(--sub);padding:5px 14px;border-radius:12px;border:1.5px solid var(--line);transition:all .15s;margin-top:10px;display:block;margin-left:auto;margin-right:auto}
+.shuffle-btn:hover{border-color:#aaa;color:var(--ink);background:rgba(0,0,0,.03)}
 .tag-mgmt-btn{margin-left:auto;font-size:.7rem;opacity:.6;border-color:#ccc}
 .tag-mgmt-btn:hover{opacity:1;background:#F0EDE5}
 .tag-mgmt-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
@@ -500,6 +502,15 @@ async function loadWords(lang, resetSession) {
   renderCard(lang);
 }
 
+// ── Fisher-Yates shuffle (in-place) ────────────────────────
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
 // ── Build deck ──────────────────────────────────────────────
 function buildDeck(lang, reset) {
   const f=nav[lang].filter, tf=nav[lang].tagFilter, now=Date.now();
@@ -509,10 +520,20 @@ function buildDeck(lang, reset) {
   else if(f==='priority') d=d.filter(w=>w.priority);
   if(tf) d=d.filter(w=>w.tags&&w.tags.includes(tf));
 
-  nav[lang].deck=[...d].sort((a,b)=>{
-    const sc=w=>w.priority?0:(!w.last_practiced?1:(!w.due_at||new Date(w.due_at)<=now?2:3));
-    return sc(a)-sc(b);
-  });
+  // Assign priority group: 0=unknown 1=new 2=due 3=not-due-yet
+  const grp=w=>w.priority?0:(!w.last_practiced?1:(!w.due_at||new Date(w.due_at)<=now?2:3));
+  const lru=w=>w.last_practiced?new Date(w.last_practiced).getTime():0;
+  const gs=[[],[],[],[]];
+  d.forEach(w=>gs[grp(w)].push(w));
+
+  if(reset){
+    // Groups 0-2 (今日队列): randomly shuffle for variety
+    shuffle(gs[0]); shuffle(gs[1]); shuffle(gs[2]);
+  }
+  // Group 3 (not yet due): LRU ascending — longest unvisited appears first
+  gs[3].sort((a,b)=>lru(a)-lru(b));
+
+  nav[lang].deck=[...gs[0],...gs[1],...gs[2],...gs[3]];
 
   if(reset){ nav[lang].idx=0; nav[lang].flipped=false; nav[lang].sKnown=0; nav[lang].sUnknown=0; }
   else if(nav[lang].idx>nav[lang].deck.length) nav[lang].idx=nav[lang].deck.length;
@@ -609,7 +630,8 @@ function renderCard(lang) {
         <button class="mark-btn know"   onclick="markNext('${lang}','${w.id}',true)">认识 ✓</button>
       </div>
       <button class="nav-arrow" onclick="nextCard('${lang}')"${nd}>→</button>
-    </div>`;
+    </div>
+    <button class="shuffle-btn" onclick="shuffleDeck('${lang}')">⇄ 重新洗牌</button>`;
 }
 
 // ── Flip (direct DOM, no innerHTML rebuild = no bug) ────────
@@ -623,6 +645,13 @@ function flipCard(lang){
 function nextCard(lang){ const n=nav[lang]; n.flipped=false; if(n.idx<n.deck.length) n.idx++; renderCard(lang); }
 function prevCard(lang){ const n=nav[lang]; if(n.idx>0){n.idx--;n.flipped=false;renderCard(lang);} }
 function restartDeck(lang){ const n=nav[lang]; n.idx=0;n.flipped=false;n.sKnown=0;n.sUnknown=0; renderCard(lang); }
+
+function shuffleDeck(lang){
+  shuffle(nav[lang].deck);
+  nav[lang].idx=0; nav[lang].flipped=false;
+  renderCard(lang);
+  showToast('已重新洗牌');
+}
 
 // ── Mark & advance ──────────────────────────────────────────
 async function markNext(lang,id,known){
