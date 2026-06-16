@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>ZAPP · 单词学习</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Manrope:wght@400;500;600;700&family=Klee+One:wght@400;600&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -19,147 +19,157 @@
   --danger:#E53935;--green:#4CAF50;
 }
 html,body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
-h1,h2,h3,.logo{font-family:'Playfair Display',serif}
+/* Playfair for section titles / logo only */
+.logo,.sec-title,.quiz-title,.mtitle,.deck-end h3{font-family:'Playfair Display',serif}
 button{font-family:'Manrope',sans-serif;cursor:pointer;border:none;background:none;-webkit-tap-highlight-color:transparent}
 input,textarea,select{font-family:'Manrope',sans-serif}
 
-/* Header */
+/* ── Header ── */
 header{height:56px;display:flex;align-items:center;padding:0 20px;background:var(--bg);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:200}
 .logo{font-size:1.3rem;letter-spacing:-0.5px}
 
-/* Tabs */
+/* ── Tabs ── */
 .tab-bar{display:flex;border-bottom:1px solid var(--line);background:var(--bg);position:sticky;top:56px;z-index:199}
-.tab-btn{flex:1;padding:12px 8px;font-size:0.85rem;font-weight:600;color:var(--sub);border-bottom:2px solid transparent;transition:color .2s,border-color .2s}
+.tab-btn{flex:1;padding:12px 8px;font-size:.85rem;font-weight:600;color:var(--sub);border-bottom:2px solid transparent;transition:color .2s,border-color .2s}
 .tab-btn.t-en{color:var(--en-back-bg);border-bottom-color:var(--en-back-bg)}
 .tab-btn.t-ja{color:var(--ja-back-bg);border-bottom-color:var(--ja-back-bg)}
 .tab-btn.t-quiz{color:var(--quiz);border-bottom-color:var(--quiz)}
 
-/* Sections */
+/* ── Sections ── */
 .section{display:none;padding:20px 16px 80px;max-width:680px;margin:0 auto}
 .section.active{display:block}
-
-/* Section header */
 .sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:8px;flex-wrap:wrap}
 .sec-title{font-size:1.4rem}
 .hd-btns{display:flex;gap:8px;flex-wrap:wrap}
 
-/* Pill buttons */
-.pill{padding:7px 14px;border-radius:20px;font-size:0.8rem;font-weight:600;border:1.5px solid currentColor;transition:background .15s,color .15s}
-.pill.en{color:var(--en-back-bg);border-color:var(--en-back-bg)}
-.pill.en:hover{background:var(--en-back-bg);color:#fff}
-.pill.ja{color:var(--ja-back-bg);border-color:var(--ja-back-bg)}
-.pill.ja:hover{background:var(--ja-back-bg);color:var(--ja-back-text)}
-.pill.qz{color:var(--quiz);border-color:var(--quiz)}
-.pill.qz:hover{background:var(--quiz);color:#fff}
+/* ── Pill buttons ── */
+.pill{padding:7px 14px;border-radius:20px;font-size:.8rem;font-weight:600;border:1.5px solid currentColor;transition:background .15s,color .15s}
+.pill.en{color:var(--en-back-bg);border-color:var(--en-back-bg)}.pill.en:hover{background:var(--en-back-bg);color:#fff}
+.pill.ja{color:var(--ja-back-bg);border-color:var(--ja-back-bg)}.pill.ja:hover{background:var(--ja-back-bg);color:var(--ja-back-text)}
+.pill.qz{color:var(--quiz);border-color:var(--quiz)}.pill.qz:hover{background:var(--quiz);color:#fff}
 
-/* Filter chips */
+/* ── Filter chips ── */
 .filter-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
-.chip{padding:5px 12px;border-radius:16px;font-size:0.77rem;font-weight:600;border:1.5px solid var(--line);color:var(--sub);transition:all .15s}
+.chip{padding:5px 12px;border-radius:16px;font-size:.77rem;font-weight:600;border:1.5px solid var(--line);color:var(--sub);transition:all .15s}
 .chip.a-en{background:var(--en-back-bg);border-color:var(--en-back-bg);color:#fff}
 .chip.a-ja{background:var(--ja-back-bg);border-color:var(--ja-back-bg);color:var(--ja-back-text)}
 
-/* Card nav meta row */
+/* ── Card nav meta ── */
 .nav-meta{display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:0 2px}
-.nav-count{font-size:0.85rem;font-weight:700;color:var(--sub)}
-.badge{font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:8px;letter-spacing:.3px}
+.nav-count{font-size:.85rem;font-weight:700;color:var(--sub)}
+.badge{font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:8px;letter-spacing:.3px}
 .b-pri{background:#FCE4EC;color:#880E4F}
 .b-new{background:#E3F2FD;color:#1565C0}
 .b-due{background:#FFF3E0;color:#E65100}
-.meta-btn{font-size:1rem;padding:5px 8px;border-radius:8px;color:var(--sub);opacity:.45;transition:opacity .15s,background .15s}
+.meta-btn{font-size:.95rem;padding:5px 8px;border-radius:8px;color:var(--sub);opacity:.45;transition:opacity .15s,background .15s}
 .meta-btn.starred{opacity:1}
 .meta-btn:hover{opacity:1;background:rgba(0,0,0,.05)}
 .meta-btn.del-btn:hover{background:#FFEBEE;color:var(--danger)}
+.meta-btn.edit-btn:hover{background:#EDF5FF;color:#1565C0}
 
-/* Flash card */
+/* ── Flash card ── */
 .flash-card{border-radius:20px;overflow:hidden;cursor:pointer;box-shadow:0 4px 24px rgba(0,0,0,.1);margin-bottom:16px;user-select:none;-webkit-user-select:none}
 .flash-card:active{box-shadow:0 2px 10px rgba(0,0,0,.08)}
-.flash-face{padding:44px 28px 36px;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px}
-.en .flash-front{background:var(--en-front-bg)}
-.en .flash-back{background:var(--en-back-bg)}
-.ja .flash-front{background:var(--ja-front-bg)}
-.ja .flash-back{background:var(--ja-back-bg)}
-.f-word{font-family:'Playfair Display',serif;font-size:2.4rem;line-height:1.2;word-break:break-word}
-.en .flash-front .f-word{color:var(--en-front-text)}
-.ja .flash-front .f-word{color:var(--ja-front-text)}
-.f-reading{font-size:1rem;font-weight:500;opacity:.65}
-.en .flash-front .f-reading{color:var(--en-front-text)}
-.ja .flash-front .f-reading{color:var(--ja-front-text)}
-.f-hint{font-size:0.72rem;font-weight:600;letter-spacing:.5px;margin-top:4px;opacity:.28}
-.en .flash-front .f-hint{color:var(--en-front-text)}
-.ja .flash-front .f-hint{color:var(--ja-front-text)}
-.f-meaning{font-size:1.3rem;font-weight:700;line-height:1.4;word-break:break-word}
-.en .flash-back .f-meaning{color:var(--en-back-text)}
-.ja .flash-back .f-meaning{color:var(--ja-back-text)}
-.f-example{font-size:0.88rem;line-height:1.65;opacity:.85}
-.en .flash-back .f-example{color:var(--en-back-text)}
-.ja .flash-back .f-example{color:var(--ja-back-text)}
+.flash-face{padding:40px 28px 32px;min-height:215px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px}
 
-/* Nav actions */
+.en .flash-front{background:var(--en-front-bg)}
+.en .flash-back {background:var(--en-back-bg)}
+.ja .flash-front{background:var(--ja-front-bg)}
+.ja .flash-back {background:var(--ja-back-bg)}
+
+/* Word text — Playfair for EN, Klee One for JA */
+.f-word{font-size:2.4rem;line-height:1.2;word-break:break-word}
+.en .f-word{font-family:'Playfair Display',serif;color:var(--en-front-text)}
+.ja .f-word{font-family:'Klee One',serif;color:var(--ja-front-text)}
+
+/* EN pos + phonetic row */
+.f-en-sub{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+.pos-tag{font-family:'Manrope',sans-serif;font-size:.76rem;font-weight:700;padding:2px 9px;border-radius:8px;background:rgba(201,54,56,.12);color:var(--en-front-text);letter-spacing:.3px}
+.f-reading{font-size:.95rem;font-weight:500;opacity:.65}
+.en .f-reading{color:var(--en-front-text)}
+
+/* Flip hint */
+.f-hint{font-size:.72rem;font-weight:600;letter-spacing:.5px;margin-top:2px;opacity:.26}
+.en .f-hint{color:var(--en-front-text)}
+.ja .f-hint{color:var(--ja-front-text)}
+
+/* Back: meaning uses Noto Serif SC */
+.f-meaning{font-family:'Noto Serif SC',serif;font-size:1.25rem;font-weight:700;line-height:1.45;word-break:break-word}
+.en .f-meaning{color:var(--en-back-text)}
+.ja .f-meaning{color:var(--ja-back-text)}
+
+/* Japanese reading on back — Klee One */
+.f-ja-reading{font-family:'Klee One',serif;font-size:1rem;opacity:.8}
+.ja .flash-back .f-ja-reading{color:var(--ja-back-text)}
+
+/* Example */
+.f-example{font-size:.87rem;line-height:1.65;opacity:.85}
+.en .f-example{color:var(--en-back-text)}          /* Manrope inherited */
+.ja .f-example{font-family:'Klee One',serif;color:var(--ja-back-text)}
+
+/* ── Nav actions ── */
 .nav-actions{display:flex;gap:10px;align-items:center}
 .nav-arrow{width:48px;height:48px;border-radius:50%;font-size:1.1rem;font-weight:700;border:1.5px solid var(--line);color:var(--sub);flex-shrink:0;transition:all .15s;display:flex;align-items:center;justify-content:center}
 .nav-arrow:hover:not(:disabled){border-color:#aaa;color:var(--ink);background:rgba(0,0,0,.03)}
 .nav-arrow:disabled{opacity:.22;cursor:default}
 .mark-group{display:flex;gap:10px;flex:1}
-.mark-btn{flex:1;padding:13px 10px;border-radius:14px;font-size:0.88rem;font-weight:700;border:2px solid;transition:all .15s}
-.know{border-color:var(--green);color:var(--green)}
-.know:hover{background:var(--green);color:#fff}
-.unknow{border-color:var(--danger);color:var(--danger)}
-.unknow:hover{background:var(--danger);color:#fff}
+.mark-btn{flex:1;padding:13px 10px;border-radius:14px;font-size:.88rem;font-weight:700;border:2px solid;transition:all .15s}
+.know  {border-color:var(--green);color:var(--green)}.know:hover{background:var(--green);color:#fff}
+.unknow{border-color:var(--danger);color:var(--danger)}.unknow:hover{background:var(--danger);color:#fff}
 
-/* Deck end / empty */
+/* ── Deck end / empty ── */
 .deck-end{text-align:center;padding:48px 20px}
 .deck-end .ei{font-size:2.8rem;margin-bottom:14px}
-.deck-end h3{font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:8px}
-.deck-end .es{color:var(--sub);font-size:0.9rem;margin-bottom:24px;line-height:1.8}
+.deck-end h3{font-size:1.5rem;margin-bottom:8px}
+.deck-end .es{color:var(--sub);font-size:.9rem;margin-bottom:24px;line-height:1.8}
 .deck-end .es strong{color:var(--ink)}
 .empty-state{text-align:center;padding:48px 20px;color:var(--sub)}
 .empty-state .ei{font-size:2.5rem;margin-bottom:12px}
-.empty-state p{font-size:0.9rem;line-height:1.6}
+.empty-state p{font-size:.9rem;line-height:1.6}
 .loading{text-align:center;padding:48px;color:var(--sub);font-size:.9rem}
 
-/* Solid buttons */
-.sbtn{padding:10px 22px;border-radius:22px;font-size:0.85rem;font-weight:700;transition:opacity .15s}
+/* ── Solid buttons ── */
+.sbtn{padding:10px 22px;border-radius:22px;font-size:.85rem;font-weight:700;transition:opacity .15s}
 .sbtn:hover{opacity:.85}
 .sbtn.en-s{background:var(--en-back-bg);color:#fff}
 .sbtn.ja-s{background:var(--ja-back-bg);color:var(--ja-back-text)}
 .sbtn.qz-s{background:var(--quiz);color:#fff}
 .sbtn.gray{background:#E0DDD5;color:var(--ink)}
 
-/* Modal */
+/* ── Modal (bottom sheet on mobile, centered on desktop) ── */
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:500;align-items:flex-end;justify-content:center}
 .modal.open{display:flex}
 .mbox{background:var(--white);border-radius:24px 24px 0 0;padding:24px 20px 36px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;box-shadow:0 -4px 40px rgba(0,0,0,.15)}
 .mhandle{width:36px;height:4px;background:var(--line);border-radius:2px;margin:0 auto 18px}
-.mtitle{font-family:'Playfair Display',serif;font-size:1.15rem;margin-bottom:16px}
+.mtitle{font-size:1.15rem;margin-bottom:16px}
 .mbody{font-size:.88rem;color:var(--sub);line-height:1.6;margin-bottom:18px}
-.mfoot{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
+.mfoot{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
 @media(min-width:640px){
   .modal{align-items:center;padding:16px}
   .mbox{border-radius:20px;max-height:85vh}
   .mhandle{display:none}
 }
 
-/* Form */
+/* ── Form ── */
 .fg{margin-bottom:13px}
 .flabel{display:block;font-size:.75rem;font-weight:700;color:var(--sub);margin-bottom:5px;letter-spacing:.5px;text-transform:uppercase}
 .finput{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:.9rem;background:var(--bg);color:var(--ink);outline:none;transition:border-color .15s}
-.finput:focus{border-color:#aaa}
-.ftarea{width:100%;min-height:120px;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:.85rem;background:var(--bg);color:var(--ink);outline:none;resize:vertical;line-height:1.7;transition:border-color .15s}
-.ftarea:focus{border-color:#aaa}
+.finput:focus{border-color:#999}
+.ftarea{width:100%;min-height:130px;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:.85rem;background:var(--bg);color:var(--ink);outline:none;resize:vertical;line-height:1.7;transition:border-color .15s}
+.ftarea:focus{border-color:#999}
 .fhint{font-size:.75rem;color:var(--sub);margin-top:5px;line-height:1.5}
 
-/* Quiz */
+/* ── Quiz ── */
 .quiz-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
-.quiz-hd h2{font-size:1.4rem}
+.quiz-title{font-size:1.4rem}
 .qpanel{display:none;background:var(--white);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:16px}
 .qpanel.open{display:block}
-.qpanel-title{font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:14px}
+.qpanel-t{font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:14px}
 .opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .qcard{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:22px 20px 18px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:14px}
-.qsentence{font-size:1.05rem;line-height:1.9;margin-bottom:18px}
+.qsent{font-size:1.05rem;line-height:1.9;margin-bottom:18px}
 .qblank{display:inline-block;min-width:80px;border-bottom:2px solid var(--quiz);color:var(--quiz);font-weight:700;text-align:center;padding:0 6px}
-.cword{cursor:pointer;border-bottom:1px dashed #bbb;position:relative;transition:color .15s}
-.cword:hover{color:var(--quiz)}
+.cword{cursor:pointer;border-bottom:1px dashed #bbb;position:relative;transition:color .15s}.cword:hover{color:var(--quiz)}
 .wtip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:.72rem;padding:4px 9px;border-radius:6px;white-space:nowrap;z-index:50;pointer-events:none}
 .wtip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:var(--ink)}
 .cword:hover .wtip,.cword.tip-on .wtip{display:block}
@@ -170,19 +180,14 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
 .obtn.wrong{border-color:var(--danger);background:#FFEBEE;color:var(--danger)}
 .obtn:disabled{cursor:default}
 .qfb{display:none;margin-top:12px;padding:10px 14px;border-radius:10px;font-size:.85rem;font-weight:600}
-.qfb.show{display:block}
-.qfb.ok{background:#E8F5E9;color:#2E7D32}
-.qfb.ng{background:#FFEBEE;color:var(--danger)}
-.qselect{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:.9rem;background:var(--bg);color:var(--ink);outline:none}
+.qfb.show{display:block}.qfb.ok{background:#E8F5E9;color:#2E7D32}.qfb.ng{background:#FFEBEE;color:var(--danger)}
+.qsel{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:.9rem;background:var(--bg);color:var(--ink);outline:none}
 
-/* Toast */
+/* ── Toast ── */
 .toast{display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:.85rem;font-weight:600;padding:10px 20px;border-radius:20px;z-index:1000;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.2)}
 .toast.show{display:block}
 
-@media(max-width:480px){
-  .qopts,.opt-grid{grid-template-columns:1fr}
-  .f-word,.flash-word{font-size:1.9rem}
-}
+@media(max-width:480px){.qopts,.opt-grid{grid-template-columns:1fr}.f-word{font-size:1.9rem}}
 </style>
 </head>
 <body>
@@ -191,11 +196,11 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
 
 <div class="tab-bar">
   <button class="tab-btn t-en" onclick="switchTab('en')">英语单词</button>
-  <button class="tab-btn" onclick="switchTab('ja')">日语单词</button>
-  <button class="tab-btn" onclick="switchTab('quiz')">选词题</button>
+  <button class="tab-btn"       onclick="switchTab('ja')">日语单词</button>
+  <button class="tab-btn"       onclick="switchTab('quiz')">选词题</button>
 </div>
 
-<!-- ── EN ── -->
+<!-- ══ EN ══ -->
 <div id="sec-en" class="section active">
   <div class="sec-hd">
     <h2 class="sec-title">英语单词</h2>
@@ -213,7 +218,7 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
   <div id="ca-en"><div class="loading">加载中…</div></div>
 </div>
 
-<!-- ── JA ── -->
+<!-- ══ JA ══ -->
 <div id="sec-ja" class="section">
   <div class="sec-hd">
     <h2 class="sec-title">日语单词</h2>
@@ -231,18 +236,15 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
   <div id="ca-ja"><div class="loading">加载中…</div></div>
 </div>
 
-<!-- ── QUIZ ── -->
+<!-- ══ QUIZ ══ -->
 <div id="sec-quiz" class="section">
   <div class="quiz-hd">
-    <h2>选词题</h2>
+    <h2 class="quiz-title">选词题</h2>
     <button class="pill qz" onclick="toggleAddQuiz()">+ 添加</button>
   </div>
   <div id="add-quiz-panel" class="qpanel">
-    <div class="qpanel-title">添加新题目</div>
-    <div class="fg">
-      <label class="flabel">句子（用 ___ 表示空格）</label>
-      <input id="q-sent" class="finput" type="text" placeholder="She ___ the piano every evening.">
-    </div>
+    <div class="qpanel-t">添加新题目</div>
+    <div class="fg"><label class="flabel">句子（用 ___ 表示空格）</label><input id="q-sent" class="finput" type="text" placeholder="She ___ the piano every evening."></div>
     <div class="fg">
       <label class="flabel">四个选项</label>
       <div class="opt-grid">
@@ -254,7 +256,7 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
     </div>
     <div class="fg">
       <label class="flabel">正确答案</label>
-      <select id="q-cor" class="qselect">
+      <select id="q-cor" class="qsel">
         <option value="0">选项 A</option><option value="1">选项 B</option>
         <option value="2">选项 C</option><option value="3">选项 D</option>
       </select>
@@ -267,13 +269,15 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
   <div id="quiz-list"></div>
 </div>
 
-<!-- ── MODALS ── -->
+<!-- ══ MODALS ══ -->
+
 <!-- EN Add -->
 <div id="m-en-add" class="modal" onclick="bdClose(event,'m-en-add')">
   <div class="mbox">
     <div class="mhandle"></div>
     <div class="mtitle">添加英语单词</div>
     <div class="fg"><label class="flabel">单词 *</label><input id="en-w" class="finput" type="text" placeholder="abandon"></div>
+    <div class="fg"><label class="flabel">词性</label><input id="en-pos" class="finput" type="text" placeholder="n. / v. / adj. / adv."></div>
     <div class="fg"><label class="flabel">音标</label><input id="en-r" class="finput" type="text" placeholder="/əˈbændən/"></div>
     <div class="fg"><label class="flabel">中文意思 *</label><input id="en-m" class="finput" type="text" placeholder="放弃"></div>
     <div class="fg"><label class="flabel">例句</label><input id="en-e" class="finput" type="text" placeholder="She abandoned her plan."></div>
@@ -290,12 +294,14 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
     <div class="mhandle"></div>
     <div class="mtitle">批量导入英语单词</div>
     <div class="fg">
-      <textarea id="en-imp-txt" class="ftarea" placeholder="每行一个单词：
-单词｜音标｜中文意思｜例句（可选）
+      <textarea id="en-imp-txt" class="ftarea" placeholder="每行一个单词，格式：
+单词｜词性｜音标｜中文意思｜例句（可选）
 
-abandon｜/əˈbændən/｜放弃｜She abandoned her plan.
-accomplish｜/əˈkɒmplɪʃ/｜完成｜He accomplished his goal."></textarea>
-      <p class="fhint">用「｜」或「|」分隔，例句可省略。</p>
+abandon｜v.｜/əˈbændən/｜放弃｜She abandoned her plan.
+eloquent｜adj.｜/ˈeləkwənt/｜雄辩的｜She gave an eloquent speech.
+
+词性可省略：abandon｜｜/əˈbændən/｜放弃"></textarea>
+      <p class="fhint">用「｜」或「|」分隔，词性和例句均可省略。</p>
     </div>
     <div class="mfoot">
       <button class="sbtn gray" onclick="closeModal('m-en-imp')">取消</button>
@@ -326,7 +332,7 @@ accomplish｜/əˈkɒmplɪʃ/｜完成｜He accomplished his goal."></textarea>
     <div class="mhandle"></div>
     <div class="mtitle">批量导入日语单词</div>
     <div class="fg">
-      <textarea id="ja-imp-txt" class="ftarea" placeholder="每行一个单词：
+      <textarea id="ja-imp-txt" class="ftarea" placeholder="每行一个单词，格式：
 单词｜读音｜中文意思｜例句（可选）
 
 勉強｜べんきょう｜学习｜毎日勉強します。
@@ -340,7 +346,30 @@ accomplish｜/əˈkɒmplɪʃ/｜完成｜He accomplished his goal."></textarea>
   </div>
 </div>
 
-<!-- Delete confirm -->
+<!-- Edit Word -->
+<div id="m-edit" class="modal" onclick="bdClose(event,'m-edit')">
+  <div class="mbox">
+    <div class="mhandle"></div>
+    <div id="edit-title" class="mtitle">编辑单词</div>
+    <div class="fg"><label class="flabel">单词 *</label><input id="edit-w" class="finput" type="text"></div>
+    <div id="edit-pos-row" class="fg">
+      <label class="flabel">词性</label>
+      <input id="edit-pos" class="finput" type="text" placeholder="n. / v. / adj. / adv.">
+    </div>
+    <div class="fg">
+      <label id="edit-r-label" class="flabel">音标</label>
+      <input id="edit-r" class="finput" type="text">
+    </div>
+    <div class="fg"><label class="flabel">中文意思 *</label><input id="edit-m" class="finput" type="text"></div>
+    <div class="fg"><label class="flabel">例句</label><input id="edit-e" class="finput" type="text"></div>
+    <div class="mfoot">
+      <button class="sbtn gray" onclick="closeModal('m-edit')">取消</button>
+      <button id="edit-save-btn" class="sbtn en-s" onclick="saveEdit()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete -->
 <div id="m-del" class="modal">
   <div class="mbox" style="max-width:400px">
     <div class="mhandle"></div>
@@ -360,361 +389,369 @@ const SUPA_URL = 'https://yrscvkupavfbgeewxoek.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyc2N2a3VwYXZmYmdlZXd4b2VrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0MjQyNzgsImV4cCI6MjA5NzAwMDI3OH0._ZsWUzC2aDI9J2M7eR3d4xLE1V_1N0rdrXmFXeoCmjw';
 const db = supabase.createClient(SUPA_URL, SUPA_KEY);
 
-// ── State ──────────────────────────────────────────────────
-const allWords = { en: [], ja: [] };
+// ── State ───────────────────────────────────────────────────
+const allWords = { en:[], ja:[] };
 const nav = {
-  en: { deck:[], idx:0, flipped:false, filter:'all', sKnown:0, sUnknown:0 },
-  ja: { deck:[], idx:0, flipped:false, filter:'all', sKnown:0, sUnknown:0 }
+  en:{ deck:[], idx:0, flipped:false, filter:'all', sKnown:0, sUnknown:0 },
+  ja:{ deck:[], idx:0, flipped:false, filter:'all', sKnown:0, sUnknown:0 }
 };
-let delId = null, delLang = null;
+let delId=null, delLang=null, editId=null, editLang=null;
 
-// ── Tabs ──────────────────────────────────────────────────
+// ── Tabs ────────────────────────────────────────────────────
 function switchTab(t) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('t-en','t-ja','t-quiz'));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('t-en','t-ja','t-quiz'));
   document.getElementById('sec-'+t).classList.add('active');
   document.querySelectorAll('.tab-btn')[['en','ja','quiz'].indexOf(t)].classList.add('t-'+t);
 }
 
-// ── Modal ─────────────────────────────────────────────────
+// ── Modal ───────────────────────────────────────────────────
 function openModal(id)  { document.getElementById(id).classList.add('open') }
 function closeModal(id) { document.getElementById(id).classList.remove('open') }
-function bdClose(e, id) { if (e.target===document.getElementById(id)) closeModal(id) }
+function bdClose(e,id)  { if(e.target===document.getElementById(id)) closeModal(id) }
 
-// ── Toast ─────────────────────────────────────────────────
-let _tt = null;
-function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg; el.classList.add('show');
-  if (_tt) clearTimeout(_tt);
-  _tt = setTimeout(() => el.classList.remove('show'), 2200);
+// ── Toast ───────────────────────────────────────────────────
+let _tt=null;
+function showToast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  if(_tt) clearTimeout(_tt);
+  _tt=setTimeout(()=>el.classList.remove('show'),2200);
 }
 
-// ── Load words from Supabase ──────────────────────────────
+// ── Load words ──────────────────────────────────────────────
 async function loadWords(lang, resetSession) {
-  const { data, error } = await db.from('words').select('*').eq('lang',lang).order('created_at',{ascending:false});
-  if (error) {
-    document.getElementById('ca-'+lang).innerHTML =
-      '<div class="empty-state"><div class="ei">⚠️</div><p>加载失败，请刷新重试</p></div>';
+  const {data,error} = await db.from('words').select('*').eq('lang',lang).order('created_at',{ascending:false});
+  if(error){
+    document.getElementById('ca-'+lang).innerHTML='<div class="empty-state"><div class="ei">⚠️</div><p>加载失败，请刷新重试</p></div>';
     return;
   }
-  allWords[lang] = data || [];
-  buildDeck(lang, resetSession !== false);
+  allWords[lang] = data||[];
+  buildDeck(lang, resetSession!==false);
   renderCard(lang);
 }
 
-// ── Build filtered & sorted deck ─────────────────────────
+// ── Build deck ──────────────────────────────────────────────
 function buildDeck(lang, reset) {
-  const f = nav[lang].filter, now = Date.now();
-  let d = allWords[lang];
-  if (f==='starred')  d = d.filter(w => w.starred);
-  else if (f==='due') d = d.filter(w => !w.due_at || new Date(w.due_at)<=now);
-  else if (f==='priority') d = d.filter(w => w.priority);
+  const f=nav[lang].filter, now=Date.now();
+  let d=allWords[lang];
+  if(f==='starred')   d=d.filter(w=>w.starred);
+  else if(f==='due')  d=d.filter(w=>!w.due_at||new Date(w.due_at)<=now);
+  else if(f==='priority') d=d.filter(w=>w.priority);
 
-  nav[lang].deck = [...d].sort((a,b) => {
-    const sc = w => w.priority ? 0 : (!w.last_practiced ? 1 : (!w.due_at||new Date(w.due_at)<=now ? 2 : 3));
+  nav[lang].deck=[...d].sort((a,b)=>{
+    const sc=w=>w.priority?0:(!w.last_practiced?1:(!w.due_at||new Date(w.due_at)<=now?2:3));
     return sc(a)-sc(b);
   });
 
-  if (reset) { nav[lang].idx=0; nav[lang].flipped=false; nav[lang].sKnown=0; nav[lang].sUnknown=0; }
-  else { if (nav[lang].idx > nav[lang].deck.length) nav[lang].idx = nav[lang].deck.length; }
+  if(reset){ nav[lang].idx=0; nav[lang].flipped=false; nav[lang].sKnown=0; nav[lang].sUnknown=0; }
+  else if(nav[lang].idx>nav[lang].deck.length) nav[lang].idx=nav[lang].deck.length;
 }
 
-// ── Render one-card view ──────────────────────────────────
+// ── Render one-card view ────────────────────────────────────
 function renderCard(lang) {
-  const area = document.getElementById('ca-'+lang);
-  const n = nav[lang];
+  const area=document.getElementById('ca-'+lang);
+  const n=nav[lang];
 
-  // Empty deck
-  if (n.deck.length === 0) {
-    const map = {
-      all:      ['📖','还没有单词，点击「+ 添加」或「批量导入」开始吧'],
-      starred:  ['⭐','还没有收藏的单词'],
-      due:      ['✅','目前没有待复习的单词'],
-      priority: ['💪','没有标记为「不认识」的单词']
+  if(!n.deck.length){
+    const mp={
+      all:['📖','还没有单词，点击「+ 添加」或「批量导入」开始吧'],
+      starred:['⭐','还没有收藏的单词'],
+      due:['✅','目前没有待复习的单词'],
+      priority:['💪','没有标记为「不认识」的单词']
     };
-    const [ic,msg] = map[n.filter]||map.all;
-    area.innerHTML = `<div class="empty-state"><div class="ei">${ic}</div><p>${msg}</p></div>`;
+    const [ic,msg]=mp[n.filter]||mp.all;
+    area.innerHTML=`<div class="empty-state"><div class="ei">${ic}</div><p>${msg}</p></div>`;
     return;
   }
 
-  // Session complete
-  if (n.idx >= n.deck.length) {
-    const cs = lang==='en'?'en-s':'ja-s';
-    area.innerHTML = `<div class="deck-end">
-      <div class="ei">🎉</div>
-      <h3>全部完成！</h3>
+  if(n.idx>=n.deck.length){
+    const cs=lang==='en'?'en-s':'ja-s';
+    area.innerHTML=`<div class="deck-end">
+      <div class="ei">🎉</div><h3>全部完成！</h3>
       <div class="es">共 <strong>${n.deck.length}</strong> 个 &nbsp;·&nbsp; 认识 <strong>${n.sKnown}</strong> &nbsp;·&nbsp; 不认识 <strong>${n.sUnknown}</strong></div>
       <button class="sbtn ${cs}" onclick="restartDeck('${lang}')">从头再来</button>
     </div>`;
     return;
   }
 
-  const w = n.deck[n.idx];
-  const now = Date.now();
-  let badge = '';
-  if (w.priority) badge = '<span class="badge b-pri">不认识</span>';
-  else if (!w.last_practiced) badge = '<span class="badge b-new">新词</span>';
-  else if (!w.due_at || new Date(w.due_at)<=now) badge = '<span class="badge b-due">待复习</span>';
+  const w=n.deck[n.idx], now=Date.now();
+  let badge='';
+  if(w.priority)            badge='<span class="badge b-pri">不认识</span>';
+  else if(!w.last_practiced)badge='<span class="badge b-new">新词</span>';
+  else if(!w.due_at||new Date(w.due_at)<=now) badge='<span class="badge b-due">待复习</span>';
 
-  const isFlipped = n.flipped;
-  const starIcon = w.starred ? '⭐' : '☆';
-  const starClass = w.starred ? ' starred' : '';
-  const prevDis = n.idx===0 ? ' disabled' : '';
-  const nextDis = n.idx>=n.deck.length-1 ? ' disabled' : '';
+  const isF=n.flipped;
+  const si=w.starred?'⭐':'☆', sc=w.starred?' starred':'';
+  const pd=n.idx===0?' disabled':'', nd=n.idx>=n.deck.length-1?' disabled':'';
 
-  area.innerHTML = `
+  // ── Front content ──
+  let front;
+  if(lang==='en'){
+    const sub=(w.pos||w.reading)?`<div class="f-en-sub">
+      ${w.pos?`<span class="pos-tag">${esc(w.pos)}</span>`:''}
+      ${w.reading?`<span class="f-reading">${esc(w.reading)}</span>`:''}
+    </div>`:'';
+    front=`<div class="f-word">${esc(w.word)}</div>${sub}<div class="f-hint">点击翻转查看释义</div>`;
+  } else {
+    // Japanese front: word only, no reading
+    front=`<div class="f-word">${esc(w.word)}</div><div class="f-hint">点击翻转查看释义</div>`;
+  }
+
+  // ── Back content ──
+  let back;
+  if(lang==='ja'){
+    // Japanese back: reading + meaning + example
+    back=`${w.reading?`<div class="f-ja-reading">${esc(w.reading)}</div>`:''}
+      <div class="f-meaning">${esc(w.meaning)}</div>
+      ${w.example?`<div class="f-example">${esc(w.example)}</div>`:''}`;
+  } else {
+    back=`<div class="f-meaning">${esc(w.meaning)}</div>
+      ${w.example?`<div class="f-example">${esc(w.example)}</div>`:''}`;
+  }
+
+  area.innerHTML=`
     <div class="nav-meta">
       <span class="nav-count">${n.idx+1} / ${n.deck.length}</span>
       ${badge}
       <div style="margin-left:auto;display:flex;gap:2px">
-        <button class="meta-btn${starClass}" onclick="starCurrent('${lang}')">${starIcon}</button>
-        <button class="meta-btn del-btn" onclick="delCurrent('${lang}')">✕</button>
+        <button class="meta-btn${sc}" onclick="starCurrent('${lang}')">${si}</button>
+        <button class="meta-btn edit-btn" onclick="editCurrent('${lang}')" title="编辑">✎</button>
+        <button class="meta-btn del-btn"  onclick="delCurrent('${lang}')"  title="删除">✕</button>
       </div>
     </div>
 
     <div class="flash-card ${lang}" onclick="flipCard('${lang}')">
-      <div id="ff-${lang}" class="flash-face flash-front"${isFlipped?' style="display:none"':''}>
-        <div class="f-word">${esc(w.word)}</div>
-        ${w.reading?`<div class="f-reading">${esc(w.reading)}</div>`:''}
-        <div class="f-hint">点击翻转查看释义</div>
+      <div id="ff-${lang}" class="flash-face flash-front"${isF?' style="display:none"':''}>
+        ${front}
       </div>
-      <div id="fb-${lang}" class="flash-face flash-back"${isFlipped?'':' style="display:none"'}>
-        <div class="f-meaning">${esc(w.meaning)}</div>
-        ${w.example?`<div class="f-example">${esc(w.example)}</div>`:''}
+      <div id="fb-${lang}" class="flash-face flash-back"${isF?'':' style="display:none"'}>
+        ${back}
       </div>
     </div>
 
     <div class="nav-actions">
-      <button class="nav-arrow" onclick="prevCard('${lang}')"${prevDis}>←</button>
+      <button class="nav-arrow" onclick="prevCard('${lang}')"${pd}>←</button>
       <div class="mark-group">
         <button class="mark-btn unknow" onclick="markNext('${lang}','${w.id}',false)">不认识</button>
         <button class="mark-btn know"   onclick="markNext('${lang}','${w.id}',true)">认识 ✓</button>
       </div>
-      <button class="nav-arrow" onclick="nextCard('${lang}')"${nextDis}>→</button>
+      <button class="nav-arrow" onclick="nextCard('${lang}')"${nd}>→</button>
     </div>`;
 }
 
-// ── Flip (direct DOM, no innerHTML rebuild) ───────────────
-function flipCard(lang) {
-  nav[lang].flipped = !nav[lang].flipped;
-  const ff = document.getElementById('ff-'+lang);
-  const fb = document.getElementById('fb-'+lang);
-  if (ff && fb) {
-    ff.style.display = nav[lang].flipped ? 'none' : '';
-    fb.style.display = nav[lang].flipped ? '' : 'none';
-  }
+// ── Flip (direct DOM, no innerHTML rebuild = no bug) ────────
+function flipCard(lang){
+  nav[lang].flipped=!nav[lang].flipped;
+  const ff=document.getElementById('ff-'+lang), fb=document.getElementById('fb-'+lang);
+  if(ff&&fb){ ff.style.display=nav[lang].flipped?'none':''; fb.style.display=nav[lang].flipped?'':'none'; }
 }
 
-// ── Navigation ────────────────────────────────────────────
-function nextCard(lang) {
-  const n = nav[lang];
-  n.flipped = false;
-  if (n.idx < n.deck.length) n.idx++;
-  renderCard(lang);
-}
-function prevCard(lang) {
-  const n = nav[lang];
-  if (n.idx > 0) { n.idx--; n.flipped = false; renderCard(lang); }
-}
-function restartDeck(lang) {
-  const n = nav[lang];
-  n.idx=0; n.flipped=false; n.sKnown=0; n.sUnknown=0;
-  renderCard(lang);
-}
+// ── Navigation ──────────────────────────────────────────────
+function nextCard(lang){ const n=nav[lang]; n.flipped=false; if(n.idx<n.deck.length) n.idx++; renderCard(lang); }
+function prevCard(lang){ const n=nav[lang]; if(n.idx>0){n.idx--;n.flipped=false;renderCard(lang);} }
+function restartDeck(lang){ const n=nav[lang]; n.idx=0;n.flipped=false;n.sKnown=0;n.sUnknown=0; renderCard(lang); }
 
-// ── Mark know/unknown then advance ────────────────────────
-async function markNext(lang, id, known) {
-  const dueAt = new Date(Date.now()+(known?3:1)*86400000).toISOString();
-  await db.from('words').update({ priority:!known, due_at:dueAt, last_practiced:new Date().toISOString() }).eq('id',id);
-
-  // update local copies so filter refresh stays consistent
-  [allWords[lang], nav[lang].deck].forEach(arr => {
-    const w = arr.find(x => x.id===id);
-    if (w) { w.priority=!known; w.due_at=dueAt; w.last_practiced=new Date().toISOString(); }
+// ── Mark & advance ──────────────────────────────────────────
+async function markNext(lang,id,known){
+  const due=new Date(Date.now()+(known?3:1)*86400000).toISOString();
+  await db.from('words').update({priority:!known,due_at:due,last_practiced:new Date().toISOString()}).eq('id',id);
+  [allWords[lang],nav[lang].deck].forEach(arr=>{
+    const w=arr.find(x=>x.id===id);
+    if(w){w.priority=!known;w.due_at=due;w.last_practiced=new Date().toISOString();}
   });
-
-  if (known) nav[lang].sKnown++; else nav[lang].sUnknown++;
-  showToast(known ? '认识 ✓，3天后复习' : '不认识，明天再复习');
+  if(known) nav[lang].sKnown++; else nav[lang].sUnknown++;
+  showToast(known?'认识 ✓，3天后复习':'不认识，明天再复习');
   nextCard(lang);
 }
 
-// ── Star ──────────────────────────────────────────────────
-async function starCurrent(lang) {
-  const w = nav[lang].deck[nav[lang].idx];
-  if (!w) return;
-  const v = !w.starred;
-  await db.from('words').update({ starred:v }).eq('id',w.id);
-  const inAll = allWords[lang].find(x=>x.id===w.id);
-  if (inAll) inAll.starred=v;
-  w.starred=v;
-  renderCard(lang);
+// ── Star ────────────────────────────────────────────────────
+async function starCurrent(lang){
+  const w=nav[lang].deck[nav[lang].idx]; if(!w) return;
+  const v=!w.starred;
+  await db.from('words').update({starred:v}).eq('id',w.id);
+  const wa=allWords[lang].find(x=>x.id===w.id); if(wa) wa.starred=v;
+  w.starred=v; renderCard(lang);
 }
 
-// ── Delete ────────────────────────────────────────────────
-function delCurrent(lang) {
-  const w = nav[lang].deck[nav[lang].idx];
-  if (!w) return;
-  delId = w.id; delLang = lang;
-  document.getElementById('del-confirm-btn').onclick = execDelete;
+// ── Delete ──────────────────────────────────────────────────
+function delCurrent(lang){
+  const w=nav[lang].deck[nav[lang].idx]; if(!w) return;
+  delId=w.id; delLang=lang;
+  document.getElementById('del-confirm-btn').onclick=execDelete;
   openModal('m-del');
 }
-async function execDelete() {
-  if (!delId) return;
-  const lang = delLang;
-  await db.from('words').delete().eq('id', delId);
-  closeModal('m-del');
-  delId=null; delLang=null;
+async function execDelete(){
+  if(!delId) return;
+  const lang=delLang;
+  await db.from('words').delete().eq('id',delId);
+  closeModal('m-del'); delId=null; delLang=null;
   showToast('已删除');
-  await loadWords(lang, false);
+  await loadWords(lang,false);
 }
 
-// ── Filter ────────────────────────────────────────────────
-function setFilter(lang, f, el) {
-  nav[lang].filter = f;
+// ── Edit ────────────────────────────────────────────────────
+function editCurrent(lang){
+  const w=nav[lang].deck[nav[lang].idx]; if(!w) return;
+  editId=w.id; editLang=lang;
+  document.getElementById('edit-title').textContent = lang==='en'?'编辑英语单词':'编辑日语单词';
+  document.getElementById('edit-w').value = w.word||'';
+  document.getElementById('edit-r').value = w.reading||'';
+  document.getElementById('edit-m').value = w.meaning||'';
+  document.getElementById('edit-e').value = w.example||'';
+  document.getElementById('edit-r-label').textContent = lang==='en'?'音标':'读音（假名）';
+
+  const posRow=document.getElementById('edit-pos-row');
+  if(lang==='en'){ posRow.style.display=''; document.getElementById('edit-pos').value=w.pos||''; }
+  else            posRow.style.display='none';
+
+  document.getElementById('edit-save-btn').className=`sbtn ${lang==='en'?'en-s':'ja-s'}`;
+  openModal('m-edit');
+}
+
+async function saveEdit(){
+  const word   =document.getElementById('edit-w').value.trim();
+  const reading=document.getElementById('edit-r').value.trim();
+  const meaning=document.getElementById('edit-m').value.trim();
+  const example=document.getElementById('edit-e').value.trim();
+  if(!word||!meaning){showToast('请填写单词和中文意思');return;}
+  const upd={word,reading,meaning,example};
+  if(editLang==='en') upd.pos=document.getElementById('edit-pos').value.trim();
+  const {error}=await db.from('words').update(upd).eq('id',editId);
+  if(error){showToast('保存失败：'+error.message);return;}
+  closeModal('m-edit'); showToast('已保存');
+  await loadWords(editLang,false);
+}
+
+// ── Filter ──────────────────────────────────────────────────
+function setFilter(lang,f,el){
+  nav[lang].filter=f;
   document.getElementById('fr-'+lang).querySelectorAll('.chip').forEach(c=>c.classList.remove('a-en','a-ja'));
   el.classList.add(lang==='en'?'a-en':'a-ja');
-  buildDeck(lang, true);
-  renderCard(lang);
+  buildDeck(lang,true); renderCard(lang);
 }
 
-// ── Add single word ───────────────────────────────────────
-async function addWord(lang) {
-  const word    = document.getElementById(lang+'-w').value.trim();
-  const reading = document.getElementById(lang+'-r').value.trim();
-  const meaning = document.getElementById(lang+'-m').value.trim();
-  const example = document.getElementById(lang+'-e').value.trim();
-  if (!word||!meaning) { showToast('请填写单词和中文意思'); return; }
-  const {error} = await db.from('words').insert({lang,word,reading,meaning,example,starred:false,priority:false,due_at:null,last_practiced:null});
-  if (error) { showToast('添加失败：'+error.message); return; }
-  ['w','r','m','e'].forEach(k => document.getElementById(lang+'-'+k).value='');
+// ── Add single word ─────────────────────────────────────────
+async function addWord(lang){
+  const word   =document.getElementById(lang+'-w').value.trim();
+  const reading=document.getElementById(lang+'-r').value.trim();
+  const meaning=document.getElementById(lang+'-m').value.trim();
+  const example=document.getElementById(lang+'-e').value.trim();
+  const pos    =lang==='en'?document.getElementById('en-pos').value.trim():'';
+  if(!word||!meaning){showToast('请填写单词和中文意思');return;}
+  const row={lang,word,reading,meaning,example,pos,starred:false,priority:false,due_at:null,last_practiced:null};
+  const {error}=await db.from('words').insert(row);
+  if(error){showToast('添加失败：'+error.message);return;}
+  ['w','r','m','e'].forEach(k=>document.getElementById(lang+'-'+k).value='');
+  if(lang==='en') document.getElementById('en-pos').value='';
   closeModal('m-'+lang+'-add');
   showToast('已添加「'+word+'」');
-  await loadWords(lang, false);
+  await loadWords(lang,false);
 }
 
-// ── Bulk import ───────────────────────────────────────────
-async function importWords(lang) {
-  const raw = document.getElementById(lang+'-imp-txt').value.trim();
-  if (!raw) { showToast('请先输入内容'); return; }
-  const rows = [];
-  for (const line of raw.split('\n').filter(l=>l.trim())) {
-    const p = line.split(/[｜|]/).map(s=>s.trim());
-    if (p.length<3) continue;
-    rows.push({lang,word:p[0],reading:p[1]||'',meaning:p[2]||'',example:p[3]||'',starred:false,priority:false,due_at:null,last_practiced:null});
+// ── Bulk import ─────────────────────────────────────────────
+async function importWords(lang){
+  const raw=document.getElementById(lang+'-imp-txt').value.trim();
+  if(!raw){showToast('请先输入内容');return;}
+  const rows=[];
+  for(const line of raw.split('\n').filter(l=>l.trim())){
+    const p=line.split(/[｜|]/).map(s=>s.trim());
+    if(p.length<2) continue;
+    let row;
+    if(lang==='en'){
+      // EN: word | pos | phonetic | meaning | example  (flexible, 2–5 cols)
+      if(p.length===2)      row={lang,word:p[0],pos:'',reading:'',meaning:p[1],example:''};
+      else if(p.length===3) row={lang,word:p[0],pos:'',reading:p[1],meaning:p[2],example:''};
+      else if(p.length===4) row={lang,word:p[0],pos:p[1],reading:p[2],meaning:p[3],example:''};
+      else                  row={lang,word:p[0],pos:p[1],reading:p[2],meaning:p[3],example:p[4]||''};
+    } else {
+      // JA: word | reading | meaning | example
+      if(p.length===2)      row={lang,word:p[0],pos:'',reading:'',meaning:p[1],example:''};
+      else if(p.length===3) row={lang,word:p[0],pos:'',reading:p[1],meaning:p[2],example:''};
+      else                  row={lang,word:p[0],pos:'',reading:p[1],meaning:p[2],example:p[3]||''};
+    }
+    row.starred=false;row.priority=false;row.due_at=null;row.last_practiced=null;
+    rows.push(row);
   }
-  if (!rows.length) { showToast('未识别到有效数据，请检查格式'); return; }
-  const {error} = await db.from('words').insert(rows);
-  if (error) { showToast('导入失败：'+error.message); return; }
+  if(!rows.length){showToast('未识别到有效数据，请检查格式');return;}
+  const {error}=await db.from('words').insert(rows);
+  if(error){showToast('导入失败：'+error.message);return;}
   document.getElementById(lang+'-imp-txt').value='';
   closeModal('m-'+lang+'-imp');
   showToast(`成功导入 ${rows.length} 个单词`);
-  await loadWords(lang, false);
+  await loadWords(lang,false);
 }
 
-// ── Quiz ──────────────────────────────────────────────────
-const QUIZ_BUILTIN = [
-  {
-    s:"Despite her busy schedule, she always manages to ___ time for her family.",
-    wm:{Despite:"尽管",busy:"忙碌的",schedule:"日程",manages:"设法",time:"时间",family:"家人"},
-    opts:["make","do","take","find"], cor:3, bi:true
-  },
-  {
-    s:"The scientist's discovery had a profound ___ on modern medicine.",
-    wm:{profound:"深远的",discovery:"发现",modern:"现代",medicine:"医学"},
-    opts:["affect","impact","effect","influence"], cor:1, bi:true
-  },
-  {
-    s:"It is essential that all employees ___ the new safety regulations.",
-    wm:{essential:"至关重要的",employees:"员工",safety:"安全",regulations:"规定"},
-    opts:["follow","obey","comply with","adhere"], cor:2, bi:true
-  }
+// ── Quiz ────────────────────────────────────────────────────
+const QUIZ_BI=[
+  {s:"Despite her busy schedule, she always manages to ___ time for her family.",
+   wm:{Despite:"尽管",busy:"忙碌的",schedule:"日程",manages:"设法",time:"时间",family:"家人"},
+   opts:["make","do","take","find"],cor:3,bi:true},
+  {s:"The scientist's discovery had a profound ___ on modern medicine.",
+   wm:{profound:"深远的",discovery:"发现",modern:"现代",medicine:"医学"},
+   opts:["affect","impact","effect","influence"],cor:1,bi:true},
+  {s:"It is essential that all employees ___ the new safety regulations.",
+   wm:{essential:"至关重要的",employees:"员工",safety:"安全",regulations:"规定"},
+   opts:["follow","obey","comply with","adhere"],cor:2,bi:true}
 ];
-const qState = { qs:[] };
+const qSt={qs:[]};
 
-async function loadQuiz() {
-  const {data} = await db.from('quiz_questions').select('*').order('created_at',{ascending:false});
-  const user = (data||[]).map(q=>({s:q.sentence,wm:{},opts:JSON.parse(q.options),cor:q.correct_index,bi:false,id:q.id}));
-  qState.qs = [...QUIZ_BUILTIN,...user];
-  renderQuiz();
+async function loadQuiz(){
+  const {data}=await db.from('quiz_questions').select('*').order('created_at',{ascending:false});
+  const uq=(data||[]).map(q=>({s:q.sentence,wm:{},opts:JSON.parse(q.options),cor:q.correct_index,bi:false,id:q.id}));
+  qSt.qs=[...QUIZ_BI,...uq]; renderQuiz();
 }
-
-function renderQuiz() {
-  const c = document.getElementById('quiz-list');
-  if (!qState.qs.length) { c.innerHTML='<div class="empty-state"><div class="ei">📝</div><p>还没有题目</p></div>'; return; }
-  c.innerHTML = qState.qs.map((q,i)=>renderQCard(q,i)).join('');
+function renderQuiz(){
+  const c=document.getElementById('quiz-list');
+  if(!qSt.qs.length){c.innerHTML='<div class="empty-state"><div class="ei">📝</div><p>还没有题目</p></div>';return;}
+  c.innerHTML=qSt.qs.map((q,i)=>renderQCard(q,i)).join('');
 }
-
-function renderQCard(q, i) {
-  const parts = q.s.split('___');
-  const mk = (txt) => txt.split(/(\s+)/).map(t=>{
-    if (!t.trim()) return t;
-    const cl = t.replace(/[^a-zA-Z']/g,'');
-    if (!cl) return esc(t);
-    const zh = q.wm[cl]||q.wm[t.trim()]||'';
+function renderQCard(q,i){
+  const mk=txt=>txt.split(/(\s+)/).map(t=>{
+    if(!t.trim()) return t;
+    const cl=t.replace(/[^a-zA-Z']/g,''); if(!cl) return esc(t);
+    const zh=q.wm[cl]||q.wm[t.trim()]||'';
     return `<span class="cword" onclick="tipToggle(this,'${esc(zh||cl)}')">${esc(t)}<span class="wtip"></span></span>`;
   }).join('');
-
-  const blank = `<span class="qblank" id="qb${i}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>`;
-  const sent  = mk(parts[0]||'')+blank+mk(parts[1]||'');
-  const opts  = q.opts.map((o,oi)=>`<button class="obtn" id="qo${i}_${oi}" onclick="pickOpt(${i},${oi})">${esc(o)}</button>`).join('');
-  const delB  = q.bi ? '' : `<div style="margin-top:10px"><button class="pill qz" style="font-size:.72rem;padding:4px 10px" onclick="delQuiz('${q.id}')">删除</button></div>`;
-
-  return `<div class="qcard">
-    <div class="qsentence">${sent}</div>
-    <div class="qopts">${opts}</div>
-    <div id="qf${i}" class="qfb"></div>
-    ${delB}
-  </div>`;
+  const pts=q.s.split('___');
+  const sent=mk(pts[0]||'')+`<span class="qblank" id="qb${i}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>`+mk(pts[1]||'');
+  const opts=q.opts.map((o,oi)=>`<button class="obtn" id="qo${i}_${oi}" onclick="pickOpt(${i},${oi})">${esc(o)}</button>`).join('');
+  const del=q.bi?'':`<div style="margin-top:10px"><button class="pill qz" style="font-size:.72rem;padding:4px 10px" onclick="delQuiz('${q.id}')">删除</button></div>`;
+  return `<div class="qcard"><div class="qsent">${sent}</div><div class="qopts">${opts}</div><div id="qf${i}" class="qfb"></div>${del}</div>`;
 }
-
-function tipToggle(el, zh) {
-  el.classList.toggle('tip-on');
-  const t = el.querySelector('.wtip');
-  if (t) t.textContent = zh;
+function tipToggle(el,zh){ el.classList.toggle('tip-on'); const t=el.querySelector('.wtip'); if(t) t.textContent=zh; }
+function pickOpt(qi,oi){
+  const q=qSt.qs[qi];
+  for(let k=0;k<q.opts.length;k++){const b=document.getElementById(`qo${qi}_${k}`);if(b)b.disabled=true;}
+  const ok=oi===q.cor;
+  const s=document.getElementById(`qo${qi}_${oi}`), c=document.getElementById(`qo${qi}_${q.cor}`);
+  if(s)s.classList.add(ok?'correct':'wrong'); if(!ok&&c)c.classList.add('correct');
+  const bl=document.getElementById('qb'+qi); if(bl)bl.textContent=q.opts[q.cor];
+  const fb=document.getElementById('qf'+qi); fb.className='qfb show '+(ok?'ok':'ng');
+  fb.textContent=ok?'✓ 正确！':'✗ 正确答案是：'+q.opts[q.cor];
 }
-
-function pickOpt(qi, oi) {
-  const q = qState.qs[qi];
-  for (let k=0;k<q.opts.length;k++) { const b=document.getElementById(`qo${qi}_${k}`); if(b) b.disabled=true; }
-  const ok = oi===q.cor;
-  const sel = document.getElementById(`qo${qi}_${oi}`);
-  const cor = document.getElementById(`qo${qi}_${q.cor}`);
-  if (sel) sel.classList.add(ok?'correct':'wrong');
-  if (!ok&&cor) cor.classList.add('correct');
-  const bl = document.getElementById('qb'+qi);
-  if (bl) bl.textContent = q.opts[q.cor];
-  const fb = document.getElementById('qf'+qi);
-  fb.className='qfb show '+(ok?'ok':'ng');
-  fb.textContent = ok ? '✓ 正确！' : `✗ 正确答案是：${q.opts[q.cor]}`;
-}
-
-function toggleAddQuiz() { document.getElementById('add-quiz-panel').classList.toggle('open'); }
-
-async function addQuizQ() {
-  const s = document.getElementById('q-sent').value.trim();
-  const opts = ['q-o1','q-o2','q-o3','q-o4'].map(id=>document.getElementById(id).value.trim());
-  const cor = parseInt(document.getElementById('q-cor').value);
-  if (!s||opts.some(o=>!o)) { showToast('请填写句子和所有选项'); return; }
-  if (!s.includes('___'))   { showToast('句子中请用 ___ 表示空格'); return; }
-  const {error} = await db.from('quiz_questions').insert({sentence:s,options:JSON.stringify(opts),correct_index:cor,blank_index:0});
-  if (error) { showToast('添加失败：'+error.message); return; }
+function toggleAddQuiz(){ document.getElementById('add-quiz-panel').classList.toggle('open'); }
+async function addQuizQ(){
+  const s=document.getElementById('q-sent').value.trim();
+  const opts=['q-o1','q-o2','q-o3','q-o4'].map(id=>document.getElementById(id).value.trim());
+  const cor=parseInt(document.getElementById('q-cor').value);
+  if(!s||opts.some(o=>!o)){showToast('请填写句子和所有选项');return;}
+  if(!s.includes('___')){showToast('句子中请用 ___ 表示空格');return;}
+  const {error}=await db.from('quiz_questions').insert({sentence:s,options:JSON.stringify(opts),correct_index:cor,blank_index:0});
+  if(error){showToast('添加失败：'+error.message);return;}
   ['q-sent','q-o1','q-o2','q-o3','q-o4'].forEach(id=>document.getElementById(id).value='');
   toggleAddQuiz(); showToast('添加成功'); await loadQuiz();
 }
-
-async function delQuiz(id) {
-  if (!confirm('确认删除这道题目？')) return;
+async function delQuiz(id){
+  if(!confirm('确认删除这道题目？'))return;
   await db.from('quiz_questions').delete().eq('id',id);
   showToast('已删除'); await loadQuiz();
 }
 
-// ── Util ──────────────────────────────────────────────────
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+// ── Util ────────────────────────────────────────────────────
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-// ── Init ──────────────────────────────────────────────────
+// ── Init ────────────────────────────────────────────────────
 Promise.all([loadWords('en',true), loadWords('ja',true), loadQuiz()]);
 </script>
 </body>
