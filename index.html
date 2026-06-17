@@ -350,13 +350,14 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
     <div class="mtitle">批量导入英语单词</div>
     <div class="fg">
       <textarea id="en-imp-txt" class="ftarea" placeholder="每行一个单词，格式：
-单词｜词性｜音标｜中文意思｜例句（可选）
+单词｜词性｜音标｜中文意思｜例句（可选）｜标签（可选，逗号分隔）
 
-abandon｜v.｜/əˈbændən/｜放弃｜She abandoned her plan.
+abandon｜v.｜/əˈbændən/｜放弃｜She abandoned her plan.｜四级,常用
 eloquent｜adj.｜/ˈeləkwənt/｜雄辩的｜She gave an eloquent speech.
+serendipity｜n.｜/ˌserənˈdɪpəti/｜意外发现
 
-词性可省略：abandon｜｜/əˈbændən/｜放弃"></textarea>
-      <p class="fhint">用「｜」或「|」分隔，词性和例句均可省略。</p>
+词性可省略：abandon｜｜/əˈbændən/｜放弃｜｜四级"></textarea>
+      <p class="fhint">用「｜」或「|」分隔，词性、例句和标签均可省略。多个标签用逗号分隔。</p>
     </div>
     <div class="mfoot">
       <button class="sbtn gray" onclick="closeModal('m-en-imp')">取消</button>
@@ -396,11 +397,12 @@ eloquent｜adj.｜/ˈeləkwənt/｜雄辩的｜She gave an eloquent speech.
     <div class="mtitle">批量导入日语单词</div>
     <div class="fg">
       <textarea id="ja-imp-txt" class="ftarea" placeholder="每行一个单词，格式：
-单词｜读音｜中文意思｜例句（可选）
+单词｜读音｜中文意思｜例句（可选）｜标签（可选，逗号分隔）
 
-勉強｜べんきょう｜学习｜毎日勉強します。
-図書館｜としょかん｜图书馆｜図書館で本を読む。"></textarea>
-      <p class="fhint">用「｜」或「|」分隔，例句可省略。</p>
+勉強｜べんきょう｜学习｜毎日勉強します。｜N5,动词
+図書館｜としょかん｜图书馆｜図書館で本を読む。
+言葉｜ことば｜语言、词语"></textarea>
+      <p class="fhint">用「｜」或「|」分隔，例句和标签均可省略。多个标签用逗号分隔。</p>
     </div>
     <div class="mfoot">
       <button class="sbtn gray" onclick="closeModal('m-ja-imp')">取消</button>
@@ -795,6 +797,11 @@ async function addWord(lang){
 }
 
 // ── Bulk import ─────────────────────────────────────────────
+function parseTags(str){
+  if(!str) return [];
+  return str.split(/[,，]/).map(t=>t.trim()).filter(Boolean);
+}
+
 async function importWords(lang){
   const raw=document.getElementById(lang+'-imp-txt').value.trim();
   if(!raw){showToast('请先输入内容');return;}
@@ -804,16 +811,18 @@ async function importWords(lang){
     if(p.length<2) continue;
     let row;
     if(lang==='en'){
-      // EN: word | pos | phonetic | meaning | example  (flexible, 2–5 cols)
-      if(p.length===2)      row={lang,word:p[0],pos:'',reading:'',meaning:p[1],example:''};
-      else if(p.length===3) row={lang,word:p[0],pos:'',reading:p[1],meaning:p[2],example:''};
-      else if(p.length===4) row={lang,word:p[0],pos:p[1],reading:p[2],meaning:p[3],example:''};
-      else                  row={lang,word:p[0],pos:p[1],reading:p[2],meaning:p[3],example:p[4]||''};
+      // EN: word | pos | phonetic | meaning | example | tags  (2–6 cols, tags optional)
+      if(p.length===2)      row={lang,word:p[0],pos:'',reading:'',meaning:p[1],example:'',tags:[]};
+      else if(p.length===3) row={lang,word:p[0],pos:'',reading:p[1],meaning:p[2],example:'',tags:[]};
+      else if(p.length===4) row={lang,word:p[0],pos:p[1],reading:p[2],meaning:p[3],example:'',tags:[]};
+      else if(p.length===5) row={lang,word:p[0],pos:p[1],reading:p[2],meaning:p[3],example:p[4],tags:[]};
+      else                  row={lang,word:p[0],pos:p[1],reading:p[2],meaning:p[3],example:p[4],tags:parseTags(p[5])};
     } else {
-      // JA: word | reading | meaning | example
-      if(p.length===2)      row={lang,word:p[0],pos:'',reading:'',meaning:p[1],example:''};
-      else if(p.length===3) row={lang,word:p[0],pos:'',reading:p[1],meaning:p[2],example:''};
-      else                  row={lang,word:p[0],pos:'',reading:p[1],meaning:p[2],example:p[3]||''};
+      // JA: word | reading | meaning | example | tags  (2–5 cols, tags optional)
+      if(p.length===2)      row={lang,word:p[0],pos:'',reading:'',meaning:p[1],example:'',tags:[]};
+      else if(p.length===3) row={lang,word:p[0],pos:'',reading:p[1],meaning:p[2],example:'',tags:[]};
+      else if(p.length===4) row={lang,word:p[0],pos:'',reading:p[1],meaning:p[2],example:p[3],tags:[]};
+      else                  row={lang,word:p[0],pos:'',reading:p[1],meaning:p[2],example:p[3],tags:parseTags(p[4])};
     }
     row.starred=false;row.priority=false;row.due_at=null;row.last_practiced=null;
     rows.push(row);
