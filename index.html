@@ -287,7 +287,10 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
 <div id="sec-quiz" class="section">
   <div class="quiz-hd">
     <h2 class="quiz-title">选词题</h2>
-    <button class="pill qz" onclick="toggleAddQuiz()">+ 添加</button>
+    <div class="hd-btns">
+      <button class="pill qz" onclick="toggleAddQuiz()">+ 添加</button>
+      <button class="pill qz" onclick="openModal('m-quiz-imp')">批量导入</button>
+    </div>
   </div>
   <div id="add-quiz-panel" class="qpanel">
     <div class="qpanel-t">添加新题目</div>
@@ -407,6 +410,26 @@ serendipity｜n.｜/ˌserənˈdɪpəti/｜意外发现
     <div class="mfoot">
       <button class="sbtn gray" onclick="closeModal('m-ja-imp')">取消</button>
       <button class="sbtn ja-s" onclick="importWords('ja')">导入</button>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz Import -->
+<div id="m-quiz-imp" class="modal" onclick="bdClose(event,'m-quiz-imp')">
+  <div class="mbox">
+    <div class="mhandle"></div>
+    <div class="mtitle">批量导入选词题</div>
+    <div class="fg">
+      <textarea id="quiz-imp-txt" class="ftarea" placeholder="每行一题，格式：
+句子（用 ___ 表示空格）｜选项1｜选项2｜选项3｜选项4｜正确答案序号(1-4)
+
+She ___ the piano every evening.｜plays｜play｜playing｜played｜1
+He has been ___ English for five years.｜learn｜learning｜learned｜learns｜2"></textarea>
+      <p class="fhint">用「｜」或「|」分隔，共 6 列：句子（含 ___）、4 个选项、正确答案序号（1-4）。</p>
+    </div>
+    <div class="mfoot">
+      <button class="sbtn gray" onclick="closeModal('m-quiz-imp')">取消</button>
+      <button class="sbtn qz-s" onclick="importQuiz()">导入</button>
     </div>
   </div>
 </div>
@@ -900,6 +923,29 @@ async function delQuiz(id){
   if(!confirm('确认删除这道题目？'))return;
   await db.from('quiz_questions').delete().eq('id',id);
   showToast('已删除'); await loadQuiz();
+}
+
+// ── Quiz bulk import ────────────────────────────────────────
+async function importQuiz(){
+  const raw=document.getElementById('quiz-imp-txt').value.trim();
+  if(!raw){showToast('请先输入内容');return;}
+  const rows=[];
+  for(const line of raw.split('\n').filter(l=>l.trim())){
+    const p=line.split(/[｜|]/).map(s=>s.trim());
+    if(p.length<6) continue;
+    const [s,o1,o2,o3,o4,corStr]=p;
+    if(!s||!s.includes('___')||!o1||!o2||!o3||!o4) continue;
+    const cor=parseInt(corStr,10);
+    if(!(cor>=1&&cor<=4)) continue;
+    rows.push({sentence:s,options:JSON.stringify([o1,o2,o3,o4]),correct_index:cor-1,blank_index:0});
+  }
+  if(!rows.length){showToast('未识别到有效数据，请检查格式');return;}
+  const {error}=await db.from('quiz_questions').insert(rows);
+  if(error){showToast('导入失败：'+error.message);return;}
+  document.getElementById('quiz-imp-txt').value='';
+  closeModal('m-quiz-imp');
+  showToast(`成功导入 ${rows.length} 道题`);
+  await loadQuiz();
 }
 
 // ── Tags ────────────────────────────────────────────────────
