@@ -177,10 +177,7 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
 .qcard{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:22px 20px 18px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:14px}
 .qsent{font-size:1.05rem;line-height:1.9;margin-bottom:18px}
 .qblank{display:inline-block;min-width:80px;border-bottom:2px solid var(--quiz);color:var(--quiz);font-weight:700;text-align:center;padding:0 6px}
-.cword{cursor:pointer;border-bottom:1px dashed #bbb;position:relative;transition:color .15s}.cword:hover{color:var(--quiz)}
-.wtip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:.72rem;padding:4px 9px;border-radius:6px;white-space:nowrap;z-index:50;pointer-events:none}
-.wtip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:var(--ink)}
-.cword:hover .wtip,.cword.tip-on .wtip{display:block}
+.cword{cursor:pointer;border-bottom:1px dashed #bbb;transition:color .15s}.cword:hover{color:var(--quiz)}
 .qopts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .obtn{padding:12px 14px;border-radius:12px;font-size:.88rem;font-weight:600;border:2px solid var(--line);color:var(--ink);text-align:left;transition:all .15s;line-height:1.4}
 .obtn:hover:not(:disabled){border-color:var(--quiz);color:var(--quiz);background:#F0FAFD}
@@ -190,6 +187,21 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
 .qfb{display:none;margin-top:12px;padding:10px 14px;border-radius:10px;font-size:.85rem;font-weight:600}
 .qfb.show{display:block}.qfb.ok{background:#E8F5E9;color:#2E7D32}.qfb.ng{background:#FFEBEE;color:var(--danger)}
 .qsel{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:.9rem;background:var(--bg);color:var(--ink);outline:none}
+
+/* ── Word popup (click a word in a quiz sentence) ── */
+.word-pop-backdrop{display:none;position:fixed;inset:0;background:transparent;z-index:600;align-items:flex-end;justify-content:center}
+.word-pop-backdrop.open{display:flex}
+.word-pop{width:min(360px,92vw);background:var(--white);border-radius:18px;box-shadow:0 8px 30px rgba(0,0,0,.22);padding:16px 18px 18px;margin-bottom:18px;max-height:70vh;overflow-y:auto}
+.wp-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.wp-word{font-family:'Playfair Display',serif;font-size:1.2rem;word-break:break-word}
+.wp-close{font-size:1.3rem;line-height:1;color:var(--sub);padding:2px 7px;border-radius:50%;transition:background .15s,color .15s}
+.wp-close:hover{background:rgba(0,0,0,.06);color:var(--ink)}
+.wp-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.wp-reading{font-size:.9rem;color:var(--sub)}
+.wp-meaning{font-family:'Noto Serif SC',serif;font-size:1.02rem;font-weight:700;margin-bottom:6px;line-height:1.5}
+.wp-example{font-size:.83rem;color:var(--sub);line-height:1.6}
+.wp-missing{font-size:.88rem;color:var(--sub);margin-bottom:12px}
+@media(min-width:640px){.word-pop-backdrop.open{align-items:center}}
 
 /* ── Toast ── */
 .toast{display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:.85rem;font-weight:600;padding:10px 20px;border-radius:20px;z-index:1000;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.2)}
@@ -287,36 +299,9 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
 <div id="sec-quiz" class="section">
   <div class="quiz-hd">
     <h2 class="quiz-title">选词题</h2>
-    <div class="hd-btns">
-      <button class="pill qz" onclick="toggleAddQuiz()">+ 添加</button>
-      <button class="pill qz" onclick="openModal('m-quiz-imp')">批量导入</button>
-    </div>
+    <button class="pill qz" onclick="openQuizMgmt()">管理</button>
   </div>
-  <div id="add-quiz-panel" class="qpanel">
-    <div class="qpanel-t">添加新题目</div>
-    <div class="fg"><label class="flabel">句子（用 ___ 表示空格）</label><input id="q-sent" class="finput" type="text" placeholder="She ___ the piano every evening."></div>
-    <div class="fg">
-      <label class="flabel">四个选项</label>
-      <div class="opt-grid">
-        <input id="q-o1" class="finput" type="text" placeholder="选项 A">
-        <input id="q-o2" class="finput" type="text" placeholder="选项 B">
-        <input id="q-o3" class="finput" type="text" placeholder="选项 C">
-        <input id="q-o4" class="finput" type="text" placeholder="选项 D">
-      </div>
-    </div>
-    <div class="fg">
-      <label class="flabel">正确答案</label>
-      <select id="q-cor" class="qsel">
-        <option value="0">选项 A</option><option value="1">选项 B</option>
-        <option value="2">选项 C</option><option value="3">选项 D</option>
-      </select>
-    </div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
-      <button class="sbtn gray" onclick="toggleAddQuiz()">取消</button>
-      <button class="sbtn qz-s" onclick="addQuizQ()">添加</button>
-    </div>
-  </div>
-  <div id="quiz-list"></div>
+  <div id="quiz-practice"></div>
 </div>
 
 <!-- ══ MODALS ══ -->
@@ -414,8 +399,100 @@ serendipity｜n.｜/ˌserənˈdɪpəti/｜意外发现
   </div>
 </div>
 
+<!-- Quiz Management -->
+<div id="m-quiz-mgmt" class="modal" onclick="bdClose(event,'m-quiz-mgmt')">
+  <div class="mbox">
+    <div class="mhandle"></div>
+    <div class="mtitle">选词题管理</div>
+    <div class="hd-btns" style="margin-bottom:14px">
+      <button class="pill qz" onclick="toggleAddQuiz()">+ 添加</button>
+      <button class="pill qz" onclick="openModal('m-quiz-imp')">批量导入</button>
+    </div>
+    <div id="add-quiz-panel" class="qpanel">
+      <div class="qpanel-t">添加新题目</div>
+      <div class="fg"><label class="flabel">句子（用 ___ 表示空格）</label><input id="q-sent" class="finput" type="text" placeholder="She ___ the piano every evening."></div>
+      <div class="fg">
+        <label class="flabel">四个选项</label>
+        <div class="opt-grid">
+          <input id="q-o1" class="finput" type="text" placeholder="选项 A">
+          <input id="q-o2" class="finput" type="text" placeholder="选项 B">
+          <input id="q-o3" class="finput" type="text" placeholder="选项 C">
+          <input id="q-o4" class="finput" type="text" placeholder="选项 D">
+        </div>
+      </div>
+      <div class="fg">
+        <label class="flabel">正确答案</label>
+        <select id="q-cor" class="qsel">
+          <option value="0">选项 A</option><option value="1">选项 B</option>
+          <option value="2">选项 C</option><option value="3">选项 D</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="flabel">难度等级</label>
+        <select id="q-diff" class="qsel">
+          <option value="1">Lv.1 · 最简单</option>
+          <option value="2">Lv.2</option>
+          <option value="3" selected>Lv.3 · 中等</option>
+          <option value="4">Lv.4</option>
+          <option value="5">Lv.5 · 最难</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+        <button class="sbtn gray" onclick="toggleAddQuiz()">取消</button>
+        <button class="sbtn qz-s" onclick="addQuizQ()">添加</button>
+      </div>
+    </div>
+    <div class="qpanel-t" style="margin-top:18px">自动生成巩固题</div>
+    <div id="quiz-gen-info" class="fhint" style="margin-bottom:10px"></div>
+    <button class="pill qz" onclick="scanAndGenerateQuizzes()">扫描并生成巩固题</button>
+    <div id="quiz-mgmt-list" style="margin-top:18px"></div>
+    <div class="mfoot">
+      <button class="sbtn gray" onclick="closeModal('m-quiz-mgmt')">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz Edit -->
+<div id="m-quiz-edit" class="modal" style="z-index:510" onclick="bdClose(event,'m-quiz-edit')">
+  <div class="mbox">
+    <div class="mhandle"></div>
+    <div class="mtitle">编辑题目</div>
+    <div class="fg"><label class="flabel">句子（用 ___ 表示空格）</label><input id="qe-sent" class="finput" type="text"></div>
+    <div class="fg">
+      <label class="flabel">四个选项</label>
+      <div class="opt-grid">
+        <input id="qe-o1" class="finput" type="text" placeholder="选项 A">
+        <input id="qe-o2" class="finput" type="text" placeholder="选项 B">
+        <input id="qe-o3" class="finput" type="text" placeholder="选项 C">
+        <input id="qe-o4" class="finput" type="text" placeholder="选项 D">
+      </div>
+    </div>
+    <div class="fg">
+      <label class="flabel">正确答案</label>
+      <select id="qe-cor" class="qsel">
+        <option value="0">选项 A</option><option value="1">选项 B</option>
+        <option value="2">选项 C</option><option value="3">选项 D</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label class="flabel">难度等级</label>
+      <select id="qe-diff" class="qsel">
+        <option value="1">Lv.1 · 最简单</option>
+        <option value="2">Lv.2</option>
+        <option value="3">Lv.3 · 中等</option>
+        <option value="4">Lv.4</option>
+        <option value="5">Lv.5 · 最难</option>
+      </select>
+    </div>
+    <div class="mfoot">
+      <button class="sbtn gray" onclick="closeModal('m-quiz-edit')">取消</button>
+      <button class="sbtn qz-s" onclick="saveQuizEdit()">保存</button>
+    </div>
+  </div>
+</div>
+
 <!-- Quiz Import -->
-<div id="m-quiz-imp" class="modal" onclick="bdClose(event,'m-quiz-imp')">
+<div id="m-quiz-imp" class="modal" style="z-index:510" onclick="bdClose(event,'m-quiz-imp')">
   <div class="mbox">
     <div class="mhandle"></div>
     <div class="mtitle">批量导入选词题</div>
@@ -491,6 +568,17 @@ He has been ___ English for five years.｜learn｜learning｜learned｜learns｜
 </div>
 
 <div id="toast" class="toast"></div>
+
+<!-- Word popup (quiz sentence word lookup) -->
+<div id="word-pop-bd" class="word-pop-backdrop" onclick="bdCloseWordPop(event)">
+  <div class="word-pop">
+    <div class="wp-hd">
+      <span id="word-pop-title" class="wp-word"></span>
+      <button class="wp-close" onclick="closeWordPop()">×</button>
+    </div>
+    <div id="word-pop-body"></div>
+  </div>
+</div>
 
 <script>
 const SUPA_URL = 'https://yrscvkupavfbgeewxoek.supabase.co';
@@ -863,42 +951,150 @@ async function importWords(lang){
 const QUIZ_BI=[
   {s:"Despite her busy schedule, she always manages to ___ time for her family.",
    wm:{Despite:"尽管",busy:"忙碌的",schedule:"日程",manages:"设法",time:"时间",family:"家人"},
-   opts:["make","do","take","find"],cor:3,bi:true},
+   opts:["make","do","take","find"],cor:3,bi:true,difficulty:3},
   {s:"The scientist's discovery had a profound ___ on modern medicine.",
    wm:{profound:"深远的",discovery:"发现",modern:"现代",medicine:"医学"},
-   opts:["affect","impact","effect","influence"],cor:1,bi:true},
+   opts:["affect","impact","effect","influence"],cor:1,bi:true,difficulty:4},
   {s:"It is essential that all employees ___ the new safety regulations.",
    wm:{essential:"至关重要的",employees:"员工",safety:"安全",regulations:"规定"},
-   opts:["follow","obey","comply with","adhere"],cor:2,bi:true}
+   opts:["follow","obey","comply with","adhere"],cor:2,bi:true,difficulty:3}
 ];
 const qSt={qs:[]};
+// Adaptive difficulty level (ReadTheory-style): persists across sessions in this browser.
+let quizLevel=parseInt(localStorage.getItem('quizLevel'),10)||3;
+function saveQuizLevel(){ localStorage.setItem('quizLevel',String(quizLevel)); }
+const quizNav={pool:[],current:null,total:0,askedCount:0,answered:false,sCorrect:0,sWrong:0};
+let editQuizId=null;
 
 async function loadQuiz(){
   const {data}=await db.from('quiz_questions').select('*').order('created_at',{ascending:false});
-  const uq=(data||[]).map(q=>({s:q.sentence,wm:{},opts:JSON.parse(q.options),cor:q.correct_index,bi:false,id:q.id}));
-  qSt.qs=[...QUIZ_BI,...uq]; renderQuiz();
+  const uq=(data||[]).map(q=>({s:q.sentence,wm:{},opts:JSON.parse(q.options),cor:q.correct_index,bi:false,id:q.id,difficulty:q.difficulty||3}));
+  qSt.qs=[...QUIZ_BI,...uq];
+  buildQuizPool(true);
+  renderQuizPractice();
+  renderQuizMgmt();
 }
-function renderQuiz(){
-  const c=document.getElementById('quiz-list');
-  if(!qSt.qs.length){c.innerHTML='<div class="empty-state"><div class="ei">📝</div><p>还没有题目</p></div>';return;}
-  c.innerHTML=qSt.qs.map((q,i)=>renderQCard(q,i)).join('');
+
+// ── Practice (one question at a time, adaptive difficulty) ──
+function buildQuizPool(reset){
+  if(!reset) return;
+  quizNav.pool=shuffle([...qSt.qs]);
+  quizNav.total=quizNav.pool.length;
+  quizNav.askedCount=0; quizNav.answered=false;
+  quizNav.sCorrect=0; quizNav.sWrong=0;
+  quizNav.current=pickNextQuestion();
 }
-function renderQCard(q,i){
+
+// Prefer questions within quizLevel±1, widening the range only if nothing
+// in range is left, so every question still gets covered before repeats.
+function pickNextQuestion(){
+  if(!quizNav.pool.length) return null;
+  let cands=quizNav.pool.filter(q=>Math.abs((q.difficulty||3)-quizLevel)<=1);
+  if(!cands.length) cands=quizNav.pool.filter(q=>Math.abs((q.difficulty||3)-quizLevel)<=2);
+  if(!cands.length) cands=quizNav.pool;
+  const pick=cands[Math.floor(Math.random()*cands.length)];
+  quizNav.pool=quizNav.pool.filter(q=>q!==pick);
+  quizNav.askedCount++;
+  return pick;
+}
+
+function qSentenceHTML(q,i){
   const mk=txt=>txt.split(/(\s+)/).map(t=>{
     if(!t.trim()) return t;
     const cl=t.replace(/[^a-zA-Z']/g,''); if(!cl) return esc(t);
-    const zh=q.wm[cl]||q.wm[t.trim()]||'';
-    return `<span class="cword" onclick="tipToggle(this,'${esc(zh||cl)}')">${esc(t)}<span class="wtip"></span></span>`;
+    return `<span class="cword" data-w="${esc(cl)}" onclick="showWordPopup(this.dataset.w)">${esc(t)}</span>`;
   }).join('');
   const pts=q.s.split('___');
-  const sent=mk(pts[0]||'')+`<span class="qblank" id="qb${i}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>`+mk(pts[1]||'');
-  const opts=q.opts.map((o,oi)=>`<button class="obtn" id="qo${i}_${oi}" onclick="pickOpt(${i},${oi})">${esc(o)}</button>`).join('');
-  const del=q.bi?'':`<div style="margin-top:10px"><button class="pill qz" style="font-size:.72rem;padding:4px 10px" onclick="delQuiz('${q.id}')">删除</button></div>`;
-  return `<div class="qcard"><div class="qsent">${sent}</div><div class="qopts">${opts}</div><div id="qf${i}" class="qfb"></div>${del}</div>`;
+  return mk(pts[0]||'')+`<span class="qblank" id="qb${i}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>`+mk(pts[1]||'');
 }
-function tipToggle(el,zh){ el.classList.toggle('tip-on'); const t=el.querySelector('.wtip'); if(t) t.textContent=zh; }
+
+function renderPracticeCard(q,i){
+  const opts=q.opts.map((o,oi)=>`<button class="obtn" id="qo${i}_${oi}" onclick="pickOpt('${i}',${oi})">${esc(o)}</button>`).join('');
+  return `<div class="qcard"><div class="qsent">${qSentenceHTML(q,i)}</div><div class="qopts">${opts}</div><div id="qf${i}" class="qfb"></div></div>`;
+}
+
+function renderQuizPractice(){
+  const area=document.getElementById('quiz-practice');
+  const n=quizNav;
+  if(!n.total){
+    area.innerHTML='<div class="empty-state"><div class="ei">📝</div><p>还没有题目，点击「管理」添加、批量导入或生成巩固题</p></div>';
+    return;
+  }
+  if(!n.current){
+    area.innerHTML=`<div class="deck-end">
+      <div class="ei">🎉</div><h3>全部完成！</h3>
+      <div class="es">共 <strong>${n.total}</strong> 题 &nbsp;·&nbsp; 答对 <strong>${n.sCorrect}</strong> &nbsp;·&nbsp; 答错 <strong>${n.sWrong}</strong> &nbsp;·&nbsp; 当前水平 <strong>Lv.${quizLevel}</strong></div>
+      <button class="sbtn qz-s" onclick="restartQuizDeck()">重新开始</button>
+    </div>`;
+    return;
+  }
+  const i='cur', q=n.current;
+  area.innerHTML=`
+    <div class="nav-meta">
+      <span class="nav-count">${n.askedCount} / ${n.total}</span>
+      <span class="badge" style="background:#EDE7F6;color:#512DA8">题目 Lv.${q.difficulty||3}</span>
+      <span class="badge" style="background:#E3F2FD;color:#1565C0;margin-left:auto">你的水平 Lv.${quizLevel}</span>
+    </div>
+    ${renderPracticeCard(q,i)}
+    <div id="quiz-next-wrap" style="display:none;justify-content:flex-end;margin-top:4px">
+      <button class="sbtn qz-s" onclick="nextQuizQuestion()">下一题 →</button>
+    </div>`;
+}
+
+function nextQuizQuestion(){
+  quizNav.current=pickNextQuestion();
+  quizNav.answered=false;
+  renderQuizPractice();
+}
+
+function restartQuizDeck(){
+  buildQuizPool(true);
+  renderQuizPractice();
+}
+
+// ── Word lookup popup ───────────────────────────────────────
+function findWordEntry(word){
+  const w=word.toLowerCase();
+  return allWords.en.find(x=>x.word&&x.word.toLowerCase()===w);
+}
+
+function showWordPopup(word){
+  document.getElementById('word-pop-title').textContent=word;
+  const body=document.getElementById('word-pop-body');
+  const entry=findWordEntry(word);
+  if(entry){
+    body.innerHTML=`
+      <div class="wp-row">${entry.pos?`<span class="pos-tag">${esc(entry.pos)}</span>`:''}${entry.reading?`<span class="wp-reading">${esc(entry.reading)}</span>`:''}</div>
+      <div class="wp-meaning">${esc(entry.meaning)}</div>
+      ${entry.example?`<div class="wp-example">${esc(entry.example)}</div>`:''}
+    `;
+  } else {
+    body.innerHTML=`
+      <div class="wp-missing">「${esc(word)}」未收录到单词库</div>
+      <button class="sbtn en-s" onclick="quickAddWord()">+ 添加到单词库</button>
+    `;
+  }
+  document.getElementById('word-pop-bd').classList.add('open');
+}
+
+function closeWordPop(){ document.getElementById('word-pop-bd').classList.remove('open'); }
+function bdCloseWordPop(e){ if(e.target===document.getElementById('word-pop-bd')) closeWordPop(); }
+
+function quickAddWord(){
+  const word=document.getElementById('word-pop-title').textContent;
+  closeWordPop();
+  initTagCtx('en-add',[]);
+  document.getElementById('en-w').value=word;
+  document.getElementById('en-pos').value='';
+  document.getElementById('en-r').value='';
+  document.getElementById('en-m').value='';
+  document.getElementById('en-e').value='';
+  openModal('m-en-add');
+}
+
 function pickOpt(qi,oi){
-  const q=qSt.qs[qi];
+  if(quizNav.answered) return;
+  const q=quizNav.current;
   for(let k=0;k<q.opts.length;k++){const b=document.getElementById(`qo${qi}_${k}`);if(b)b.disabled=true;}
   const ok=oi===q.cor;
   const s=document.getElementById(`qo${qi}_${oi}`), c=document.getElementById(`qo${qi}_${q.cor}`);
@@ -906,19 +1102,149 @@ function pickOpt(qi,oi){
   const bl=document.getElementById('qb'+qi); if(bl)bl.textContent=q.opts[q.cor];
   const fb=document.getElementById('qf'+qi); fb.className='qfb show '+(ok?'ok':'ng');
   fb.textContent=ok?'✓ 正确！':'✗ 正确答案是：'+q.opts[q.cor];
+  quizNav.answered=true;
+  if(ok){ quizNav.sCorrect++; quizLevel=Math.min(5,quizLevel+1); }
+  else   { quizNav.sWrong++;   quizLevel=Math.max(1,quizLevel-1); }
+  saveQuizLevel();
+  const nw=document.getElementById('quiz-next-wrap');
+  if(nw) nw.style.display='flex';
 }
+
+// ── Management (add / edit / delete, separate from practice) ─
+function openQuizMgmt(){ renderQuizMgmt(); openModal('m-quiz-mgmt'); }
+
+function renderQuizMgmt(){
+  const el=document.getElementById('quiz-mgmt-list');
+  if(el){
+    if(!qSt.qs.length) el.innerHTML='<div class="empty-state"><div class="ei">📝</div><p>还没有题目</p></div>';
+    else el.innerHTML=qSt.qs.map(q=>renderQMgmtCard(q)).join('');
+  }
+  renderReinforcementInfo();
+}
+
+// ── Auto-generated reinforcement questions ──────────────────
+function escapeRegex(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+
+// Words marked "不认识" (priority) or due for review after having been
+// known before ("认识但忘记") are candidates, as long as no existing
+// question already tests them (matched by its correct-answer text).
+function getReinforcementCandidates(){
+  const now=Date.now();
+  const existingAnswers=new Set(qSt.qs.map(q=>(q.opts[q.cor]||'').toLowerCase()));
+  const hard=[], forgotten=[];
+  allWords.en.forEach(w=>{
+    if(!w.word||existingAnswers.has(w.word.toLowerCase())) return;
+    if(w.priority) hard.push(w);
+    else if(w.last_practiced&&w.due_at&&new Date(w.due_at)<=now) forgotten.push(w);
+  });
+  return {hard,forgotten};
+}
+
+function wordUsableForGen(w){
+  if(!w.example) return false;
+  return new RegExp('\\b'+escapeRegex(w.word)+'\\b','i').test(w.example);
+}
+
+// Builds a fill-in-the-blank question from a word's example sentence.
+// Distractors are drawn from same-part-of-speech words first (closest
+// proxy we have to "similar meaning"), falling back to random words.
+function genQuestionFromWord(word){
+  if(!wordUsableForGen(word)) return {skip:true};
+  const re=new RegExp('\\b'+escapeRegex(word.word)+'\\b','i');
+  const sentence=word.example.replace(re,'___');
+  const pool=allWords.en.filter(x=>x.id!==word.id&&x.word&&x.word.toLowerCase()!==word.word.toLowerCase());
+  let distractors=word.pos?shuffle(pool.filter(x=>x.pos===word.pos)).slice(0,3).map(x=>x.word):[];
+  if(distractors.length<3){
+    const used=new Set(distractors.map(d=>d.toLowerCase()));
+    const rest=shuffle(pool.filter(x=>!used.has(x.word.toLowerCase()))).slice(0,3-distractors.length).map(x=>x.word);
+    distractors=[...distractors,...rest];
+  }
+  if(distractors.length<3) return {skip:true};
+  const opts=shuffle([word.word,...distractors]);
+  return {skip:false,sentence,opts,cor:opts.indexOf(word.word)};
+}
+
+function renderReinforcementInfo(){
+  const el=document.getElementById('quiz-gen-info');
+  if(!el) return;
+  const {hard,forgotten}=getReinforcementCandidates();
+  const all=[...hard,...forgotten];
+  if(!all.length){ el.textContent='目前没有需要巩固的单词（不认识 / 待复习且曾认识）。'; return; }
+  const ready=all.filter(wordUsableForGen).length;
+  const missing=all.length-ready;
+  el.innerHTML=`待巩固单词 <strong>${all.length}</strong> 个（不认识 ${hard.length} · 待复习 ${forgotten.length}），可生成 <strong>${ready}</strong> 道题`
+    +(missing?`，另有 <strong>${missing}</strong> 个缺少例句或例句中未出现该词，需先补充例句`:'')+'。';
+}
+
+async function scanAndGenerateQuizzes(){
+  const {hard,forgotten}=getReinforcementCandidates();
+  const targets=[...hard.map(w=>({w,diff:4})),...forgotten.map(w=>({w,diff:3}))];
+  const toInsert=[]; let missing=0;
+  for(const {w,diff} of targets){
+    const r=genQuestionFromWord(w);
+    if(r.skip){ missing++; continue; }
+    toInsert.push({sentence:r.sentence,options:JSON.stringify(r.opts),correct_index:r.cor,blank_index:0,difficulty:diff});
+  }
+  if(!toInsert.length){
+    showToast(missing?`没有可生成的题目，${missing} 个单词缺少例句或例句中未出现该词`:'目前没有需要巩固的单词');
+    return;
+  }
+  const {error}=await db.from('quiz_questions').insert(toInsert);
+  if(error){ showToast('生成失败：'+error.message); return; }
+  showToast(`成功生成 ${toInsert.length} 道巩固题`+(missing?`，另有 ${missing} 个单词因缺少例句被跳过`:''));
+  await loadQuiz();
+}
+
+function renderQMgmtCard(q){
+  const optsHtml=q.opts.map((o,oi)=>`<div${oi===q.cor?' style="color:var(--green);font-weight:700"':''}>${oi+1}. ${esc(o)}</div>`).join('');
+  const actions=q.bi
+    ?'<span style="font-size:.72rem;color:var(--sub)">内置题目，不可编辑</span>'
+    :`<div style="display:flex;gap:8px;margin-top:10px">
+        <button class="pill qz" style="font-size:.72rem;padding:4px 10px" onclick="openQuizEdit('${q.id}')">编辑</button>
+        <button class="pill qz" style="font-size:.72rem;padding:4px 10px;color:var(--danger);border-color:var(--danger)" onclick="delQuiz('${q.id}')">删除</button>
+      </div>`;
+  return `<div class="qcard"><div class="qsent" style="margin-bottom:4px">${esc(q.s)}</div>
+    <span class="badge" style="background:#EDE7F6;color:#512DA8;margin-bottom:8px;display:inline-block">难度 Lv.${q.difficulty||3}</span>
+    <div style="font-size:.85rem;color:var(--sub);line-height:1.6">${optsHtml}</div>${actions}</div>`;
+}
+
 function toggleAddQuiz(){ document.getElementById('add-quiz-panel').classList.toggle('open'); }
 async function addQuizQ(){
   const s=document.getElementById('q-sent').value.trim();
   const opts=['q-o1','q-o2','q-o3','q-o4'].map(id=>document.getElementById(id).value.trim());
   const cor=parseInt(document.getElementById('q-cor').value);
+  const diff=parseInt(document.getElementById('q-diff').value);
   if(!s||opts.some(o=>!o)){showToast('请填写句子和所有选项');return;}
   if(!s.includes('___')){showToast('句子中请用 ___ 表示空格');return;}
-  const {error}=await db.from('quiz_questions').insert({sentence:s,options:JSON.stringify(opts),correct_index:cor,blank_index:0});
+  const {error}=await db.from('quiz_questions').insert({sentence:s,options:JSON.stringify(opts),correct_index:cor,blank_index:0,difficulty:diff});
   if(error){showToast('添加失败：'+error.message);return;}
   ['q-sent','q-o1','q-o2','q-o3','q-o4'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('q-diff').value='3';
   toggleAddQuiz(); showToast('添加成功'); await loadQuiz();
 }
+
+function openQuizEdit(id){
+  const q=qSt.qs.find(x=>x.id===id); if(!q) return;
+  editQuizId=id;
+  document.getElementById('qe-sent').value=q.s;
+  q.opts.forEach((o,k)=>document.getElementById('qe-o'+(k+1)).value=o);
+  document.getElementById('qe-cor').value=q.cor;
+  document.getElementById('qe-diff').value=q.difficulty||3;
+  openModal('m-quiz-edit');
+}
+
+async function saveQuizEdit(){
+  const s=document.getElementById('qe-sent').value.trim();
+  const opts=['qe-o1','qe-o2','qe-o3','qe-o4'].map(id=>document.getElementById(id).value.trim());
+  const cor=parseInt(document.getElementById('qe-cor').value);
+  const diff=parseInt(document.getElementById('qe-diff').value);
+  if(!s||opts.some(o=>!o)){showToast('请填写句子和所有选项');return;}
+  if(!s.includes('___')){showToast('句子中请用 ___ 表示空格');return;}
+  const {error}=await db.from('quiz_questions').update({sentence:s,options:JSON.stringify(opts),correct_index:cor,difficulty:diff}).eq('id',editQuizId);
+  if(error){showToast('保存失败：'+error.message);return;}
+  closeModal('m-quiz-edit'); showToast('已保存'); await loadQuiz();
+}
+
 async function delQuiz(id){
   if(!confirm('确认删除这道题目？'))return;
   await db.from('quiz_questions').delete().eq('id',id);
@@ -937,7 +1263,7 @@ async function importQuiz(){
     if(!s||!s.includes('___')||!o1||!o2||!o3||!o4) continue;
     const cor=parseInt(corStr,10);
     if(!(cor>=1&&cor<=4)) continue;
-    rows.push({sentence:s,options:JSON.stringify([o1,o2,o3,o4]),correct_index:cor-1,blank_index:0});
+    rows.push({sentence:s,options:JSON.stringify([o1,o2,o3,o4]),correct_index:cor-1,blank_index:0,difficulty:3});
   }
   if(!rows.length){showToast('未识别到有效数据，请检查格式');return;}
   const {error}=await db.from('quiz_questions').insert(rows);
