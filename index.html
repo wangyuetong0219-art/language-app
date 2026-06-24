@@ -264,6 +264,35 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
 .word-sel-toggle.selected{border-color:var(--quiz);background:var(--quiz);color:#fff}
 .word-sel-toggle.remove{font-size:.7rem;padding:2px 6px;border:none;background:rgba(0,0,0,.1);color:var(--ink);border-radius:50%}
 .word-sel-toggle.remove:hover{background:var(--danger);color:#fff}
+
+/* ── Date browsing ── */
+.date-browser{margin-top:16px;border-top:1px solid var(--line);padding-top:16px}
+.date-browser-toggle{width:100%;padding:12px 14px;background:var(--white);border:1.5px solid var(--line);border-radius:12px;font-size:.9rem;font-weight:600;color:var(--ink);cursor:pointer;text-align:left;display:flex;align-items:center;justify-content:space-between;transition:all .2s}
+.date-browser-toggle:hover{border-color:var(--quiz);color:var(--quiz)}
+.date-browser-toggle.open{background:var(--quiz);border-color:var(--quiz);color:#fff}
+.date-browser-content{display:none;margin-top:12px;max-height:60vh;overflow-y:auto;border:1px solid var(--line);border-radius:12px;background:var(--white)}
+.date-browser-content.open{display:block}
+.date-group{padding:12px 14px;border-bottom:1px solid var(--line)}
+.date-group:last-child{border-bottom:none}
+.date-group-title{font-size:.85rem;font-weight:700;color:var(--sub);margin-bottom:8px;text-transform:uppercase;letter-spacing:.3px}
+.date-word-item{padding:8px 10px;margin-bottom:6px;background:var(--bg);border-radius:8px;cursor:pointer;transition:all .15s;border-left:3px solid transparent}
+.date-word-item:hover{background:rgba(201,54,56,.08);border-left-color:var(--quiz)}
+.date-word-text{font-size:.85rem;font-weight:600;color:var(--ink)}
+.date-word-meaning{font-size:.75rem;color:var(--sub);margin-top:2px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── Related phrases ── */
+.related-phrases-block{margin-top:12px;padding-top:12px;border-top:1px solid rgba(201,54,56,.2);font-size:.9rem;line-height:1.6}
+.related-phrases-label{font-weight:700;font-size:.85rem;color:rgba(201,54,56,.7);margin-bottom:6px;text-transform:uppercase;letter-spacing:.3px}
+.related-phrases-list{display:flex;flex-wrap:wrap;gap:6px}
+.phrase-badge{display:inline-block;padding:4px 10px;background:rgba(201,54,56,.1);border-radius:6px;color:var(--en-back-text);font-size:.8rem;font-weight:600}
+
+/* ── Related phrases in modal ── */
+.phrase-input-wrapper{margin-top:8px}
+.phrase-pills-wrap{display:flex;flex-wrap:wrap;gap:5px;align-items:center;min-height:36px;padding:5px 0}
+.phrase-edit-pill{display:inline-flex;align-items:center;gap:3px;font-size:.8rem;font-weight:600;padding:4px 8px 4px 10px;border-radius:8px;background:#F5DDD8;color:#6B4423}
+.phrase-rm{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;font-size:.7rem;cursor:pointer;line-height:1;background:none;border:none;color:#999;border-radius:50%;flex-shrink:0}
+.phrase-rm:hover{background:rgba(0,0,0,.15);color:#333}
+.phrase-ti{border:none;outline:none;font-family:'Manrope',sans-serif;font-size:.88rem;background:transparent;flex:1;min-width:100px;height:28px}
 </style>
 </head>
 <body>
@@ -574,6 +603,14 @@ He has been ___ English for five years.｜learn｜learning｜learned｜learns｜
       </div>
       <div id="ts-edit" class="tag-sugg-box" style="display:none"></div>
     </div>
+    <div class="fg">
+      <label class="flabel">关联词组</label>
+      <div style="border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--bg)">
+        <div id="tp-phrases-edit" class="phrase-pills-wrap"></div>
+        <input id="ti-phrases-edit" class="phrase-ti" placeholder="输入词组，回车确认" onkeydown="phrasesKey(event,'edit')">
+      </div>
+      <p class="fhint" style="margin-top:5px">输入多个词组，每个按回车确认。如：make up, make sense of</p>
+    </div>
     <div class="mfoot">
       <button class="sbtn gray" onclick="closeModal('m-edit')">取消</button>
       <button id="edit-save-btn" class="sbtn en-s" onclick="saveEdit()">保存</button>
@@ -664,6 +701,7 @@ const db = supabase.createClient(SUPA_URL, SUPA_KEY);
 const allWords = { en:[], ja:[] };
 const allTags  = { en:[], ja:[] };
 const ctxTags  = {};
+const ctxPhrases = {};
 const nav = {
   en:{ deck:[], idx:0, flipped:false, filter:'all', tagFilter:null, search:'', sKnown:0, sUnknown:0 },
   ja:{ deck:[], idx:0, flipped:false, filter:'all', tagFilter:null, search:'', sKnown:0, sUnknown:0 }
@@ -672,6 +710,7 @@ let delId=null, delLang=null, editId=null, editLang=null;
 const comparisons = [];
 let editCompId = null;
 let compWordSlots = {};
+let dateBrowserOpen = { en:false, ja:false };
 
 // ── Tabs ────────────────────────────────────────────────────
 function switchTab(t) {
@@ -799,14 +838,25 @@ function renderCard(lang) {
 
   // ── Back content ──
   let back;
+  const phrasesBlock = (w.related_phrases && w.related_phrases.length) ? `
+    <div class="related-phrases-block">
+      <div class="related-phrases-label">相关词组</div>
+      <div class="related-phrases-list">
+        ${w.related_phrases.map(p=>`<span class="phrase-badge">${esc(p)}</span>`).join('')}
+      </div>
+    </div>
+  ` : '';
+
   if(lang==='ja'){
     // Japanese back: reading + meaning + example
     back=`${w.reading?`<div class="f-ja-reading">${esc(w.reading)}</div>`:''}
       <div class="f-meaning">${esc(w.meaning)}</div>
-      ${w.example?`<div class="f-example">${esc(w.example)}</div>`:''}`;
+      ${w.example?`<div class="f-example">${esc(w.example)}</div>`:''}
+      ${phrasesBlock}`;
   } else {
     back=`<div class="f-meaning">${esc(w.meaning)}</div>
-      ${w.example?`<div class="f-example">${esc(w.example)}</div>`:''}`;
+      ${w.example?`<div class="f-example">${esc(w.example)}</div>`:''}
+      ${phrasesBlock}`;
   }
 
   area.innerHTML=`
@@ -839,7 +889,15 @@ function renderCard(lang) {
       </div>
       <button class="nav-arrow" onclick="nextCard('${lang}')"${nd}>→</button>
     </div>
-    <button class="shuffle-btn" onclick="shuffleDeck('${lang}')">⇄ 重新洗牌</button>`;
+    <button class="shuffle-btn" onclick="shuffleDeck('${lang}')">⇄ 重新洗牌</button>
+
+    <div class="date-browser">
+      <button class="date-browser-toggle" onclick="toggleDateBrowser('${lang}')">
+        <span>📅 按日期浏览</span>
+        <span id="date-browser-arrow-${lang}" style="font-size:1rem">▼</span>
+      </button>
+      <div id="date-browser-content-${lang}" class="date-browser-content"></div>
+    </div>`;
 }
 
 // ── Flip (direct DOM, no innerHTML rebuild = no bug) ────────
@@ -916,6 +974,7 @@ function editCurrent(lang){
 
   document.getElementById('edit-save-btn').className=`sbtn ${lang==='en'?'en-s':'ja-s'}`;
   initTagCtx('edit', w.tags||[]);
+  initPhrasesCtx('edit', w.related_phrases||[]);
   openModal('m-edit');
 }
 
@@ -927,7 +986,9 @@ async function saveEdit(){
   if(!word||!meaning){showToast('请填写单词和中文意思');return;}
   const ti=document.getElementById('ti-edit');
   if(ti&&ti.value.trim()) addTag('edit',ti.value);
-  const upd={word,reading,meaning,example,tags:ctxTags['edit']||[]};
+  const tiphrases=document.getElementById('ti-phrases-edit');
+  if(tiphrases&&tiphrases.value.trim()) addPhrase('edit',tiphrases.value);
+  const upd={word,reading,meaning,example,tags:ctxTags['edit']||[],related_phrases:ctxPhrases['edit']||[]};
   if(editLang==='en') upd.pos=document.getElementById('edit-pos').value.trim();
   const {error}=await db.from('words').update(upd).eq('id',editId);
   if(error){showToast('保存失败：'+error.message);return;}
@@ -1548,6 +1609,140 @@ function tagInput(val,ctx){
 function hideSugg(ctx){
   const sbox=document.getElementById('ts-'+ctx);
   if(sbox){ sbox.style.display='none'; sbox.innerHTML=''; }
+}
+
+// ── Phrases (related words/expressions) ──────────────────────
+function initPhrasesCtx(ctx, phrases){
+  ctxPhrases[ctx]=[...phrases];
+  renderPhrasePills(ctx);
+  const ti=document.getElementById('ti-phrases-'+ctx);
+  if(ti) ti.value='';
+}
+
+function renderPhrasePills(ctx){
+  const box=document.getElementById('tp-phrases-'+ctx);
+  if(!box) return;
+  box.innerHTML=(ctxPhrases[ctx]||[]).map((p,i)=>`<span class="phrase-edit-pill">${esc(p)}<button class="phrase-rm" onclick="rmPhrase('${ctx}',${i})">✕</button></span>`).join('');
+}
+
+function rmPhrase(ctx,idx){
+  if(!ctxPhrases[ctx]) return;
+  ctxPhrases[ctx].splice(idx,1);
+  renderPhrasePills(ctx);
+}
+
+function addPhrase(ctx,phrase){
+  phrase=phrase.trim();
+  if(!phrase) return;
+  if(!ctxPhrases[ctx]) ctxPhrases[ctx]=[];
+  if(!ctxPhrases[ctx].includes(phrase)) ctxPhrases[ctx].push(phrase);
+  renderPhrasePills(ctx);
+  const ti=document.getElementById('ti-phrases-'+ctx);
+  if(ti) ti.value='';
+}
+
+function phrasesKey(e,ctx){
+  if(e.isComposing||e.keyCode===229) return;
+  if(e.key==='Enter' || e.key===',' || e.key==='，'){
+    e.preventDefault();
+    const ti=document.getElementById('ti-phrases-'+ctx);
+    if(ti&&ti.value.trim()) addPhrase(ctx,ti.value);
+  } else if(e.key==='Backspace'){
+    const ti=document.getElementById('ti-phrases-'+ctx);
+    if(ti&&!ti.value&&ctxPhrases[ctx]&&ctxPhrases[ctx].length){
+      ctxPhrases[ctx].pop();
+      renderPhrasePills(ctx);
+    }
+  }
+}
+
+// ── Date browsing ───────────────────────────────────────────
+function groupWordsByDate(lang){
+  const words=allWords[lang];
+  const groups={};
+  const now=new Date();
+  const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const yesterday=new Date(today);
+  yesterday.setDate(yesterday.getDate()-1);
+
+  words.forEach(w=>{
+    if(!w.created_at) return;
+    const wdate=new Date(w.created_at);
+    const wday=new Date(wdate.getFullYear(),wdate.getMonth(),wdate.getDate());
+    let key;
+    if(wday.getTime()===today.getTime()) key='today';
+    else if(wday.getTime()===yesterday.getTime()) key='yesterday';
+    else key=wday.toLocaleDateString('zh-CN',{year:'numeric',month:'2-digit',day:'2-digit'});
+
+    if(!groups[key]) groups[key]={label:getDateLabel(key),words:[]};
+    groups[key].words.push(w);
+  });
+
+  const order=['today','yesterday'];
+  const sorted={};
+  order.forEach(k=>{if(groups[k]) sorted[k]=groups[k];});
+  Object.keys(groups).filter(k=>!order.includes(k)).sort().reverse().forEach(k=>{sorted[k]=groups[k];});
+  return sorted;
+}
+
+function getDateLabel(key){
+  if(key==='today') return '今天';
+  if(key==='yesterday') return '昨天';
+  return key;
+}
+
+function toggleDateBrowser(lang){
+  dateBrowserOpen[lang]=!dateBrowserOpen[lang];
+  const btn=document.querySelector('.date-browser-toggle');
+  const arrow=document.getElementById('date-browser-arrow-'+lang);
+  const content=document.getElementById('date-browser-content-'+lang);
+  if(dateBrowserOpen[lang]){
+    btn.classList.add('open');
+    if(arrow) arrow.textContent='▲';
+    renderDateBrowser(lang);
+    if(content) content.classList.add('open');
+  } else {
+    btn.classList.remove('open');
+    if(arrow) arrow.textContent='▼';
+    if(content) content.classList.remove('open');
+  }
+}
+
+function renderDateBrowser(lang){
+  const content=document.getElementById('date-browser-content-'+lang);
+  if(!content) return;
+  const groups=groupWordsByDate(lang);
+  if(!Object.keys(groups).length){
+    content.innerHTML='<div style="padding:12px;color:var(--sub);text-align:center">暂无单词</div>';
+    return;
+  }
+  let html='';
+  Object.entries(groups).forEach(([key,grp])=>{
+    html+=`<div class="date-group">
+      <div class="date-group-title">${grp.label} (${grp.words.length})</div>
+      ${grp.words.map(w=>`<div class="date-word-item" onclick="jumpToWord('${lang}','${w.id}')">
+        <div class="date-word-text">${esc(w.word)}</div>
+        <div class="date-word-meaning">${esc(w.meaning)}</div>
+      </div>`).join('')}
+    </div>`;
+  });
+  content.innerHTML=html;
+}
+
+function jumpToWord(lang,wordId){
+  const idx=nav[lang].deck.findIndex(w=>w.id===wordId);
+  if(idx>=0){
+    nav[lang].idx=idx;
+    nav[lang].flipped=false;
+    renderCard(lang);
+    dateBrowserOpen[lang]=false;
+    const content=document.getElementById('date-browser-content-'+lang);
+    if(content) content.classList.remove('open');
+    const btn=document.querySelector('.date-browser-toggle');
+    if(btn) btn.classList.remove('open');
+    const arrow=document.getElementById('date-browser-arrow-'+lang);
+    if(arrow) arrow.textContent='▼';
+  }
 }
 
 // ── Comparison ──────────────────────────────────────────────
