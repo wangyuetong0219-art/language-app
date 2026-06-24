@@ -1009,8 +1009,52 @@ function qSentenceHTML(q,i){
 }
 
 function renderPracticeCard(q,i){
-  const opts=q.opts.map((o,oi)=>`<button class="obtn" id="qo${i}_${oi}" onclick="pickOpt('${i}',${oi})">${esc(o)}</button>`).join('');
+  const opts=q.opts.map((o,oi)=>`<button class="obtn" id="qo${i}_${oi}" data-opt-text="${esc(o)}" data-qi="${i}" data-oi="${oi}">${esc(o)}</button>`).join('');
   return `<div class="qcard"><div class="qsent">${qSentenceHTML(q,i)}</div><div class="qopts">${opts}</div><div id="qf${i}" class="qfb"></div></div>`;
+}
+
+function initOptButtonEvents(){
+  document.querySelectorAll('.obtn').forEach(btn=>{
+    let pressTimer=null;
+    let isLongPress=false;
+
+    const handleStart=()=>{
+      isLongPress=false;
+      pressTimer=setTimeout(()=>{
+        isLongPress=true;
+        const optText=btn.dataset.optText;
+        showWordPopup(optText);
+      },500);
+    };
+
+    const handleEnd=()=>{
+      if(pressTimer){
+        clearTimeout(pressTimer);
+        pressTimer=null;
+      }
+      if(!isLongPress){
+        const qi=btn.dataset.qi;
+        const oi=parseInt(btn.dataset.oi,10);
+        pickOpt(qi,oi);
+      }
+      isLongPress=false;
+    };
+
+    const handleCancel=()=>{
+      if(pressTimer){
+        clearTimeout(pressTimer);
+        pressTimer=null;
+      }
+      isLongPress=false;
+    };
+
+    btn.addEventListener('mousedown',handleStart);
+    btn.addEventListener('mouseup',handleEnd);
+    btn.addEventListener('mouseleave',handleCancel);
+    btn.addEventListener('touchstart',handleStart);
+    btn.addEventListener('touchend',handleEnd);
+    btn.addEventListener('touchcancel',handleCancel);
+  });
 }
 
 function renderQuizPractice(){
@@ -1039,6 +1083,7 @@ function renderQuizPractice(){
     <div id="quiz-next-wrap" style="display:none;justify-content:flex-end;margin-top:4px">
       <button class="sbtn qz-s" onclick="nextQuizQuestion()">下一题 →</button>
     </div>`;
+  setTimeout(initOptButtonEvents,0);
 }
 
 function nextQuizQuestion(){
