@@ -34,6 +34,7 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
 .tab-btn.t-en{color:var(--en-back-bg);border-bottom-color:var(--en-back-bg)}
 .tab-btn.t-ja{color:var(--ja-back-bg);border-bottom-color:var(--ja-back-bg)}
 .tab-btn.t-quiz{color:var(--quiz);border-bottom-color:var(--quiz)}
+.tab-btn.t-comp{color:#8B5CF6;border-bottom-color:#8B5CF6}
 
 /* ── Sections ── */
 .section{display:none;padding:20px 16px 80px;max-width:680px;margin:0 auto}
@@ -237,6 +238,32 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
 .tag-mgmt-del:hover{background:var(--danger);color:#fff}
 
 @media(max-width:480px){.qopts,.opt-grid{grid-template-columns:1fr}.f-word{font-size:1.9rem}}
+
+/* ── Comparison cards ── */
+.comp-card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.comp-title{font-size:1.05rem;font-weight:700;color:var(--ink);margin-bottom:16px}
+.comp-words-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:16px}
+.comp-word-item{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--bg)}
+.comp-word-head{font-size:1.1rem;font-weight:700;color:var(--en-back-bg);margin-bottom:8px;word-break:break-word}
+.comp-pos-tag{font-size:.7rem;font-weight:700;padding:2px 7px;border-radius:6px;background:rgba(201,54,56,.12);color:var(--en-back-bg);display:inline-block;margin-bottom:6px}
+.comp-reading{font-size:.85rem;color:var(--sub);margin-bottom:8px}
+.comp-meaning{font-size:.95rem;font-weight:600;color:var(--ink);margin-bottom:8px;line-height:1.4}
+.comp-example{font-size:.8rem;color:var(--sub);line-height:1.5;font-style:italic}
+.comp-actions{display:flex;gap:8px;padding-top:12px;border-top:1px solid var(--line);justify-content:flex-end}
+.comp-action-btn{font-size:.75rem;font-weight:600;padding:4px 10px;border-radius:8px;border:1.5px solid;cursor:pointer;transition:all .15s}
+.comp-del-btn{color:var(--danger);border-color:var(--danger)}
+.comp-del-btn:hover{background:var(--danger);color:#fff}
+.comp-edit-btn{color:var(--quiz);border-color:var(--quiz)}
+.comp-edit-btn:hover{background:var(--quiz);color:#fff}
+.comp-empty{text-align:center;padding:40px 20px;color:var(--sub);font-size:.9rem}
+
+/* Word selector in modal */
+.word-selector{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.word-sel-toggle{font-size:.75rem;padding:6px 10px;border-radius:8px;border:1.5px solid var(--line);color:var(--ink);background:var(--white);cursor:pointer;transition:all .15s;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.word-sel-toggle:hover{border-color:var(--quiz);color:var(--quiz)}
+.word-sel-toggle.selected{border-color:var(--quiz);background:var(--quiz);color:#fff}
+.word-sel-toggle.remove{font-size:.7rem;padding:2px 6px;border:none;background:rgba(0,0,0,.1);color:var(--ink);border-radius:50%}
+.word-sel-toggle.remove:hover{background:var(--danger);color:#fff}
 </style>
 </head>
 <body>
@@ -247,6 +274,7 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
   <button class="tab-btn t-en" onclick="switchTab('en')">英语单词</button>
   <button class="tab-btn"       onclick="switchTab('ja')">日语单词</button>
   <button class="tab-btn"       onclick="switchTab('quiz')">选词题</button>
+  <button class="tab-btn"       onclick="switchTab('comp')">易混词对比</button>
 </div>
 
 <!-- ══ EN ══ -->
@@ -302,6 +330,17 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
     <button class="pill qz" onclick="openQuizMgmt()">管理</button>
   </div>
   <div id="quiz-practice"></div>
+</div>
+
+<!-- ══ COMPARISON ══ -->
+<div id="sec-comp" class="section">
+  <div class="sec-hd">
+    <h2 class="sec-title">易混词对比</h2>
+    <div class="hd-btns">
+      <button class="pill en" onclick="openAddComparison()">+ 新建对比组</button>
+    </div>
+  </div>
+  <div id="comp-list" style="margin-top:20px"></div>
 </div>
 
 <!-- ══ MODALS ══ -->
@@ -554,6 +593,42 @@ He has been ___ English for five years.｜learn｜learning｜learned｜learns｜
   </div>
 </div>
 
+<!-- Add Comparison -->
+<div id="m-comp-add" class="modal" onclick="bdClose(event,'m-comp-add')">
+  <div class="mbox">
+    <div class="mhandle"></div>
+    <div class="mtitle">新建对比组</div>
+    <div class="fg"><label class="flabel">对比组名称（可选）</label><input id="comp-name" class="finput" type="text" placeholder="如：近义易混词、形近词"></div>
+    <div class="fg">
+      <label class="flabel">选择或新建单词（2-4个）</label>
+      <div id="comp-words-container" style="display:flex;flex-direction:column;gap:10px;margin-top:8px"></div>
+      <button class="pill en" style="font-size:.8rem;padding:6px 12px;margin-top:8px" id="comp-add-word-btn" onclick="addComparisonWordSlot()">+ 添加单词</button>
+    </div>
+    <div class="mfoot">
+      <button class="sbtn gray" onclick="closeModal('m-comp-add')">取消</button>
+      <button class="sbtn en-s" onclick="saveComparison()">创建</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Comparison -->
+<div id="m-comp-edit" class="modal" onclick="bdClose(event,'m-comp-edit')">
+  <div class="mbox">
+    <div class="mhandle"></div>
+    <div class="mtitle">编辑对比组</div>
+    <div class="fg"><label class="flabel">对比组名称（可选）</label><input id="comp-edit-name" class="finput" type="text"></div>
+    <div class="fg">
+      <label class="flabel">选择或新建单词（2-4个）</label>
+      <div id="comp-edit-words-container" style="display:flex;flex-direction:column;gap:10px;margin-top:8px"></div>
+      <button class="pill en" style="font-size:.8rem;padding:6px 12px;margin-top:8px" id="comp-edit-add-word-btn" onclick="addComparisonWordSlot('edit')">+ 添加单词</button>
+    </div>
+    <div class="mfoot">
+      <button class="sbtn gray" onclick="closeModal('m-comp-edit')">取消</button>
+      <button class="sbtn en-s" onclick="saveComparisonEdit()">保存</button>
+    </div>
+  </div>
+</div>
+
 <!-- Delete -->
 <div id="m-del" class="modal">
   <div class="mbox" style="max-width:400px">
@@ -594,13 +669,17 @@ const nav = {
   ja:{ deck:[], idx:0, flipped:false, filter:'all', tagFilter:null, search:'', sKnown:0, sUnknown:0 }
 };
 let delId=null, delLang=null, editId=null, editLang=null;
+const comparisons = [];
+let editCompId = null;
+let compWordSlots = {};
 
 // ── Tabs ────────────────────────────────────────────────────
 function switchTab(t) {
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('t-en','t-ja','t-quiz'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('t-en','t-ja','t-quiz','t-comp'));
   document.getElementById('sec-'+t).classList.add('active');
-  document.querySelectorAll('.tab-btn')[['en','ja','quiz'].indexOf(t)].classList.add('t-'+t);
+  const idx=['en','ja','quiz','comp'].indexOf(t);
+  document.querySelectorAll('.tab-btn')[idx].classList.add('t-'+t);
 }
 
 // ── Modal ───────────────────────────────────────────────────
@@ -1471,11 +1550,222 @@ function hideSugg(ctx){
   if(sbox){ sbox.style.display='none'; sbox.innerHTML=''; }
 }
 
+// ── Comparison ──────────────────────────────────────────────
+async function loadComparisons(){
+  const {data,error}=await db.from('word_comparisons').select('*').order('created_at',{ascending:false});
+  if(error){
+    if(error.code==='PGRST116'){
+      // Table doesn't exist, try to create it
+      console.log('word_comparisons table not found, user needs to create it manually');
+    }
+    comparisons.length=0;
+  } else {
+    comparisons.length=0;
+    (data||[]).forEach(row=>comparisons.push({id:row.id,name:row.name||'',words:row.words||[],created_at:row.created_at}));
+  }
+  renderComparisonList();
+}
+
+function renderComparisonList(){
+  const el=document.getElementById('comp-list');
+  if(!el) return;
+  if(!comparisons.length){
+    el.innerHTML='<div class="comp-empty">还没有对比组，点击「+ 新建对比组」开始吧</div>';
+    return;
+  }
+  el.innerHTML=comparisons.map(comp=>renderComparisonCard(comp)).join('');
+}
+
+function renderComparisonCard(comp){
+  if(!comp.words||!comp.words.length) return '';
+  const wordsHtml=comp.words.map(wid=>{
+    const w=allWords.en.find(x=>x.id===wid);
+    if(!w) return '';
+    return `<div class="comp-word-item">
+      <div class="comp-word-head">${esc(w.word)}</div>
+      ${w.pos?`<div class="comp-pos-tag">${esc(w.pos)}</div>`:''}
+      ${w.reading?`<div class="comp-reading">${esc(w.reading)}</div>`:''}
+      <div class="comp-meaning">${esc(w.meaning)}</div>
+      ${w.example?`<div class="comp-example">${esc(w.example)}</div>`:''}
+    </div>`;
+  }).join('');
+  return `<div class="comp-card">
+    ${comp.name?`<div class="comp-title">${esc(comp.name)}</div>`:''}
+    <div class="comp-words-grid">${wordsHtml}</div>
+    <div class="comp-actions">
+      <button class="comp-action-btn comp-edit-btn" onclick="editComparison('${comp.id}')">编辑</button>
+      <button class="comp-action-btn comp-del-btn" onclick="delComparison('${comp.id}')">删除</button>
+    </div>
+  </div>`;
+}
+
+function openAddComparison(){
+  compWordSlots={};
+  document.getElementById('comp-name').value='';
+  const container=document.getElementById('comp-words-container');
+  container.innerHTML='';
+  addComparisonWordSlot();
+  addComparisonWordSlot();
+  document.getElementById('comp-add-word-btn').style.display='';
+  editCompId=null;
+  openModal('m-comp-add');
+}
+
+function addComparisonWordSlot(ctx){
+  const isEdit=ctx==='edit';
+  const container=document.getElementById(isEdit?'comp-edit-words-container':'comp-words-container');
+  const slotId='comp-word-'+(Date.now()+Math.random());
+  if(!compWordSlots[slotId]) compWordSlots[slotId]={type:'select',value:null};
+
+  const slotHtml=`<div id="${slotId}" style="padding:10px;background:var(--bg);border-radius:10px;border:1px solid var(--line)">
+    <div style="font-size:.8rem;color:var(--sub);margin-bottom:6px">单词 ${Object.keys(compWordSlots).filter(k=>k.includes('comp-word')).length}</div>
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <button class="pill" style="flex:1;font-size:.75rem" onclick="toggleCompWordType('${slotId}')">
+        <span id="${slotId}-type-btn">从库中选择</span>
+      </button>
+      <button class="pill" style="font-size:.75rem;padding:6px;color:var(--danger);border-color:var(--danger)" onclick="removeCompWordSlot('${slotId}')">×</button>
+    </div>
+    <div id="${slotId}-content"></div>
+  </div>`;
+
+  container.insertAdjacentHTML('beforeend',slotHtml);
+  renderCompWordSelector(slotId);
+}
+
+function toggleCompWordType(slotId){
+  const slot=compWordSlots[slotId];
+  if(!slot) return;
+  const nextType=slot.type==='select'?'new':'select';
+  compWordSlots[slotId].type=nextType;
+  compWordSlots[slotId].value=null;
+  const btn=document.getElementById(slotId+'-type-btn');
+  if(btn) btn.textContent=nextType==='select'?'从库中选择':'新建单词';
+  renderCompWordSelector(slotId);
+}
+
+function renderCompWordSelector(slotId){
+  const slot=compWordSlots[slotId];
+  const content=document.getElementById(slotId+'-content');
+  if(!content) return;
+
+  if(slot.type==='select'){
+    const opts=allWords.en.map(w=>`<button class="word-sel-toggle${slot.value===w.id?' selected':''}" onclick="selectCompWord('${slotId}','${w.id}')" title="${esc(w.word)}">${esc(w.word)}</button>`).join('');
+    content.innerHTML=opts?`<div style="display:flex;flex-wrap:wrap;gap:6px">${opts}</div>`:'<p style="color:var(--sub);font-size:.85rem">还没有英文单词，请先在「英语单词」标签页添加</p>';
+  } else {
+    content.innerHTML=`
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:.85rem">
+        <input id="${slotId}-new-w" class="finput" type="text" placeholder="单词" style="font-size:.85rem;padding:8px">
+        <input id="${slotId}-new-pos" class="finput" type="text" placeholder="词性（可选）" style="font-size:.85rem;padding:8px">
+        <input id="${slotId}-new-r" class="finput" type="text" placeholder="音标（可选）" style="font-size:.85rem;padding:8px">
+        <input id="${slotId}-new-m" class="finput" type="text" placeholder="中文意思" style="font-size:.85rem;padding:8px">
+        <textarea id="${slotId}-new-e" class="ftarea" placeholder="例句（可选）" style="font-size:.85rem;padding:8px;min-height:50px"></textarea>
+      </div>`;
+  }
+}
+
+function selectCompWord(slotId,wordId){
+  compWordSlots[slotId].value=wordId;
+  renderCompWordSelector(slotId);
+}
+
+function removeCompWordSlot(slotId){
+  const el=document.getElementById(slotId);
+  if(el) el.remove();
+  delete compWordSlots[slotId];
+}
+
+async function saveComparison(){
+  const name=document.getElementById('comp-name').value.trim();
+  const slots=Object.entries(compWordSlots);
+  let words=[];
+
+  for(const [slotId,slot] of slots){
+    if(slot.type==='select'){
+      if(slot.value) words.push(slot.value);
+    } else {
+      const word=document.getElementById(slotId+'-new-w').value.trim();
+      const pos=document.getElementById(slotId+'-new-pos').value.trim();
+      const reading=document.getElementById(slotId+'-new-r').value.trim();
+      const meaning=document.getElementById(slotId+'-new-m').value.trim();
+      const example=document.getElementById(slotId+'-new-e').value.trim();
+      if(!word||!meaning){showToast('请填写单词和中文意思');return;}
+      const {data,error}=await db.from('words').insert({lang:'en',word,reading,meaning,example,pos,tags:[],starred:false,priority:false,due_at:null,last_practiced:null}).select();
+      if(error){showToast('创建单词失败：'+error.message);return;}
+      if(data&&data[0]) {
+        allWords.en.push(data[0]);
+        words.push(data[0].id);
+      }
+    }
+  }
+
+  if(words.length<2||words.length>4){showToast('请选择2-4个单词');return;}
+  const {error}=await db.from('word_comparisons').insert({name,words});
+  if(error){showToast('创建对比组失败：'+error.message);return;}
+  closeModal('m-comp-add');
+  showToast('创建成功');
+  await loadComparisons();
+}
+
+function editComparison(compId){
+  const comp=comparisons.find(c=>c.id===compId);
+  if(!comp) return;
+  editCompId=compId;
+  document.getElementById('comp-edit-name').value=comp.name||'';
+  const container=document.getElementById('comp-edit-words-container');
+  container.innerHTML='';
+  compWordSlots={};
+  (comp.words||[]).forEach(wid=>{
+    const slotId='comp-word-'+(Date.now()+Math.random());
+    compWordSlots[slotId]={type:'select',value:wid};
+  });
+  Object.keys(compWordSlots).forEach(slotId=>{
+    const slotNum=Object.keys(compWordSlots).filter(k=>k<=slotId).length;
+    const slotHtml=`<div id="${slotId}" style="padding:10px;background:var(--bg);border-radius:10px;border:1px solid var(--line)">
+      <div style="font-size:.8rem;color:var(--sub);margin-bottom:6px">单词 ${slotNum}</div>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button class="pill" style="flex:1;font-size:.75rem" onclick="toggleCompWordType('${slotId}')">从库中选择</button>
+        <button class="pill" style="font-size:.75rem;padding:6px;color:var(--danger);border-color:var(--danger)" onclick="removeCompWordSlot('${slotId}')">×</button>
+      </div>
+      <div id="${slotId}-content"></div>
+    </div>`;
+    container.insertAdjacentHTML('beforeend',slotHtml);
+    renderCompWordSelector(slotId);
+  });
+  const addBtn=document.getElementById('comp-edit-add-word-btn');
+  if(addBtn) addBtn.style.display=Object.keys(compWordSlots).length<4?'':'none';
+  openModal('m-comp-edit');
+}
+
+async function saveComparisonEdit(){
+  const name=document.getElementById('comp-edit-name').value.trim();
+  const slots=Object.entries(compWordSlots);
+  let words=[];
+
+  for(const [slotId,slot] of slots){
+    if(slot.value) words.push(slot.value);
+  }
+
+  if(words.length<2||words.length>4){showToast('请选择2-4个单词');return;}
+  const {error}=await db.from('word_comparisons').update({name,words}).eq('id',editCompId);
+  if(error){showToast('保存失败：'+error.message);return;}
+  closeModal('m-comp-edit');
+  showToast('保存成功');
+  await loadComparisons();
+}
+
+async function delComparison(compId){
+  if(!confirm('确认删除这个对比组？')) return;
+  const {error}=await db.from('word_comparisons').delete().eq('id',compId);
+  if(error){showToast('删除失败：'+error.message);return;}
+  showToast('已删除');
+  await loadComparisons();
+}
+
 // ── Util ────────────────────────────────────────────────────
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // ── Init ────────────────────────────────────────────────────
-Promise.all([loadWords('en',true), loadWords('ja',true), loadQuiz()]);
+Promise.all([loadWords('en',true), loadWords('ja',true), loadQuiz(), loadComparisons()]);
 </script>
 </body>
 </html>
