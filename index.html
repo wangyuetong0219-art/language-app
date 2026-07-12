@@ -249,13 +249,13 @@ header{height:56px;display:flex;align-items:center;padding:0 20px;background:var
 .lib-tag-chip{padding:5px 12px;border-radius:16px;font-size:.75rem;font-weight:600;border:1.5px solid var(--line);color:var(--sub);background:var(--bg);transition:all .15s;cursor:pointer}
 .lib-tag-chip:hover{border-color:#999;background:rgba(0,0,0,.04)}
 .lib-tag-chip.active{background:var(--ink);border-color:var(--ink);color:#fff}
-.lib-date-group{margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--line)}
-.lib-date-group:last-child{border-bottom:none}
-.lib-date-title{font-size:.8rem;font-weight:700;color:var(--sub);letter-spacing:.3px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
-.lib-date-title strong{color:var(--ink);font-size:.85rem}
-.lib-words-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px}
-.lib-word-btn{padding:8px;border-radius:10px;border:1px solid var(--line);background:var(--white);font-size:.85rem;font-weight:500;color:var(--ink);transition:all .15s;cursor:pointer;text-align:center;line-height:1.3;word-break:break-word}
-.lib-word-btn:hover{border-color:#999;background:rgba(0,0,0,.02);color:var(--en-back-bg)}
+.lib-date-group{margin-bottom:24px;padding-bottom:0}
+.lib-date-group:last-child{margin-bottom:0}
+.lib-date-title{font-size:.75rem;font-weight:600;color:#999;letter-spacing:.2px;margin-bottom:12px;text-transform:uppercase}
+.lib-words-flex{display:flex;flex-wrap:wrap;gap:16px 24px;align-items:baseline;padding-bottom:20px;border-bottom:1px solid #f0f0f0}
+.lib-date-group:last-child .lib-words-flex{border-bottom:none}
+.lib-word-btn{padding:0;border:none;background:none;font-size:.95rem;font-weight:500;color:var(--ink);cursor:pointer;transition:color .15s;text-decoration:none;line-height:1}
+.lib-word-btn:hover{color:var(--en-back-bg)}
 
 /* ── Comparison cards ── */
 .comp-card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
@@ -720,6 +720,17 @@ He has been ___ English for five years.｜learn｜learning｜learned｜learns｜
       <button class="wp-close" onclick="closeWordPop()">×</button>
     </div>
     <div id="word-pop-body"></div>
+  </div>
+</div>
+
+<!-- Lib word preview popup -->
+<div id="lib-word-pop-bd" class="word-pop-backdrop" onclick="bdCloseLibWordPop(event)">
+  <div class="word-pop">
+    <div class="wp-hd">
+      <span id="lib-word-pop-title" class="wp-word"></span>
+      <button class="wp-close" onclick="closeLibWordPop()">×</button>
+    </div>
+    <div id="lib-word-pop-body"></div>
   </div>
 </div>
 
@@ -1795,26 +1806,54 @@ function renderLibrary(){
 
   let html='';
   Object.entries(sorted).forEach(([key,grp])=>{
-    const wordsHtml=grp.words.map(w=>`<button class="lib-word-btn" onclick="libJumpToWord('${lang}','${w.id}')" title="${esc(w.word)}">${esc(w.word)}</button>`).join('');
+    const wordsHtml=grp.words.map(w=>`<button class="lib-word-btn" onclick="showLibWordPopup('${lang}','${w.id}')">${esc(w.word)}</button>`).join('');
     html+=`<div class="lib-date-group">
-      <div class="lib-date-title">${grp.label} <strong>(${grp.words.length})</strong></div>
-      <div class="lib-words-grid">${wordsHtml}</div>
+      <div class="lib-date-title">${grp.label}</div>
+      <div class="lib-words-flex">${wordsHtml}</div>
     </div>`;
   });
   content.innerHTML=html;
 }
 
-function libJumpToWord(lang,wordId){
-  // Switch to the word practice tab
-  switchTab(lang);
-  // Find and navigate to the word
-  buildDeck(lang,false);
-  const idx=nav[lang].deck.findIndex(w=>w.id===wordId);
-  if(idx>=0){
-    nav[lang].idx=idx;
-    nav[lang].flipped=false;
-    renderCard(lang);
+function showLibWordPopup(lang,wordId){
+  const w=allWords[lang].find(x=>x.id===wordId);
+  if(!w) return;
+
+  document.getElementById('lib-word-pop-title').textContent=w.word;
+  const body=document.getElementById('lib-word-pop-body');
+
+  let content='';
+  if(lang==='en'){
+    // English word
+    const sub=(w.pos||w.reading)?`<div class="wp-row">
+      ${w.pos?`<span class="pos-tag">${esc(w.pos)}</span>`:''}
+      ${w.reading?`<span class="wp-reading">${esc(w.reading)}</span>`:''}
+    </div>`:'';
+    content=`${sub}<div class="wp-meaning">${esc(w.meaning)}</div>
+      ${w.example?`<div class="wp-example">${esc(w.example)}</div>`:''}`;
+  } else {
+    // Japanese word
+    content=`${w.reading?`<div class="wp-reading">${esc(w.reading)}</div>`:''}
+      <div class="wp-meaning">${esc(w.meaning)}</div>
+      ${w.example?`<div class="wp-example">${esc(w.example)}</div>`:''}`;
   }
+
+  if(w.tags&&w.tags.length){
+    content+=`<div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:5px">
+      ${w.tags.map(t=>`<span class="ctag">${esc(t)}</span>`).join('')}
+    </div>`;
+  }
+
+  body.innerHTML=content;
+  document.getElementById('lib-word-pop-bd').classList.add('open');
+}
+
+function closeLibWordPop(){
+  document.getElementById('lib-word-pop-bd').classList.remove('open');
+}
+
+function bdCloseLibWordPop(e){
+  if(e.target===document.getElementById('lib-word-pop-bd')) closeLibWordPop();
 }
 
 // ── Comparison ──────────────────────────────────────────────
